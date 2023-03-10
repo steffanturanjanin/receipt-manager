@@ -1,8 +1,8 @@
 package services
 
 import (
+	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
-	"github.com/steffanturanjanin/receipt-manager/internal/transform"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 )
 
@@ -16,24 +16,24 @@ func NewUserService(repository repositories.UserRepositoryInterface) *UserServic
 	}
 }
 
-func (service *UserService) Create(request transport.RegisterUserRequest) (*transport.UserResponse, error) {
+func (service *UserService) Create(request transport.RegisterUserRequestDTO) (*transport.UserResponseDTO, error) {
 	userModel, err := service.UserRepository.Create(request)
 	if err != nil {
 		return nil, err
 	}
 
-	response := transform.NewUserResponseFromUserModel(*userModel)
+	response := models.NewUserResponseDTOFromUserModel(*userModel)
 
 	return &response, nil
 }
 
-func (service *UserService) GetById(id int) (*transport.UserResponse, error) {
+func (service *UserService) GetById(id int) (*transport.UserResponseDTO, error) {
 	userModel, err := service.UserRepository.GetById(id)
 	if err != nil {
 		return nil, err
 	}
 
-	userResponse := transform.NewUserResponseFromUserModel(*userModel)
+	userResponse := models.NewUserResponseDTOFromUserModel(*userModel)
 
 	return &userResponse, nil
 }

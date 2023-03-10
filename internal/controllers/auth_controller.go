@@ -1,21 +1,20 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
-
+	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/services"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
+	"github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
 type AuthController struct {
 	AuthService *services.AuthService
-	Validator   *validator.Validate
+	Validator   *validator.Validator
 }
 
-func NewAuthController(authService *services.AuthService, validator *validator.Validate) *AuthController {
+func NewAuthController(authService *services.AuthService, validator *validator.Validator) *AuthController {
 	return &AuthController{
 		AuthService: authService,
 		Validator:   validator,
@@ -23,61 +22,54 @@ func NewAuthController(authService *services.AuthService, validator *validator.V
 }
 
 func (controller *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	var registerRequest transport.RegisterUserRequest
+	registerRequest := new(transport.RegisterUserRequestDTO)
 
-	if err := json.NewDecoder(r.Body).Decode(&registerRequest); err != nil {
-		transport.ResponseJson(w, transport.HttpErrorResponse{
-			Message: "Could not parse the Register User Request.",
-			Code:    http.StatusInternalServerError,
-		}, http.StatusInternalServerError)
-	}
-
-	err := controller.Validator.Struct(registerRequest)
-	if err != nil {
-		transport.ValidationErrorResponseJson(w, err)
+	if err := ParseBody(registerRequest, r); err != nil {
+		JsonErrorResponse(w, errors.NewHttpError(err))
 		return
 	}
 
-	response, err := controller.AuthService.RegisterUser(registerRequest)
-	if err != nil {
-		transport.ResponseJson(w, transport.HttpErrorResponse{
-			Message: err.Error(),
-			Code:    http.StatusInternalServerError,
-		}, http.StatusInternalServerError)
+	if err := ValidateRequest(registerRequest, controller.Validator); err != nil {
+		JsonErrorResponse(w, err)
+		return
 	}
 
-	transport.ResponseJson(w, response, http.StatusCreated)
+	response, err := controller.AuthService.RegisterUser(*registerRequest)
+	if err != nil {
+		JsonErrorResponse(w, errors.NewHttpError(err))
+		return
+	}
+
+	JsonResponse(w, response, http.StatusCreated)
 }
 
 func (controller *AuthController) LoginUser(w http.ResponseWriter, r *http.Request) {
-	var loginRequest transport.LoginUserRequest
+	loginRequest := new(transport.LoginUserRequestDTO)
 
-	if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
-		transport.ResponseJson(w, transport.HttpErrorResponse{
-			Message: "Could not parse the Login Request.",
-			Code:    http.StatusInternalServerError,
-		}, http.StatusInternalServerError)
-	}
+	if err := ParseBody(loginRequest, r); err != nil {
+		JsonErrorResponse(w, errors.NewHttpError(err))
 
-	err := controller.Validator.Struct(loginRequest)
-	if err != nil {
-		transport.ValidationErrorResponseJson(w, err)
 		return
 	}
 
-	loginResponse, authCookies, err := controller.AuthService.LoginUser(loginRequest)
+	if err := ValidateRequest(loginRequest, controller.Validator); err != nil {
+		JsonErrorResponse(w, err)
+
+		return
+	}
+
+	loginResponse, authCookies, err := controller.AuthService.LoginUser(*loginRequest)
 	if err != nil {
-		transport.ResponseJson(w, transport.HttpErrorResponse{
-			Message: "Failed authenticating user",
-			Code:    http.StatusBadRequest,
-		}, http.StatusBadRequest)
+		JsonErrorResponse(w, err)
+
+		return
 	}
 
 	http.SetCookie(w, (*http.Cookie)(&authCookies.AccessTokenCookie))
 	http.SetCookie(w, (*http.Cookie)(&authCookies.RefreshTokenCookie))
 	http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
 
-	transport.ResponseJson(w, loginResponse, http.StatusOK)
+	JsonResponse(w, loginResponse, http.StatusOK)
 }
 
 func (controller *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
@@ -85,16 +77,19 @@ func (controller *AuthController) RefreshToken(w http.ResponseWriter, r *http.Re
 
 	loginResponse, authCookies, err := controller.AuthService.RefreshToken(services.RefreshTokenCookie(*refreshTokenCookie))
 	if err != nil {
-		transport.ResponseJson(w, transport.HttpErrorResponse{
-			Message: "Failed refreshing access token",
-			Code:    http.StatusBadRequest,
-		}, http.StatusBadRequest)
+		// transport.ResponseJson(w, transport.HttpErrorResponse{
+		// 	Message: "Failed refreshing access token",
+		// 	Code:    http.StatusBadRequest,
+		// }, http.StatusBadRequest)
+		JsonErrorResponse(w, errors.NewHttpError(err))
+
+		return
 	}
 
 	http.SetCookie(w, (*http.Cookie)(&authCookies.AccessTokenCookie))
 	http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
 
-	transport.ResponseJson(w, loginResponse, http.StatusOK)
+	JsonResponse(w, loginResponse, http.StatusOK)
 }
 
 func (controller *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
@@ -104,5 +99,5 @@ func (controller *AuthController) Logout(w http.ResponseWriter, r *http.Request)
 	http.SetCookie(w, (*http.Cookie)(&authCookies.RefreshTokenCookie))
 	http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
 
-	transport.ResponseJson(w, nil, http.StatusOK)
+	JsonResponse(w, nil, http.StatusOK)
 }

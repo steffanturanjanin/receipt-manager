@@ -5,13 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
 	"github.com/steffanturanjanin/receipt-manager/internal/services"
+	"github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
 func main() {
@@ -25,7 +25,9 @@ func main() {
 	}
 
 	// Validator
-	validator := validator.New()
+	translator := validator.NewEnglishTranslator()
+	validator := validator.NewValidator(translator)
+	validator.ConfigureValidator()
 
 	// Repositories
 	userRepository := repositories.NewUserRepository(database.Instance)
@@ -42,5 +44,7 @@ func main() {
 	mux.HandleFunc("/logout", authController.Logout).Methods("POST")
 
 	fmt.Println("Server running at port 8080")
-	http.ListenAndServe(":8080", mux)
+	if err := http.ListenAndServe(":8080", mux); err != nil {
+		fmt.Println(err)
+	}
 }

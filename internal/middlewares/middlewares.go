@@ -2,16 +2,18 @@ package middlewares
 
 import (
 	"context"
+	native_errors "errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
+	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
 	"github.com/steffanturanjanin/receipt-manager/internal/services"
-	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 )
 
@@ -47,19 +49,27 @@ func setAuthMIddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		if accessToken == "" {
-			transport.ResponseJson(w, nil, 401)
+			controllers.JsonErrorResponse(w, errors.NewErrUnauthorized(nil, "No Access Token."))
 		}
 
 		accessTokenPublicKey := os.Getenv("ACCESS_TOKEN_PUBLI_KEY")
 		sub, err := utils.ValidateToken(accessToken, accessTokenPublicKey)
 		if err != nil {
-			transport.ResponseJson(w, nil, 401)
+			controllers.JsonErrorResponse(w, errors.NewErrUnauthorized(err, "Invalid access token."))
 		}
 
 		userId, _ := strconv.Atoi(fmt.Sprint(sub))
 		userResponse, err := userService.GetById(userId)
 		if err != nil {
-			transport.ResponseJson(w, nil, 403)
+			var appError errors.AppErrorInterface
+			if native_errors.As(err, &appError) {
+				controllers.JsonErrorResponse(
+					w,
+					errors.NewHttpError(errors.NewErrUnauthorized(appError.GetError(), "Forbidden.")),
+				)
+			}
+
+			controllers.JsonErrorResponse(w, errors.NewErrForbidden(nil, "Forbidden"))
 		}
 
 		ctx := context.WithValue(r.Context(), CURRENT_USER, *userResponse)

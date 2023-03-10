@@ -1,17 +1,18 @@
 package repositories
 
 import (
-	"errors"
+	native_errors "errors"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
-	"github.com/steffanturanjanin/receipt-manager/internal/transform"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 	"gorm.io/gorm"
 )
 
 type UserRepositoryInterface interface {
-	Create(request transport.RegisterUserRequest) (*models.User, error)
+	Create(request transport.RegisterUserRequestDTO) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
 	GetById(id int) (*models.User, error)
 }
@@ -26,8 +27,8 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	}
 }
 
-func (repository *UserRepository) Create(request transport.RegisterUserRequest) (*models.User, error) {
-	userModel := transform.NewUserModelFromRegisterRequest(request)
+func (repository *UserRepository) Create(request transport.RegisterUserRequestDTO) (*models.User, error) {
+	userModel := models.NewUserModelFromRegisterRequestDTO(request)
 	hashedPassword, err := utils.HashPassword(userModel.Password)
 	if err != nil {
 		return nil, err
@@ -37,7 +38,13 @@ func (repository *UserRepository) Create(request transport.RegisterUserRequest) 
 	result := repository.db.Create(&userModel)
 
 	if result.Error != nil {
-		return nil, result.Error
+		err := result.Error
+		var mysqlErr *mysql.MySQLError
+		if native_errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			err = errors.NewErrDuplicateEntry(err, "User with given email already exists.")
+		}
+
+		return nil, err
 	}
 
 	return &userModel, nil
@@ -45,10 +52,12 @@ func (repository *UserRepository) Create(request transport.RegisterUserRequest) 
 
 func (repository *UserRepository) GetByEmail(email string) (*models.User, error) {
 	var userModel *models.User
-	repository.db.First(&userModel, "email = ?", email)
+	result := repository.db.First(&userModel, "email = ?", email)
 
-	if userModel == nil {
-		return nil, errors.New("user with requested email not found")
+	if result.Error != nil {
+		if native_errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.NewErrResourceNotFound(result.Error, "User not found.")
+		}
 	}
 
 	return userModel, nil
@@ -56,10 +65,12 @@ func (repository *UserRepository) GetByEmail(email string) (*models.User, error)
 
 func (repository *UserRepository) GetById(id int) (*models.User, error) {
 	var userModel *models.User
-	repository.db.First(&userModel, "id = ?", id)
+	result := repository.db.First(&userModel, "id = ?", id)
 
-	if userModel == nil {
-		return nil, errors.New("user with requested id not found")
+	if result.Error != nil {
+		if native_errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, errors.NewErrResourceNotFound(result.Error, "User not found.")
+		}
 	}
 
 	return userModel, nil
