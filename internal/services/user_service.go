@@ -1,9 +1,9 @@
 package services
 
 import (
+	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
-	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 )
 
 type UserService struct {
@@ -16,7 +16,7 @@ func NewUserService(repository repositories.UserRepositoryInterface) *UserServic
 	}
 }
 
-func (service *UserService) Create(request transport.RegisterUserRequestDTO) (*transport.UserResponseDTO, error) {
+func (service *UserService) Create(request dto.RegisterUserRequestDTO) (*dto.UserResponseDTO, error) {
 	userModel, err := service.UserRepository.Create(request)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (service *UserService) Create(request transport.RegisterUserRequestDTO) (*t
 	return &response, nil
 }
 
-func (service *UserService) GetById(id int) (*transport.UserResponseDTO, error) {
+func (service *UserService) GetById(id int) (*dto.UserResponseDTO, error) {
 	userModel, err := service.UserRepository.GetById(id)
 	if err != nil {
 		return nil, err

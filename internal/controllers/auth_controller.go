@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
+	transport "github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/services"
-	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 	"github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 

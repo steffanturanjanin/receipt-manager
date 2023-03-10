@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
-	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 )
 
@@ -35,7 +35,7 @@ func NewAuthService(userRepository repositories.UserRepositoryInterface) *AuthSe
 	}
 }
 
-func (service *AuthService) RegisterUser(request transport.RegisterUserRequestDTO) (*transport.UserResponseDTO, error) {
+func (service *AuthService) RegisterUser(request dto.RegisterUserRequestDTO) (*dto.UserResponseDTO, error) {
 	userModel, err := service.UserRepository.Create(request)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (service *AuthService) RegisterUser(request transport.RegisterUserRequestDT
 	return &response, nil
 }
 
-func (service *AuthService) LoginUser(request transport.LoginUserRequestDTO) (*transport.LoginUserResponseDTO, *AuthCookies, error) {
+func (service *AuthService) LoginUser(request dto.LoginUserRequestDTO) (*dto.LoginUserResponseDTO, *AuthCookies, error) {
 	userModel, err := service.UserRepository.GetByEmail(strings.ToLower(request.Email))
 	if err != nil {
 		return nil, nil, err
@@ -107,14 +107,14 @@ func (service *AuthService) LoginUser(request transport.LoginUserRequestDTO) (*t
 		HttpOnly: false,
 	}
 
-	return &transport.LoginUserResponseDTO{AccessToken: accessToken}, &AuthCookies{
+	return &dto.LoginUserResponseDTO{AccessToken: accessToken}, &AuthCookies{
 		AccessTokenCookie:  accessTokenCookie,
 		RefreshTokenCookie: refreshTokenCookie,
 		LoggedInCookie:     loggedInCookie,
 	}, nil
 }
 
-func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*transport.LoginUserResponseDTO, *AuthCookies, error) {
+func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*dto.LoginUserResponseDTO, *AuthCookies, error) {
 	refreshTokenPublicKey := os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
 	sub, _ := utils.ValidateToken(refreshToken.Value, refreshTokenPublicKey)
 	userId, _ := strconv.Atoi(fmt.Sprint(sub))
@@ -153,7 +153,7 @@ func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*tran
 		HttpOnly: false,
 	}
 
-	return &transport.LoginUserResponseDTO{AccessToken: accessToken},
+	return &dto.LoginUserResponseDTO{AccessToken: accessToken},
 		&AuthCookies{
 			AccessTokenCookie: accessTokenCookie,
 			LoggedInCookie:    loggedInCookie,

@@ -4,15 +4,15 @@ import (
 	native_errors "errors"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
-	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 	"gorm.io/gorm"
 )
 
 type UserRepositoryInterface interface {
-	Create(request transport.RegisterUserRequestDTO) (*models.User, error)
+	Create(request dto.RegisterUserRequestDTO) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
 	GetById(id int) (*models.User, error)
 }
@@ -27,7 +27,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	}
 }
 
-func (repository *UserRepository) Create(request transport.RegisterUserRequestDTO) (*models.User, error) {
+func (repository *UserRepository) Create(request dto.RegisterUserRequestDTO) (*models.User, error) {
 	userModel := models.NewUserModelFromRegisterRequestDTO(request)
 	hashedPassword, err := utils.HashPassword(userModel.Password)
 	if err != nil {
