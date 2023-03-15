@@ -16,7 +16,7 @@ func NewUserService(repository repositories.UserRepositoryInterface) *UserServic
 	}
 }
 
-func (service *UserService) Create(request dto.RegisterUserRequestDTO) (*dto.UserResponseDTO, error) {
+func (service *UserService) Create(request dto.RegisterUserRequest) (*dto.User, error) {
 	userModel, err := service.UserRepository.Create(request)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (service *UserService) Create(request dto.RegisterUserRequestDTO) (*dto.Use
 	return &response, nil
 }
 
-func (service *UserService) GetById(id int) (*dto.UserResponseDTO, error) {
+func (service *UserService) GetById(id int) (*dto.User, error) {
 	userModel, err := service.UserRepository.GetById(id)
 	if err != nil {
 		return nil, err

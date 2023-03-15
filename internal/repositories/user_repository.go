@@ -12,7 +12,7 @@ import (
 )
 
 type UserRepositoryInterface interface {
-	Create(request dto.RegisterUserRequestDTO) (*models.User, error)
+	Create(request dto.RegisterUserRequest) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
 	GetById(id int) (*models.User, error)
 }
@@ -27,7 +27,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	}
 }
 
-func (repository *UserRepository) Create(request dto.RegisterUserRequestDTO) (*models.User, error) {
+func (repository *UserRepository) Create(request dto.RegisterUserRequest) (*models.User, error) {
 	userModel := models.NewUserModelFromRegisterRequestDTO(request)
 	hashedPassword, err := utils.HashPassword(userModel.Password)
 	if err != nil {

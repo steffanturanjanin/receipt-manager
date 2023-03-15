@@ -22,7 +22,7 @@ func NewAuthController(authService *services.AuthService, validator *validator.V
 }
 
 func (controller *AuthController) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	registerRequest := new(transport.RegisterUserRequestDTO)
+	registerRequest := new(transport.RegisterUserRequest)
 
 	if err := ParseBody(registerRequest, r); err != nil {
 		JsonErrorResponse(w, errors.NewHttpError(err))
@@ -44,7 +44,7 @@ func (controller *AuthController) RegisterUser(w http.ResponseWriter, r *http.Re
 }
 
 func (controller *AuthController) LoginUser(w http.ResponseWriter, r *http.Request) {
-	loginRequest := new(transport.LoginUserRequestDTO)
+	loginRequest := new(transport.LoginUserRequest)
 
 	if err := ParseBody(loginRequest, r); err != nil {
 		JsonErrorResponse(w, errors.NewHttpError(err))

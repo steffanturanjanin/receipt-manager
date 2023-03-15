@@ -15,10 +15,12 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/navossoc/bayesian v0.0.0-20171203014413-18fc5ea11e24 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
+	gorm.io/datatypes v1.1.1 // indirect
 	gorm.io/driver/mysql v1.4.7 // indirect
-	gorm.io/gorm v1.24.5 // indirect
+	gorm.io/gorm v1.24.6 // indirect
 )

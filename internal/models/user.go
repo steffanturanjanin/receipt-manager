@@ -16,8 +16,8 @@ type User struct {
 	UpdatedAt time.Time `gorm:"not null;autoCreateTime" json:"updated_at"`
 }
 
-func NewUserResponseDTOFromUserModel(user User) dto.UserResponseDTO {
-	return dto.UserResponseDTO{
+func NewUserResponseDTOFromUserModel(user User) dto.User {
+	return dto.User{
 		Id:        user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
@@ -27,7 +27,7 @@ func NewUserResponseDTOFromUserModel(user User) dto.UserResponseDTO {
 	}
 }
 
-func NewUserModelFromRegisterRequestDTO(requestDTO dto.RegisterUserRequestDTO) User {
+func NewUserModelFromRegisterRequestDTO(requestDTO dto.RegisterUserRequest) User {
 	return User{
 		FirstName: requestDTO.FirstName,
 		LastName:  requestDTO.LastName,

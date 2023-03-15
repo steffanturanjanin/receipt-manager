@@ -131,7 +131,7 @@ func parseReceipt(receiptContent string) (*Receipt, error) {
 		Store:               store,
 		Number:              fiscalization["ПФР број рачуна"],
 		Counter:             fiscalization["Бројач рачуна"],
-		Meta:                meta,
+		MetaData:            meta,
 		Items:               receiptItems,
 		Taxes:               taxes,
 		PaymentSummary:      paymentSummary,

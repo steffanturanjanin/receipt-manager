@@ -4,19 +4,19 @@ import (
 	"time"
 )
 
-type RegisterUserRequestDTO struct {
+type RegisterUserRequest struct {
 	FirstName string `validate:"required,max=255" json:"first_name"`
 	LastName  string `validate:"required,max=255" json:"last_name"`
 	Email     string `validate:"required,email,max=100" json:"email"`
 	Password  string `validate:"required,min=8,max=100" json:"password"`
 }
 
-type LoginUserRequestDTO struct {
+type LoginUserRequest struct {
 	Email    string `validate:"required" json:"email"`
 	Password string `validate:"required" json:"password"`
 }
 
-type UserResponseDTO struct {
+type User struct {
 	Id        uint      `json:"id"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
@@ -25,6 +25,6 @@ type UserResponseDTO struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type LoginUserResponseDTO struct {
+type AccessToken struct {
 	AccessToken string `json:"access_token"`
 }

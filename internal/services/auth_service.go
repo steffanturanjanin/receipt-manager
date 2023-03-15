@@ -35,7 +35,7 @@ func NewAuthService(userRepository repositories.UserRepositoryInterface) *AuthSe
 	}
 }
 
-func (service *AuthService) RegisterUser(request dto.RegisterUserRequestDTO) (*dto.UserResponseDTO, error) {
+func (service *AuthService) RegisterUser(request dto.RegisterUserRequest) (*dto.User, error) {
 	userModel, err := service.UserRepository.Create(request)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (service *AuthService) RegisterUser(request dto.RegisterUserRequestDTO) (*d
 	return &response, nil
 }
 
-func (service *AuthService) LoginUser(request dto.LoginUserRequestDTO) (*dto.LoginUserResponseDTO, *AuthCookies, error) {
+func (service *AuthService) LoginUser(request dto.LoginUserRequest) (*dto.AccessToken, *AuthCookies, error) {
 	userModel, err := service.UserRepository.GetByEmail(strings.ToLower(request.Email))
 	if err != nil {
 		return nil, nil, err
@@ -107,14 +107,14 @@ func (service *AuthService) LoginUser(request dto.LoginUserRequestDTO) (*dto.Log
 		HttpOnly: false,
 	}
 
-	return &dto.LoginUserResponseDTO{AccessToken: accessToken}, &AuthCookies{
+	return &dto.AccessToken{AccessToken: accessToken}, &AuthCookies{
 		AccessTokenCookie:  accessTokenCookie,
 		RefreshTokenCookie: refreshTokenCookie,
 		LoggedInCookie:     loggedInCookie,
 	}, nil
 }
 
-func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*dto.LoginUserResponseDTO, *AuthCookies, error) {
+func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*dto.AccessToken, *AuthCookies, error) {
 	refreshTokenPublicKey := os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
 	sub, _ := utils.ValidateToken(refreshToken.Value, refreshTokenPublicKey)
 	userId, _ := strconv.Atoi(fmt.Sprint(sub))
@@ -153,7 +153,7 @@ func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*dto.
 		HttpOnly: false,
 	}
 
-	return &dto.LoginUserResponseDTO{AccessToken: accessToken},
+	return &dto.AccessToken{AccessToken: accessToken},
 		&AuthCookies{
 			AccessTokenCookie: accessTokenCookie,
 			LoggedInCookie:    loggedInCookie,
