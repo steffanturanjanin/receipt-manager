@@ -59,7 +59,15 @@ func (service *ReceiptService) CreateFromUrl(url string) (*dto.Receipt, error) {
 	}
 
 	receiptDTO := dto.Receipt{
-		ID:                  receiptModel.ID,
+		ID: receiptModel.ID,
+		Store: dto.Store{
+			Tin:          receiptModel.Store.Tin,
+			Name:         receiptModel.Store.Name,
+			LocationName: receiptModel.Store.LocationName,
+			LocationId:   receiptModel.Store.LocationId,
+			Address:      receiptModel.Store.Address,
+			City:         receiptModel.Store.City,
+		},
 		PfrNumber:           receiptModel.PfrNumber,
 		Counter:             receiptModel.Counter,
 		TotalPurchaseAmount: math.Round(float64(receiptModel.TotalPurchaseAmount)) / 100,

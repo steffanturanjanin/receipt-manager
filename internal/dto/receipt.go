@@ -8,8 +8,10 @@ import (
 
 type ReceiptData receipt_fetcher.Receipt
 
+// ReceiptDTO
 type Receipt struct {
 	ID                  uint              `json:"id"`
+	Store               Store             `json:"store"`
 	PfrNumber           string            `json:"pfr_number"`
 	Counter             string            `json:"counter"`
 	TotalPurchaseAmount float64           `json:"total_purchase_amount"`
@@ -20,6 +22,16 @@ type Receipt struct {
 	QrCode              string            `json:"qr_code"`
 	Meta                map[string]string `json:"meta_data"`
 	CreatedAt           time.Time         `json:"created_at"`
+}
+
+// StoreDTO
+type Store struct {
+	Tin          string `jsontin:"tin"`
+	Name         string `json:"name"`
+	LocationName string `json:"location_name"`
+	LocationId   string `json:"location_id"`
+	Address      string `json:"address"`
+	City         string `json:"city"`
 }
 
 // ReceiptItem DTO

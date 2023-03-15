@@ -28,6 +28,16 @@ func NewReceiptRepository(db *gorm.DB) *ReceiptRepository {
 }
 
 func (repository *ReceiptRepository) Create(receiptDTO dto.ReceiptData) (*models.Receipt, error) {
+	var store models.Store
+	repository.db.FirstOrCreate(&store, models.Store{
+		Tin:          receiptDTO.Store.Tin,
+		Name:         receiptDTO.Store.Name,
+		LocationId:   receiptDTO.Store.LocationId,
+		LocationName: receiptDTO.Store.Name,
+		Address:      receiptDTO.Store.Address,
+		City:         receiptDTO.Store.City,
+	})
+
 	receiptItems := make([]models.ReceiptItem, 0)
 
 	for _, receiptItemDTO := range receiptDTO.Items {
@@ -55,6 +65,8 @@ func (repository *ReceiptRepository) Create(receiptDTO dto.ReceiptData) (*models
 	metaJson, _ := json.Marshal(receiptDTO.MetaData)
 
 	receipt := models.Receipt{
+		StoreID:             store.Tin,
+		Store:               store,
 		PfrNumber:           receiptDTO.Number,
 		Counter:             receiptDTO.Counter,
 		TotalPurchaseAmount: receiptDTO.TotalPurchaseAmount.GetParas(),
