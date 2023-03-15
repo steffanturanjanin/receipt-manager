@@ -70,6 +70,8 @@ func NewHttpValidationEror(err error, trans ut.Translator) *HttpError {
 
 func HttpStatusCodeFromAppError(err error) int {
 	switch err.(type) {
+	case ErrBadRequest:
+		return http.StatusBadRequest
 	case ErrResourceNotFound:
 		return http.StatusNotFound
 	case ErrUnauthorized:

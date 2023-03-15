@@ -12,11 +12,9 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
 	"github.com/steffanturanjanin/receipt-manager/internal/services"
 	"github.com/steffanturanjanin/receipt-manager/internal/validator"
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
 )
 
 func main() {
-	receipt_fetcher.Get("aa")
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Failed loading env variables with error: %s", err.Error())
 	}
@@ -49,6 +47,7 @@ func main() {
 	mux.HandleFunc("/logout", authController.Logout).Methods("POST")
 
 	mux.HandleFunc("/receipts", receiptController.CreateFromUrl).Methods("POST")
+	mux.HandleFunc("/receipts/{id}", receiptController.Delete).Methods("DELETE")
 
 	fmt.Println("Server running at port 8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {

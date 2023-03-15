@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
+	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
 	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
 )
@@ -21,9 +22,8 @@ func NewReceiptService(receiptRepository repositories.ReceiptRepositoryInterface
 
 func (service *ReceiptService) CreateFromUrl(url string) (*dto.Receipt, error) {
 	receipt, err := receipt_fetcher.Get(url)
-
 	if err != nil {
-		return nil, err
+		return nil, errors.NewErrBadRequest(err, "Invalid receipt url.")
 	}
 
 	receiptModel, err := service.ReceiptRepository.Create(dto.ReceiptData(*receipt))
@@ -73,4 +73,8 @@ func (service *ReceiptService) CreateFromUrl(url string) (*dto.Receipt, error) {
 	}
 
 	return &receiptDTO, nil
+}
+
+func (service *ReceiptService) Delete(id int) error {
+	return service.ReceiptRepository.Delete(id)
 }

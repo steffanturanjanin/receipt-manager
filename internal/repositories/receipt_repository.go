@@ -2,8 +2,11 @@ package repositories
 
 import (
 	"encoding/json"
+	native_errors "errors"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
+	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -11,6 +14,7 @@ import (
 
 type ReceiptRepositoryInterface interface {
 	Create(receiptDTO dto.ReceiptData) (*models.Receipt, error)
+	Delete(id int) error
 }
 
 type ReceiptRepository struct {
@@ -63,8 +67,33 @@ func (repository *ReceiptRepository) Create(receiptDTO dto.ReceiptData) (*models
 	}
 
 	if result := repository.db.Create(&receipt); result.Error != nil {
-		return nil, result.Error
+		err := result.Error
+		var mysqlErr *mysql.MySQLError
+		if native_errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			err = errors.NewErrDuplicateEntry(err, "This receipt has already been processed.")
+		}
+
+		return nil, err
 	}
 
 	return &receipt, nil
+}
+
+func (repository *ReceiptRepository) Delete(id int) error {
+	var receipt models.Receipt
+
+	if result := repository.db.First(&receipt, id); result.Error != nil {
+		err := result.Error
+		if native_errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.NewErrResourceNotFound(err, "Receipt failed to be deleted because it does not exist.")
+		}
+
+		return err
+	}
+
+	if result := repository.db.Delete(&receipt); result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }

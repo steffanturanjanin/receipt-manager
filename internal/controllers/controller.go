@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	encodedServerErrResp []byte = json.RawMessage(`{"message":"Internal server error."}`)
+	encodedServerErrResp []byte = json.RawMessage(`{code: "500", "message":"Internal server error."}`)
 )
 
 func ParseBody(destination interface{}, r *http.Request) error {
