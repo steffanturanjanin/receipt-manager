@@ -47,6 +47,7 @@ func main() {
 	mux.HandleFunc("/logout", authController.Logout).Methods("POST")
 
 	mux.HandleFunc("/receipts", receiptController.CreateFromUrl).Methods("POST")
+	mux.HandleFunc("/receipts", receiptController.List).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", receiptController.Delete).Methods("DELETE")
 
 	fmt.Println("Server running at port 8080")

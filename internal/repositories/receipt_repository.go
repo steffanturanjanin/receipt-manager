@@ -8,11 +8,13 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
+	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type ReceiptRepositoryInterface interface {
+	GetAll(p *pagination.Pagination) ([]models.Receipt, error)
 	Create(receiptDTO dto.ReceiptData) (*models.Receipt, error)
 	Delete(id int) error
 }
@@ -108,4 +110,18 @@ func (repository *ReceiptRepository) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func (repository *ReceiptRepository) GetAll(p *pagination.Pagination) ([]models.Receipt, error) {
+	var receipts []models.Receipt
+	baseQuery := repository.db.Model(models.Receipt{})
+
+	paginatedQuery := Paginate(baseQuery, p, models.Receipt{})
+	result := paginatedQuery.Preload("Store").Preload("ReceiptItems").Find(&receipts)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return receipts, nil
 }

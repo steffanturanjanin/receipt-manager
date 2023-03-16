@@ -21,3 +21,14 @@ type Receipt struct {
 	Meta                datatypes.JSON `gorm:"nullable" json:"meta_data"`
 	Store               Store          `json:"store"`
 }
+
+func (r Receipt) SortableFields() []string {
+	return []string{
+		"id",
+		"pfr_number",
+		"counter",
+		"total_purchase_amount",
+		"total_tax_amount",
+		"date",
+	}
+}

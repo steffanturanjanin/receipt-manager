@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
 	v "github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
@@ -83,4 +84,30 @@ func ValidateRequest(request interface{}, v *v.Validator) error {
 		Code:    http.StatusBadRequest,
 		Errors:  validationErrors,
 	}
+}
+
+func JsonPaginatedResponse(w http.ResponseWriter, data interface{}, p pagination.Pagination, status int) {
+	paginatedResponse := PaginatedResponse{
+		Data: data,
+		MetaData: PaginationMetaData{
+			CurrentPage:  p.Page,
+			PerPage:      p.Limit,
+			TotalPages:   p.TotalPages,
+			TotalEntries: p.TotalEnties,
+		},
+	}
+
+	JsonResponse(w, paginatedResponse, status)
+}
+
+type PaginatedResponse struct {
+	Data     interface{}        `json:"data"`
+	MetaData PaginationMetaData `json:"meta_data"`
+}
+
+type PaginationMetaData struct {
+	CurrentPage  int `json:"current_page"`
+	PerPage      int `json:"per_page"`
+	TotalPages   int `json:"total_pages"`
+	TotalEntries int `json:"total_entries"`
 }
