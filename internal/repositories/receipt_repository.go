@@ -29,20 +29,20 @@ func NewReceiptRepository(db *gorm.DB) *ReceiptRepository {
 	}
 }
 
-func (repository *ReceiptRepository) Create(receiptDTO dto.ReceiptData) (*models.Receipt, error) {
+func (repository *ReceiptRepository) Create(receiptData dto.ReceiptData) (*models.Receipt, error) {
 	var store models.Store
 	repository.db.FirstOrCreate(&store, models.Store{
-		Tin:          receiptDTO.Store.Tin,
-		Name:         receiptDTO.Store.Name,
-		LocationId:   receiptDTO.Store.LocationId,
-		LocationName: receiptDTO.Store.Name,
-		Address:      receiptDTO.Store.Address,
-		City:         receiptDTO.Store.City,
+		Tin:          receiptData.Store.Tin,
+		Name:         receiptData.Store.Name,
+		LocationId:   receiptData.Store.LocationId,
+		LocationName: receiptData.Store.Name,
+		Address:      receiptData.Store.Address,
+		City:         receiptData.Store.City,
 	})
 
 	receiptItems := make([]models.ReceiptItem, 0)
 
-	for _, receiptItemDTO := range receiptDTO.Items {
+	for _, receiptItemDTO := range receiptData.Items {
 		receiptItem := models.ReceiptItem{
 			Name:         receiptItemDTO.Name,
 			Unit:         receiptItemDTO.Unit,
@@ -56,7 +56,7 @@ func (repository *ReceiptRepository) Create(receiptDTO dto.ReceiptData) (*models
 	}
 
 	taxes := make([]models.Tax, 0)
-	for _, taxItem := range receiptDTO.Taxes {
+	for _, taxItem := range receiptData.Taxes {
 		taxModel := models.Tax{
 			TaxIdentifier: int(dto.TaxIdentifierMapper[taxItem.Tax.Identifier]),
 		}
@@ -64,23 +64,22 @@ func (repository *ReceiptRepository) Create(receiptDTO dto.ReceiptData) (*models
 		taxes = append(taxes, taxModel)
 	}
 
-	metaJson, _ := json.Marshal(receiptDTO.MetaData)
+	metaJson, _ := json.Marshal(receiptData.MetaData)
 
 	receipt := models.Receipt{
 		StoreID:             store.Tin,
-		Store:               store,
-		PfrNumber:           receiptDTO.Number,
-		Counter:             receiptDTO.Counter,
-		TotalPurchaseAmount: receiptDTO.TotalPurchaseAmount.GetParas(),
-		TotalTaxAmount:      receiptDTO.TotalTaxAmount.GetParas(),
-		Date:                receiptDTO.Date,
-		QrCode:              receiptDTO.QrCod,
+		PfrNumber:           receiptData.Number,
+		Counter:             receiptData.Counter,
+		TotalPurchaseAmount: receiptData.TotalPurchaseAmount.GetParas(),
+		TotalTaxAmount:      receiptData.TotalTaxAmount.GetParas(),
+		Date:                receiptData.Date,
+		QrCode:              receiptData.QrCod,
 		ReceiptItems:        receiptItems,
 		Taxes:               taxes,
 		Meta:                datatypes.JSON(metaJson),
 	}
 
-	if result := repository.db.Create(&receipt); result.Error != nil {
+	if result := repository.db.Create(&receipt).Preload("Store"); result.Error != nil {
 		err := result.Error
 		var mysqlErr *mysql.MySQLError
 		if native_errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
@@ -114,8 +113,8 @@ func (repository *ReceiptRepository) Delete(id int) error {
 
 func (repository *ReceiptRepository) GetAll(p *pagination.Pagination) ([]models.Receipt, error) {
 	var receipts []models.Receipt
-	baseQuery := repository.db.Model(models.Receipt{})
 
+	baseQuery := repository.db.Model(models.Receipt{})
 	paginatedQuery := Paginate(baseQuery, p, models.Receipt{})
 	result := paginatedQuery.Preload("Store").Preload("ReceiptItems").Find(&receipts)
 

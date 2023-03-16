@@ -1,8 +1,11 @@
 package models
 
 import (
+	"encoding/json"
+	"math"
 	"time"
 
+	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"gorm.io/datatypes"
 )
 
@@ -20,6 +23,43 @@ type Receipt struct {
 	Taxes               []Tax          `gorm:"foreignKey:ReceiptID;references:ID;constraint:OnDelete:CASCADE" json:"taxes"`
 	Meta                datatypes.JSON `gorm:"nullable" json:"meta_data"`
 	Store               Store          `json:"store"`
+}
+
+func (r Receipt) NewReceiptDTO() (*dto.Receipt, error) {
+	receiptItems := make([]dto.ReceiptItem, 0)
+	for _, receiptItemModel := range r.ReceiptItems {
+		receiptItem := receiptItemModel.NewReceiptItemDTO()
+		receiptItems = append(receiptItems, receiptItem)
+	}
+
+	taxes := make([]dto.Tax, 0)
+	for _, taxModel := range r.Taxes {
+		if tax := taxModel.NewTaxDTO(); tax != nil {
+			taxes = append(taxes, *tax)
+		}
+	}
+
+	meta := make(map[string]string)
+	if err := json.Unmarshal(r.Meta, &meta); err != nil {
+		return nil, err
+	}
+
+	receiptDTO := dto.Receipt{
+		ID:                  r.ID,
+		Store:               r.Store.NewStoreDTO(),
+		PfrNumber:           r.PfrNumber,
+		Counter:             r.Counter,
+		TotalPurchaseAmount: math.Round(float64(r.TotalPurchaseAmount)) / 100,
+		TotalTaxAmount:      math.Round(float64(r.TotalTaxAmount)) / 100,
+		ReceiptItems:        receiptItems,
+		Taxes:               taxes,
+		Date:                r.Date,
+		QrCode:              r.QrCode,
+		Meta:                meta,
+		CreatedAt:           r.Date,
+	}
+
+	return &receiptDTO, nil
 }
 
 func (r Receipt) SortableFields() []string {
