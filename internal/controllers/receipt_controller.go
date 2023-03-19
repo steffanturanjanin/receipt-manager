@@ -2,12 +2,12 @@ package controllers
 
 import (
 	native_erors "errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	"github.com/steffanturanjanin/receipt-manager/internal/filters"
 	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
 	"github.com/steffanturanjanin/receipt-manager/internal/services"
 )
@@ -61,11 +61,11 @@ func (controller *ReceiptController) Delete(w http.ResponseWriter, r *http.Reque
 }
 
 func (controller *ReceiptController) List(w http.ResponseWriter, r *http.Request) {
+	filters := filters.ReceiptFilters{}
+	filters.BuildFromRequest(r)
 	pagination := pagination.GetPaginationFromRequest(r)
 
-	fmt.Printf("PAGINATION: %+v\n", pagination)
-
-	receipts, err := controller.ReceiptService.GetAll(&pagination)
+	receipts, err := controller.ReceiptService.GetAll(filters, &pagination)
 	if err != nil {
 		JsonErrorResponse(w, err)
 		return

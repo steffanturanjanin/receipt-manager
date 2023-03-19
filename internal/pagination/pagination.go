@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 )
 
 const (
@@ -36,7 +38,7 @@ type SortList []Sort
 
 func ValidateSortList(sl SortList, s Sortable) {
 	for sortListElIndex, sortListEl := range sl {
-		if contains(s.SortableFields(), sortListEl.Field) {
+		if utils.InSlice(s.SortableFields(), sortListEl.Field) {
 			continue
 		}
 
@@ -51,15 +53,6 @@ type Sort struct {
 
 type Sortable interface {
 	SortableFields() []string
-}
-
-func contains[T comparable](elems []T, v T) bool {
-	for _, s := range elems {
-		if v == s {
-			return true
-		}
-	}
-	return false
 }
 
 func GetPaginationFromRequest(r *http.Request) Pagination {

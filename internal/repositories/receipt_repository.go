@@ -3,10 +3,12 @@ package repositories
 import (
 	"encoding/json"
 	native_errors "errors"
+	"fmt"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	"github.com/steffanturanjanin/receipt-manager/internal/filters"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
 	"gorm.io/datatypes"
@@ -14,7 +16,7 @@ import (
 )
 
 type ReceiptRepositoryInterface interface {
-	GetAll(p *pagination.Pagination) ([]models.Receipt, error)
+	GetAll(f filters.ReceiptFilters, p *pagination.Pagination) ([]models.Receipt, error)
 	Create(receiptDTO dto.ReceiptData) (*models.Receipt, error)
 	Delete(id int) error
 }
@@ -111,11 +113,15 @@ func (repository *ReceiptRepository) Delete(id int) error {
 	return nil
 }
 
-func (repository *ReceiptRepository) GetAll(p *pagination.Pagination) ([]models.Receipt, error) {
+func (repository *ReceiptRepository) GetAll(f filters.ReceiptFilters, p *pagination.Pagination) ([]models.Receipt, error) {
 	var receipts []models.Receipt
 
 	baseQuery := repository.db.Model(models.Receipt{})
-	paginatedQuery := Paginate(baseQuery, p, models.Receipt{})
+	fmt.Printf("FILTERS_LIST %+v\n", f.FiltersList)
+
+	filteredQuery := f.ApplyFilters(baseQuery)
+	paginatedQuery := Paginate(filteredQuery, p, models.Receipt{})
+
 	result := paginatedQuery.Preload("Store").Preload("ReceiptItems").Find(&receipts)
 
 	if result.Error != nil {

@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	"github.com/steffanturanjanin/receipt-manager/internal/filters"
 	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
 	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
@@ -41,10 +42,10 @@ func (service *ReceiptService) Delete(id int) error {
 	return service.ReceiptRepository.Delete(id)
 }
 
-func (service *ReceiptService) GetAll(p *pagination.Pagination) ([]dto.Receipt, error) {
+func (service *ReceiptService) GetAll(f filters.ReceiptFilters, p *pagination.Pagination) ([]dto.Receipt, error) {
 	receipts := make([]dto.Receipt, 0)
 
-	receiptModels, err := service.ReceiptRepository.GetAll(p)
+	receiptModels, err := service.ReceiptRepository.GetAll(f, p)
 	if err != nil {
 		return nil, err
 	}
