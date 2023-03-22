@@ -17,6 +17,7 @@ var (
 
 	AllowedFilterInFields = []string{
 		"date",
+		"store_id",
 	}
 )
 

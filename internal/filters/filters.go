@@ -15,6 +15,7 @@ const (
 	FILTER_RANGE = "filter_range"
 	FILTER_MATCH = "filter_match"
 	FILTER_IN    = "filter_in"
+	SEARCH       = "search"
 
 	GreaterThan          Operation = ">"
 	LessThan             Operation = "<"
@@ -24,7 +25,7 @@ const (
 	LessThanOrEqualTo    Operation = "<="
 )
 
-var FilterOpetaionMapper = map[string]Operation{
+var FilterMatchOpetaionMapper = map[string]Operation{
 	"gt":  GreaterThan,
 	"lt":  LessThan,
 	"eq":  EqualTo,
@@ -92,74 +93,6 @@ func (f abstractResourceFilters) ApplyFilters(query *gorm.DB) *gorm.DB {
 	return query
 }
 
-// func (f abstractResourceFilters) getFilterRangeFromRequest(r *http.Request, filterKey string, field string) *FilterRange {
-// 	if value, ok := r.URL.Query()[filterKey]; ok {
-// 		rangeValues := strings.Split(value[0], ",")
-
-// 		if len(rangeValues) != 2 {
-// 			return nil
-// 		}
-
-// 		return &FilterRange{
-// 			Field:     field,
-// 			LimitFrom: rangeValues[0],
-// 			LimitTo:   rangeValues[1],
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// func (f abstractResourceFilters) getFilterDateRangeFromRequest(r *http.Request, filterKey string, field string) *FilterRange {
-// 	if value, ok := r.URL.Query()[filterKey]; ok {
-// 		rangeValues := strings.Split(value[0], ",")
-
-// 		if len(rangeValues) != 2 {
-// 			return nil
-// 		}
-
-// 		_, err1 := time.Parse("2006-01-02", rangeValues[0])
-// 		_, err2 := time.Parse("2006-01-02", rangeValues[1])
-
-// 		if err1 != nil && err2 != nil {
-// 			return nil
-// 		}
-
-// 		return &FilterRange{
-// 			Field:     field,
-// 			LimitFrom: rangeValues[0],
-// 			LimitTo:   rangeValues[1],
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// func (f abstractResourceFilters) getFilterMatchFromRequest(r *http.Request, filterKey string, field string, op Operation) *FilterMatch {
-// 	if value, ok := r.URL.Query()[filterKey]; ok {
-// 		return &FilterMatch{
-// 			Field:     field,
-// 			Value:     value[0],
-// 			Operation: op,
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// func (f abstractResourceFilters) getFilterInFromRequest(r *http.Request, filterKey string, field string) *FilterIn {
-// 	if value, ok := r.URL.Query()[filterKey]; ok {
-// 		values := strings.Split(value[0], ",")
-
-// 		return &FilterIn{
-// 			Field:  field,
-// 			Values: values,
-// 		}
-// 	}
-
-// 	return nil
-// }
-
 func (f abstractResourceFilters) getFiltersRangeFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
 	filtersList := make([]FilterInterface, 0)
 
@@ -214,7 +147,7 @@ func getFilterMatchFromRequest(filterMatch string, allowedFields []string) *Filt
 		return nil
 	}
 
-	if operation, ok := FilterOpetaionMapper[comparator]; ok {
+	if operation, ok := FilterMatchOpetaionMapper[comparator]; ok {
 		return &FilterMatch{
 			Field:     field,
 			Value:     value,

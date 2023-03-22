@@ -1,15 +1,37 @@
 package receipt_fetcher
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+)
+
+const (
+	START_DELIMITER = "========================================"
+	END_DELIMITER   = "----------------------------------------"
+
+	FISCAL_RECEIPT_IDENTIFIER = "============ ФИСКАЛНИ РАЧУН ============"
+
+	FISACLIZATION_SYSTEM_HOST = "suf.purs.gov.rs"
+)
+
+var (
+	ErrReceiptDataNotAvailable = errors.New("receipt data currently not available")
+	ErrInvalidReceiptUrl       = errors.New("invalid url")
+
+	httpClient = &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 )
 
 func Get(url string) (*Receipt, error) {
@@ -32,9 +54,17 @@ func Get(url string) (*Receipt, error) {
 }
 
 func getUrlContent(url string) (io.ReadCloser, error) {
-	res, err := http.Get(url)
+	if !isHostValid(url) {
+		return nil, ErrInvalidReceiptUrl
+	}
+
+	res, err := httpClient.Get(url)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode == http.StatusFound {
+		return nil, ErrInvalidReceiptUrl
 	}
 
 	return res.Body, nil
@@ -53,6 +83,10 @@ func getReceiptContent(rc io.ReadCloser) (string, error) {
 		return "", err
 	}
 
+	if !strings.Contains(html, FISCAL_RECEIPT_IDENTIFIER) {
+		return "", ErrReceiptDataNotAvailable
+	}
+
 	return html, nil
 }
 
@@ -60,10 +94,7 @@ func parseReceipt(receiptContent string) (*Receipt, error) {
 	receiptContent = receiptContent[strings.Index(receiptContent, "\n")+1:]
 	receiptContent = receiptContent[:strings.LastIndex(receiptContent, "\n")]
 
-	startDelimiter := "========================================"
-	endDelimiter := "----------------------------------------"
-
-	recSections := strings.Split(receiptContent, startDelimiter)
+	recSections := strings.Split(receiptContent, START_DELIMITER)
 	for index := range recSections {
 		recSections[index] = normalizeMultilineStrings(recSections[index])
 	}
@@ -79,7 +110,7 @@ func parseReceipt(receiptContent string) (*Receipt, error) {
 	totalTaxAmount := RsdAmount{}
 
 	for i := 1; i < len(taxLines); i++ {
-		if taxLines[i] == endDelimiter {
+		if taxLines[i] == END_DELIMITER {
 			totals := extractKeyValuePairs(taxLines[i+1])
 			totalTaxAmount, _ = NewRsdAmountFromString(totals["Укупан износ пореза"])
 
@@ -108,7 +139,7 @@ func parseReceipt(receiptContent string) (*Receipt, error) {
 		taxes = append(taxes, taxItem)
 	}
 
-	bodySplit := strings.Split(body, endDelimiter)
+	bodySplit := strings.Split(body, END_DELIMITER)
 	itemsData, paymentData := normalizeMultilineStrings(bodySplit[0]), normalizeMultilineStrings(bodySplit[1])
 
 	paymentPairs := extractKeyValuePairs(paymentData)
@@ -266,4 +297,15 @@ func extractItemData(itemData string, taxes map[string]Tax) []ReceiptItem {
 	}
 
 	return items
+}
+
+func isHostValid(u string) bool {
+	url, err := url.Parse(u)
+	if err != nil {
+		return false
+	}
+
+	hostname := strings.TrimPrefix(url.Hostname(), "www.")
+
+	return hostname == FISACLIZATION_SYSTEM_HOST
 }
