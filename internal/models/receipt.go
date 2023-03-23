@@ -9,8 +9,15 @@ import (
 	"gorm.io/datatypes"
 )
 
+const (
+	RECEIPT_STATUS_PENDING   = "pending"
+	RECEIPT_STATUS_PROCESSED = "processed"
+	RECEIPT_STATUS_FAILED    = "failed"
+)
+
 type Receipt struct {
 	ID                  uint           `gorm:"primaryKey; autoIncrement" json:"id"`
+	Status              string         `gorm:"not null" json:"status"`
 	PfrNumber           string         `gorm:"unique; not null" json:"pfr_number"`
 	Counter             string         `gorm:"unique; not null" json:"counter"`
 	TotalPurchaseAmount int            `gorm:"not null; default:0" json:"total_purchase_amount"`
