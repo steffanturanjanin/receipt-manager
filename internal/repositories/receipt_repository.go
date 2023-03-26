@@ -18,6 +18,7 @@ import (
 type ReceiptRepositoryInterface interface {
 	GetAll(f filters.ReceiptFilters, p *pagination.Pagination) ([]models.Receipt, error)
 	GetByPfr(string) (*models.Receipt, error)
+	GetById(int) (*models.Receipt, error)
 	Create(receiptDTO dto.ReceiptData) (*models.Receipt, error)
 	Create2(*models.Receipt) error
 	Delete(id int) error
@@ -145,6 +146,15 @@ func (r *ReceiptRepository) Update(receipt *models.Receipt) error {
 func (r *ReceiptRepository) GetByPfr(pfr string) (*models.Receipt, error) {
 	var receipt *models.Receipt
 	if err := r.db.Where(&models.Receipt{PfrNumber: &pfr}).First(&receipt).Error; err != nil {
+		return nil, err
+	}
+
+	return receipt, nil
+}
+
+func (r *ReceiptRepository) GetById(id int) (*models.Receipt, error) {
+	var receipt *models.Receipt
+	if err := r.db.Preload("ReceiptItems").Preload("Store").First(&receipt, uint(id)).Error; err != nil {
 		return nil, err
 	}
 

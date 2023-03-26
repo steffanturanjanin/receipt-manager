@@ -14,12 +14,12 @@ import (
 )
 
 type ReceiptService struct {
-	ReceiptRepository repositories.ReceiptRepositoryInterface
+	receiptRepository repositories.ReceiptRepositoryInterface
 }
 
 func NewReceiptService(receiptRepository repositories.ReceiptRepositoryInterface) *ReceiptService {
 	return &ReceiptService{
-		ReceiptRepository: receiptRepository,
+		receiptRepository: receiptRepository,
 	}
 }
 
@@ -29,7 +29,7 @@ func (service *ReceiptService) CreateFromUrl(url string) (*dto.Receipt, error) {
 		return nil, errors.NewErrBadRequest(err, "Invalid receipt url.")
 	}
 
-	receiptModel, err := service.ReceiptRepository.Create(dto.ReceiptData(*receiptData))
+	receiptModel, err := service.receiptRepository.Create(dto.ReceiptData(*receiptData))
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (service *ReceiptService) CreatePendingReceipt() (*dto.Receipt, error) {
 		Status: models.RECEIPT_STATUS_PENDING,
 	}
 
-	if err := service.ReceiptRepository.Create2(&r); err != nil {
+	if err := service.receiptRepository.Create2(&r); err != nil {
 		return nil, err
 	}
 
@@ -60,13 +60,13 @@ func (service *ReceiptService) CreatePendingReceipt() (*dto.Receipt, error) {
 }
 
 func (service *ReceiptService) Delete(id int) error {
-	return service.ReceiptRepository.Delete(id)
+	return service.receiptRepository.Delete(id)
 }
 
 func (service *ReceiptService) GetAll(f filters.ReceiptFilters, p *pagination.Pagination) ([]dto.Receipt, error) {
 	receipts := make([]dto.Receipt, 0)
 
-	receiptModels, err := service.ReceiptRepository.GetAll(f, p)
+	receiptModels, err := service.receiptRepository.GetAll(f, p)
 	if err != nil {
 		return nil, err
 	}
@@ -130,11 +130,11 @@ func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 		Taxes:        taxes,
 	}
 
-	return s.ReceiptRepository.Update(receipt)
+	return s.receiptRepository.Update(receipt)
 }
 
 func (s *ReceiptService) GetByPfr(pfr string) (*dto.Receipt, error) {
-	receiptModel, err := s.ReceiptRepository.GetByPfr(pfr)
+	receiptModel, err := s.receiptRepository.GetByPfr(pfr)
 	if err != nil {
 		return nil, err
 	}
@@ -144,4 +144,57 @@ func (s *ReceiptService) GetByPfr(pfr string) (*dto.Receipt, error) {
 	}
 
 	return &receipt, nil
+}
+
+func (s *ReceiptService) GetById(id int) (*dto.Receipt, error) {
+	receipt, err := s.receiptRepository.GetById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	receiptItems := make([]dto.ReceiptItem, 0)
+	for _, receiptItem := range receipt.ReceiptItems {
+		receiptItems = append(receiptItems, dto.ReceiptItem{
+			ID:           receiptItem.ID,
+			Name:         receiptItem.Name,
+			CategoryId:   receiptItem.CategoryID,
+			Quantity:     receiptItem.Quantity,
+			Unit:         receiptItem.Unit,
+			SingleAmount: math.Round(float64(receiptItem.SingleAmount)) / 100,
+			TotalAmount:  math.Round(float64(receiptItem.TotalAmount)) / 100,
+			Tax:          *dto.TaxIdentifier(receiptItem.Tax).Tax(),
+		})
+	}
+
+	taxes := make([]dto.Tax, 0)
+	for _, taxModel := range receipt.Taxes {
+		tax := dto.TaxIdentifier(taxModel.TaxIdentifier).Tax()
+		taxes = append(taxes, *tax)
+	}
+
+	var meta map[string]string
+	json.Unmarshal(receipt.Meta, &meta)
+	receiptDto := dto.Receipt{
+		ID:                  receipt.ID,
+		Status:              receipt.Status,
+		PfrNumber:           *receipt.PfrNumber,
+		Counter:             *receipt.Counter,
+		TotalPurchaseAmount: math.Round(float64(receipt.TotalPurchaseAmount)) / 100,
+		TotalTaxAmount:      math.Round(float64(receipt.TotalTaxAmount)) / 100,
+		Date:                receipt.Date,
+		QrCode:              *receipt.QrCode,
+		Meta:                meta,
+		ReceiptItems:        receiptItems,
+		Taxes:               taxes,
+		Store: dto.Store{
+			Tin:          receipt.Store.Tin,
+			Name:         receipt.Store.Name,
+			LocationName: receipt.Store.LocationName,
+			LocationId:   receipt.Store.LocationId,
+			Address:      receipt.Store.Address,
+			City:         receipt.Store.City,
+		},
+	}
+
+	return &receiptDto, nil
 }

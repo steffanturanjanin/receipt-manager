@@ -30,23 +30,6 @@ func NewReceiptController(rs *services.ReceiptService, qs *queue.QueueService, v
 }
 
 func (controller *ReceiptController) CreateFromUrl(w http.ResponseWriter, r *http.Request) {
-	url := struct{ Url string }{}
-
-	if err := ParseBody(&url, r); err != nil {
-		JsonErrorResponse(w, errors.NewHttpError(err))
-		return
-	}
-
-	receipt, err := controller.receiptService.CreateFromUrl(url.Url)
-	if err != nil {
-		JsonErrorResponse(w, errors.NewHttpError(err))
-		return
-	}
-
-	JsonResponse(w, receipt, http.StatusCreated)
-}
-
-func (controller *ReceiptController) CreateFromUrl2(w http.ResponseWriter, r *http.Request) {
 	url := struct {
 		Url string `validate:"receiptUrl" json:"url"`
 	}{}
@@ -85,6 +68,47 @@ func (controller *ReceiptController) CreateFromUrl2(w http.ResponseWriter, r *ht
 	JsonInfoResponse(w, "Receipt created and is set to be processed.", http.StatusOK)
 }
 
+func (controller *ReceiptController) List(w http.ResponseWriter, r *http.Request) {
+	filters := filters.ReceiptFilters{}
+	filters.BuildFromRequest(r)
+	pagination := pagination.GetPaginationFromRequest(r)
+
+	receipts, err := controller.receiptService.GetAll(filters, &pagination)
+	if err != nil {
+		JsonErrorResponse(w, err)
+		return
+	}
+
+	JsonPaginatedResponse(w, receipts, pagination, http.StatusOK)
+}
+
+func (controller *ReceiptController) Show(w http.ResponseWriter, r *http.Request) {
+	idParam, ok := mux.Vars(r)["id"]
+	if !ok {
+		JsonErrorResponse(w, errors.NewErrBadRequest(
+			native_erors.New("missing id parameter in request"),
+			"Missing id parameter in request.",
+		))
+		return
+	}
+
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		JsonErrorResponse(w, errors.NewErrBadRequest(
+			native_erors.New("invalid data type for id parameter"),
+			"Invalid data type for id parameter.",
+		))
+		return
+	}
+
+	receipt, err := controller.receiptService.GetById(id)
+	if err != nil {
+		JsonErrorResponse(w, errors.NewHttpError(err))
+	}
+
+	JsonResponse(w, receipt, http.StatusOK)
+}
+
 func (controller *ReceiptController) Delete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	if _, ok := params["id"]; !ok {
@@ -104,18 +128,4 @@ func (controller *ReceiptController) Delete(w http.ResponseWriter, r *http.Reque
 	}
 
 	JsonResponse(w, nil, http.StatusNoContent)
-}
-
-func (controller *ReceiptController) List(w http.ResponseWriter, r *http.Request) {
-	filters := filters.ReceiptFilters{}
-	filters.BuildFromRequest(r)
-	pagination := pagination.GetPaginationFromRequest(r)
-
-	receipts, err := controller.receiptService.GetAll(filters, &pagination)
-	if err != nil {
-		JsonErrorResponse(w, err)
-		return
-	}
-
-	JsonPaginatedResponse(w, receipts, pagination, http.StatusOK)
 }

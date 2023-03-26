@@ -62,9 +62,8 @@ func main() {
 
 	mux.HandleFunc("/receipts", receiptController.CreateFromUrl).Methods("POST")
 	mux.HandleFunc("/receipts", receiptController.List).Methods("GET")
+	mux.HandleFunc("/receipts/{id}", receiptController.Show).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", receiptController.Delete).Methods("DELETE")
-
-	mux.HandleFunc("/test-function", receiptController.CreateFromUrl2).Methods("POST")
 
 	// Workers
 	receiptUrlQueueWorker, err := queue.NewReceiptUrlQueueWorker(queueService)
