@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"net/url"
 	"reflect"
 	"strings"
 
@@ -43,6 +44,11 @@ func (v *Validator) ConfigureValidator() {
 	en_translations.RegisterDefaultTranslations(v.validator, v.translator)
 	v.RegisterTranslations()
 	v.RegisterTagNameFunc(lowerCaseTagNameFunction)
+	v.RegisterCustomTagValidations()
+}
+
+func (v *Validator) RegisterCustomTagValidations() {
+	v.validator.RegisterValidation("receiptUrl", receiptUrlValidation)
 }
 
 func (v *Validator) RegisterTranslations() {
@@ -76,6 +82,13 @@ func (v *Validator) RegisterTranslations() {
 		return ut.Add("min", "{0} must have at least {1} characters.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("min", fe.Field(), fe.Param())
+		return t
+	})
+
+	_ = v.validator.RegisterTranslation("receiptUrl", v.translator, func(ut ut.Translator) error {
+		return ut.Add("receiptUrl", "{0} is not valid.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("receiptUrl", fe.Field())
 		return t
 	})
 }
@@ -115,4 +128,17 @@ func lowerCaseTagNameFunction(field reflect.StructField) string {
 	}
 
 	return name
+}
+
+// Custom tag validation functions
+func receiptUrlValidation(fl validator.FieldLevel) bool {
+	const FISACLIZATION_SYSTEM_HOST = "suf.purs.gov.rs"
+	url, err := url.Parse(fl.Field().String())
+	if err != nil {
+		return false
+	}
+
+	hostname := strings.TrimPrefix(url.Hostname(), "www.")
+
+	return hostname == FISACLIZATION_SYSTEM_HOST
 }

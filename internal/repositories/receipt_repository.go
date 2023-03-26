@@ -17,8 +17,11 @@ import (
 
 type ReceiptRepositoryInterface interface {
 	GetAll(f filters.ReceiptFilters, p *pagination.Pagination) ([]models.Receipt, error)
+	GetByPfr(string) (*models.Receipt, error)
 	Create(receiptDTO dto.ReceiptData) (*models.Receipt, error)
+	Create2(*models.Receipt) error
 	Delete(id int) error
+	Update(receipt *models.Receipt) error
 }
 
 type ReceiptRepository struct {
@@ -69,13 +72,13 @@ func (repository *ReceiptRepository) Create(receiptData dto.ReceiptData) (*model
 	metaJson, _ := json.Marshal(receiptData.MetaData)
 
 	receipt := models.Receipt{
-		StoreID:             store.Tin,
-		PfrNumber:           receiptData.Number,
-		Counter:             receiptData.Counter,
+		StoreID:             &store.Tin,
+		PfrNumber:           &receiptData.Number,
+		Counter:             &receiptData.Counter,
 		TotalPurchaseAmount: receiptData.TotalPurchaseAmount.GetParas(),
 		TotalTaxAmount:      receiptData.TotalTaxAmount.GetParas(),
 		Date:                receiptData.Date,
-		QrCode:              receiptData.QrCod,
+		QrCode:              &receiptData.QrCod,
 		ReceiptItems:        receiptItems,
 		Taxes:               taxes,
 		Meta:                datatypes.JSON(metaJson),
@@ -92,6 +95,10 @@ func (repository *ReceiptRepository) Create(receiptData dto.ReceiptData) (*model
 	}
 
 	return &receipt, nil
+}
+
+func (receiptRepository *ReceiptRepository) Create2(r *models.Receipt) error {
+	return receiptRepository.db.Create(&r).Error
 }
 
 func (repository *ReceiptRepository) Delete(id int) error {
@@ -129,4 +136,17 @@ func (repository *ReceiptRepository) GetAll(f filters.ReceiptFilters, p *paginat
 	}
 
 	return receipts, nil
+}
+
+func (r *ReceiptRepository) Update(receipt *models.Receipt) error {
+	return r.db.Omit("created_at").Updates(&receipt).Error
+}
+
+func (r *ReceiptRepository) GetByPfr(pfr string) (*models.Receipt, error) {
+	var receipt *models.Receipt
+	if err := r.db.Where(&models.Receipt{PfrNumber: &pfr}).First(&receipt).Error; err != nil {
+		return nil, err
+	}
+
+	return receipt, nil
 }

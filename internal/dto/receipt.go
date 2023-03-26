@@ -11,6 +11,7 @@ type ReceiptData receipt_fetcher.Receipt
 // ReceiptDTO
 type Receipt struct {
 	ID                  uint              `json:"id"`
+	Status              string            `json:"status"`
 	Store               Store             `json:"store"`
 	PfrNumber           string            `json:"pfr_number"`
 	Counter             string            `json:"counter"`
@@ -38,6 +39,7 @@ type Store struct {
 type ReceiptItem struct {
 	ID           uint    `json:"id"`
 	Name         string  `json:"name"`
+	CategoryId   *uint   `json:"category"`
 	Quantity     float64 `json:"quantity"`
 	Unit         string  `json:"unit"`
 	Tax          Tax     `json:"tax"`
@@ -85,4 +87,20 @@ func (tid TaxIdentifier) Tax() *Tax {
 	default:
 		return nil
 	}
+}
+
+type ReceiptParams struct {
+	Id                  *uint
+	Status              *string
+	PfrNumber           *string
+	Counter             *string
+	TotalPurchaseAmount *int
+	TotalTaxAmount      *int
+	Date                *time.Time
+	QrCode              *string
+	StoreID             *string
+	Meta                map[string]string
+	Store               *Store
+	ReceiptItems        []ReceiptItem
+	Taxes               []Tax
 }

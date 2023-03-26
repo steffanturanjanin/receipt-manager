@@ -15,7 +15,7 @@ type ReceiptItem struct {
 	TotalAmount  int     `gorm:"not null; default:0" json:"total_amount"`
 	Tax          int     `gorm:"nullable" json:"tax"`
 	ReceiptID    uint    `json:"receipt_id"`
-	CategoryID   uint    `json:"category_id"`
+	CategoryID   *uint   `gorm:"nullable" json:"category_id"`
 }
 
 func (receiptItem ReceiptItem) NewReceiptItemDTO() dto.ReceiptItem {

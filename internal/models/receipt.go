@@ -18,14 +18,14 @@ const (
 type Receipt struct {
 	ID                  uint           `gorm:"primaryKey; autoIncrement" json:"id"`
 	Status              string         `gorm:"not null" json:"status"`
-	PfrNumber           string         `gorm:"unique; not null" json:"pfr_number"`
-	Counter             string         `gorm:"unique; not null" json:"counter"`
+	PfrNumber           *string        `gorm:"unique;" json:"pfr_number"`
+	Counter             *string        `gorm:"unique;" json:"counter"`
 	TotalPurchaseAmount int            `gorm:"not null; default:0" json:"total_purchase_amount"`
 	TotalTaxAmount      int            `gorm:"not null; default:0" json:"total_tax_amount"`
-	Date                time.Time      `gorm:"not null" json:"date"`
-	QrCode              string         `gorm:"not null" json:"qr_code"`
+	Date                time.Time      `json:"date"`
+	QrCode              *string        `gorm:"type:text" json:"qr_code"`
 	CreatedAt           time.Time      `gorm:"not null;autoCreateTime" json:"created_at"`
-	StoreID             string         `gorm:"type:varchar(9)"`
+	StoreID             *string        `gorm:"nullable;type:varchar(9)"`
 	ReceiptItems        []ReceiptItem  `gorm:"foreignKey:ReceiptID;references:ID;constraint:OnDelete:CASCADE" json:"receipt_items"`
 	Taxes               []Tax          `gorm:"foreignKey:ReceiptID;references:ID;constraint:OnDelete:CASCADE" json:"taxes"`
 	Meta                datatypes.JSON `gorm:"nullable" json:"meta_data"`
@@ -54,14 +54,14 @@ func (r Receipt) NewReceiptDTO() (*dto.Receipt, error) {
 	receiptDTO := dto.Receipt{
 		ID:                  r.ID,
 		Store:               r.Store.NewStoreDTO(),
-		PfrNumber:           r.PfrNumber,
-		Counter:             r.Counter,
+		PfrNumber:           *r.PfrNumber,
+		Counter:             *r.Counter,
 		TotalPurchaseAmount: math.Round(float64(r.TotalPurchaseAmount)) / 100,
 		TotalTaxAmount:      math.Round(float64(r.TotalTaxAmount)) / 100,
 		ReceiptItems:        receiptItems,
 		Taxes:               taxes,
 		Date:                r.Date,
-		QrCode:              r.QrCode,
+		QrCode:              *r.QrCode,
 		Meta:                meta,
 		CreatedAt:           r.Date,
 	}

@@ -46,6 +46,15 @@ func JsonResponse(w http.ResponseWriter, payload interface{}, status int) {
 	}
 }
 
+func JsonInfoResponse(w http.ResponseWriter, msg string, status int) {
+	info := struct {
+		Msg  string `json:"message"`
+		Code int    `json:"code"`
+	}{Msg: msg, Code: status}
+
+	JsonResponse(w, info, status)
+}
+
 func JsonErrorResponse(w http.ResponseWriter, err error) {
 	if httpClientError, ok := err.(errors.HttpClientErrorInterface); ok {
 		JsonResponse(w, httpClientError, httpClientError.GetCode())
