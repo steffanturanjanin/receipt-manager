@@ -57,5 +57,5 @@ func NewErrForbidden(err error, msg string) error {
 type ErrBadRequest struct{ ErrBase }
 
 func NewErrBadRequest(err error, msg string) error {
-	return ErrForbidden{ErrBase: ErrBase{Err: err, Message: msg}}
+	return ErrBadRequest{ErrBase: ErrBase{Err: err, Message: msg}}
 }

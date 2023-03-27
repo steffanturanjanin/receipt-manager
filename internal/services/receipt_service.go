@@ -95,7 +95,7 @@ func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 			SingleAmount: int(math.Round(item.SingleAmount * 100)),
 			TotalAmount:  int(math.Round(item.TotalAmount * 100)),
 			Tax:          int(taxId),
-			CategoryID:   item.CategoryId,
+			CategoryID:   &item.Category.Id,
 		})
 	}
 
@@ -155,9 +155,12 @@ func (s *ReceiptService) GetById(id int) (*dto.Receipt, error) {
 	receiptItems := make([]dto.ReceiptItem, 0)
 	for _, receiptItem := range receipt.ReceiptItems {
 		receiptItems = append(receiptItems, dto.ReceiptItem{
-			ID:           receiptItem.ID,
-			Name:         receiptItem.Name,
-			CategoryId:   receiptItem.CategoryID,
+			ID:   receiptItem.ID,
+			Name: receiptItem.Name,
+			Category: &dto.Category{
+				Id:   receiptItem.Category.ID,
+				Name: receiptItem.Category.Name,
+			},
 			Quantity:     receiptItem.Quantity,
 			Unit:         receiptItem.Unit,
 			SingleAmount: math.Round(float64(receiptItem.SingleAmount)) / 100,
@@ -186,6 +189,7 @@ func (s *ReceiptService) GetById(id int) (*dto.Receipt, error) {
 		Meta:                meta,
 		ReceiptItems:        receiptItems,
 		Taxes:               taxes,
+		CreatedAt:           receipt.CreatedAt,
 		Store: dto.Store{
 			Tin:          receipt.Store.Tin,
 			Name:         receipt.Store.Name,

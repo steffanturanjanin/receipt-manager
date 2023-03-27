@@ -6,19 +6,19 @@ import (
 )
 
 type CategoryService struct {
-	CategoryRepository repositories.CategoryRepositoryInterface
+	categoryRepository repositories.CategoryRepositoryInterface
 }
 
 func NewCategoryService(r repositories.CategoryRepositoryInterface) *CategoryService {
 	return &CategoryService{
-		CategoryRepository: r,
+		categoryRepository: r,
 	}
 }
 
 func (s *CategoryService) GetAll() ([]dto.Category, error) {
 	categories := make([]dto.Category, 0)
 
-	categoryModels, err := s.CategoryRepository.GetAll()
+	categoryModels, err := s.categoryRepository.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -31,4 +31,8 @@ func (s *CategoryService) GetAll() ([]dto.Category, error) {
 	}
 
 	return categories, nil
+}
+
+func (s *CategoryService) GetIds() ([]int, error) {
+	return s.categoryRepository.GetIds()
 }

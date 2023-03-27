@@ -57,6 +57,7 @@ func JsonInfoResponse(w http.ResponseWriter, msg string, status int) {
 
 func JsonErrorResponse(w http.ResponseWriter, err error) {
 	if httpClientError, ok := err.(errors.HttpClientErrorInterface); ok {
+
 		JsonResponse(w, httpClientError, httpClientError.GetCode())
 
 		return

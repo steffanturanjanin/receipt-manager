@@ -37,14 +37,14 @@ type Store struct {
 
 // ReceiptItem DTO
 type ReceiptItem struct {
-	ID           uint    `json:"id"`
-	Name         string  `json:"name"`
-	CategoryId   *uint   `json:"category"`
-	Quantity     float64 `json:"quantity"`
-	Unit         string  `json:"unit"`
-	Tax          Tax     `json:"tax"`
-	SingleAmount float64 `json:"single_amount"`
-	TotalAmount  float64 `json:"total_amount"`
+	ID           uint      `json:"id"`
+	Name         string    `json:"name"`
+	Category     *Category `json:"category"`
+	Quantity     float64   `json:"quantity"`
+	Unit         string    `json:"unit"`
+	Tax          Tax       `json:"tax"`
+	SingleAmount float64   `json:"single_amount"`
+	TotalAmount  float64   `json:"total_amount"`
 }
 
 type Tax struct {

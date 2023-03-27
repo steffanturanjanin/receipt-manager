@@ -154,7 +154,7 @@ func (r *ReceiptRepository) GetByPfr(pfr string) (*models.Receipt, error) {
 
 func (r *ReceiptRepository) GetById(id int) (*models.Receipt, error) {
 	var receipt *models.Receipt
-	if err := r.db.Preload("ReceiptItems").Preload("Store").First(&receipt, uint(id)).Error; err != nil {
+	if err := r.db.Preload("ReceiptItems.Category").Preload("Store").First(&receipt, uint(id)).Error; err != nil {
 		return nil, err
 	}
 

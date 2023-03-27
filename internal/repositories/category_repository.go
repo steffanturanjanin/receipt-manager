@@ -7,6 +7,7 @@ import (
 
 type CategoryRepositoryInterface interface {
 	GetAll() ([]models.Category, error)
+	GetIds() ([]int, error)
 }
 
 type CategoryRepository struct {
@@ -26,4 +27,14 @@ func (r *CategoryRepository) GetAll() ([]models.Category, error) {
 	}
 
 	return categories, nil
+}
+
+func (r *CategoryRepository) GetIds() ([]int, error) {
+	ids := make([]int, 0)
+
+	if err := r.db.Model(&models.Category{}).Select("id").Find(&ids).Error; err != nil {
+		return nil, err
+	}
+
+	return ids, nil
 }

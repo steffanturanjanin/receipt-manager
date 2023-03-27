@@ -42,19 +42,24 @@ func main() {
 
 	// Repositories
 	userRepository := repositories.NewUserRepository(database.Instance)
-	receiptRepository := repositories.NewReceiptRepository(database.Instance)
 	categoryRepository := repositories.NewCategoryRepository(database.Instance)
+	receiptRepository := repositories.NewReceiptRepository(database.Instance)
+	receiptItemRepository := repositories.NewReceiptItemRepository(database.Instance)
 
 	// Services
 	authService := services.NewAuthService(userRepository)
-	receiptService := services.NewReceiptService(receiptRepository)
 	categoryService := services.NewCategoryService(categoryRepository)
+	receiptService := services.NewReceiptService(receiptRepository)
+	receiptItemService := services.NewReceiptItemService(receiptItemRepository, categoryService)
+
 	queueService := queue.NewQueueService(SqsService)
 
 	// Controllers
 	authController := controllers.NewAuthController(authService, validator)
 	receiptController := controllers.NewReceiptController(receiptService, queueService, validator)
+	receiptItemController := controllers.NewReceiptItemController(receiptItemService)
 
+	// Routes
 	mux := mux.NewRouter()
 	mux.HandleFunc("/register", authController.RegisterUser).Methods("POST")
 	mux.HandleFunc("/login", authController.LoginUser).Methods("POST")
@@ -64,6 +69,8 @@ func main() {
 	mux.HandleFunc("/receipts", receiptController.List).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", receiptController.Show).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", receiptController.Delete).Methods("DELETE")
+
+	mux.HandleFunc("/receipt-items/{id}", receiptItemController.UpdateCategory).Methods("PUT")
 
 	// Workers
 	receiptUrlQueueWorker, err := queue.NewReceiptUrlQueueWorker(queueService)

@@ -131,8 +131,10 @@ func (w *ParsedReceiptQueueWorker) CategoriezeReceiptItemsHandler(ctx context.Co
 	for _, receiptItem := range receiptData.ParsedReceipt.Items {
 		categoryId := categorizedReceiptItemsMap[receiptItem.Name]
 		receiptItems = append(receiptItems, dto.ReceiptItem{
-			Name:         receiptItem.Name,
-			CategoryId:   categoryId,
+			Name: receiptItem.Name,
+			Category: &dto.Category{
+				Id: *categoryId,
+			},
 			Quantity:     receiptItem.Quantity,
 			Unit:         receiptItem.Unit,
 			Tax:          dto.Tax(receiptItem.Tax),
