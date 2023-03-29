@@ -88,6 +88,11 @@ func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 	for _, item := range r.ReceiptItems {
 		taxId := dto.TaxIdentifierMapper[item.Tax.Identifier]
 
+		var cateogoryId *uint
+		if item.Category != nil {
+			cateogoryId = &item.Category.Id
+		}
+
 		receiptItems = append(receiptItems, models.ReceiptItem{
 			Name:         item.Name,
 			Unit:         item.Unit,
@@ -95,7 +100,7 @@ func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 			SingleAmount: int(math.Round(item.SingleAmount * 100)),
 			TotalAmount:  int(math.Round(item.TotalAmount * 100)),
 			Tax:          int(taxId),
-			CategoryID:   &item.Category.Id,
+			CategoryID:   cateogoryId,
 		})
 	}
 
@@ -154,13 +159,16 @@ func (s *ReceiptService) GetById(id int) (*dto.Receipt, error) {
 
 	receiptItems := make([]dto.ReceiptItem, 0)
 	for _, receiptItem := range receipt.ReceiptItems {
+		var category *dto.Category
+		if receiptItem.Category != nil {
+			category.Id = receiptItem.Category.ID
+			category.Name = receiptItem.Category.Name
+		}
+
 		receiptItems = append(receiptItems, dto.ReceiptItem{
-			ID:   receiptItem.ID,
-			Name: receiptItem.Name,
-			Category: &dto.Category{
-				Id:   receiptItem.Category.ID,
-				Name: receiptItem.Category.Name,
-			},
+			ID:           receiptItem.ID,
+			Name:         receiptItem.Name,
+			Category:     category,
 			Quantity:     receiptItem.Quantity,
 			Unit:         receiptItem.Unit,
 			SingleAmount: math.Round(float64(receiptItem.SingleAmount)) / 100,

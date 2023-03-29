@@ -76,16 +76,16 @@ func (f FilterIn) Filter(query *gorm.DB) *gorm.DB {
 	return query.Where(queryString, f.Values)
 }
 
-type ResourceFilters interface {
-	BuildFromRequest(r *http.Request) ResourceFilters
+type FilterableInterface interface {
+	BuildFromRequest(r *http.Request) FilterableInterface
 }
 
-type abstractResourceFilters struct {
-	ResourceFilters
+type abstractFilterable struct {
+	FilterableInterface
 	FiltersList FiltersList
 }
 
-func (f abstractResourceFilters) ApplyFilters(query *gorm.DB) *gorm.DB {
+func (f abstractFilterable) ApplyFilters(query *gorm.DB) *gorm.DB {
 	for _, filters := range f.FiltersList {
 		query = filters.Filter(query)
 	}
@@ -93,7 +93,7 @@ func (f abstractResourceFilters) ApplyFilters(query *gorm.DB) *gorm.DB {
 	return query
 }
 
-func (f abstractResourceFilters) getFiltersRangeFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
+func (f abstractFilterable) getFiltersRangeFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
 	filtersList := make([]FilterInterface, 0)
 
 	if filtersRange, ok := r.URL.Query()[FILTER_RANGE]; ok {
@@ -125,7 +125,7 @@ func getFilterRangeFromRequest(filterRange string, allowedFields []string) *Filt
 	}
 }
 
-func (f abstractResourceFilters) getFiltersMatchFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
+func (f abstractFilterable) getFiltersMatchFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
 	filtersList := make([]FilterInterface, 0)
 
 	if filtersMatch, ok := r.URL.Query()[FILTER_MATCH]; ok {
@@ -158,7 +158,7 @@ func getFilterMatchFromRequest(filterMatch string, allowedFields []string) *Filt
 	return nil
 }
 
-func (f abstractResourceFilters) getFiltersInFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
+func (f abstractFilterable) getFiltersInFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
 	filterList := make([]FilterInterface, 0)
 
 	if filtersIn, ok := r.URL.Query()[FILTER_IN]; ok {

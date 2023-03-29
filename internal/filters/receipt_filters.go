@@ -22,7 +22,7 @@ var (
 )
 
 type ReceiptFilters struct {
-	abstractResourceFilters
+	abstractFilterable
 }
 
 func (f *ReceiptFilters) BuildFromRequest(r *http.Request) {

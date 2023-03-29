@@ -45,32 +45,37 @@ func main() {
 	categoryRepository := repositories.NewCategoryRepository(database.Instance)
 	receiptRepository := repositories.NewReceiptRepository(database.Instance)
 	receiptItemRepository := repositories.NewReceiptItemRepository(database.Instance)
+	statisticRepository := repositories.NewStatisticRepository(database.Instance)
 
 	// Services
 	authService := services.NewAuthService(userRepository)
 	categoryService := services.NewCategoryService(categoryRepository)
 	receiptService := services.NewReceiptService(receiptRepository)
 	receiptItemService := services.NewReceiptItemService(receiptItemRepository, categoryService)
-
+	statisticService := services.NewStatisticService(statisticRepository, categoryService)
 	queueService := queue.NewQueueService(SqsService)
 
 	// Controllers
 	authController := controllers.NewAuthController(authService, validator)
 	receiptController := controllers.NewReceiptController(receiptService, queueService, validator)
 	receiptItemController := controllers.NewReceiptItemController(receiptItemService)
+	statisticController := controllers.NewStatisticController(statisticService)
 
 	// Routes
 	mux := mux.NewRouter()
+	// Auth routes
 	mux.HandleFunc("/register", authController.RegisterUser).Methods("POST")
 	mux.HandleFunc("/login", authController.LoginUser).Methods("POST")
 	mux.HandleFunc("/logout", authController.Logout).Methods("POST")
-
+	// Receipt routes
 	mux.HandleFunc("/receipts", receiptController.CreateFromUrl).Methods("POST")
 	mux.HandleFunc("/receipts", receiptController.List).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", receiptController.Show).Methods("GET")
 	mux.HandleFunc("/receipts/{id}", receiptController.Delete).Methods("DELETE")
-
+	// Receipt Item routes
 	mux.HandleFunc("/receipt-items/{id}", receiptItemController.UpdateCategory).Methods("PUT")
+	// Statistics routes
+	mux.HandleFunc("/statistics/categories", statisticController.ListCategoriesStatistic).Methods("GET")
 
 	// Workers
 	receiptUrlQueueWorker, err := queue.NewReceiptUrlQueueWorker(queueService)

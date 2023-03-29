@@ -129,12 +129,14 @@ func (w *ParsedReceiptQueueWorker) CategoriezeReceiptItemsHandler(ctx context.Co
 
 	receiptItems := make([]dto.ReceiptItem, 0)
 	for _, receiptItem := range receiptData.ParsedReceipt.Items {
-		categoryId := categorizedReceiptItemsMap[receiptItem.Name]
+		category := new(dto.Category)
+		if categoryId, ok := categorizedReceiptItemsMap[receiptItem.Name]; ok && categoryId != nil {
+			category.Id = *categoryId
+		}
+
 		receiptItems = append(receiptItems, dto.ReceiptItem{
-			Name: receiptItem.Name,
-			Category: &dto.Category{
-				Id: *categoryId,
-			},
+			Name:         receiptItem.Name,
+			Category:     category,
 			Quantity:     receiptItem.Quantity,
 			Unit:         receiptItem.Unit,
 			Tax:          dto.Tax(receiptItem.Tax),

@@ -47,13 +47,16 @@ func (s *ReceiptItemService) UpdateCategory(data UpdateReceiptItemCategory) (*dt
 		return nil, err
 	}
 
+	var category *dto.Category
+	if receiptItem.Category != nil {
+		category.Id = receiptItem.Category.ID
+		category.Name = receiptItem.Category.Name
+	}
+
 	receiptItemDto := dto.ReceiptItem{
-		ID:   receiptItem.ID,
-		Name: receiptItem.Name,
-		Category: &dto.Category{
-			Id:   receiptItem.Category.ID,
-			Name: receiptItem.Category.Name,
-		},
+		ID:           receiptItem.ID,
+		Name:         receiptItem.Name,
+		Category:     category,
 		Unit:         receiptItem.Unit,
 		Tax:          *dto.TaxIdentifier(receiptItem.Tax).Tax(),
 		SingleAmount: math.Round(float64(receiptItem.SingleAmount)) / 100,
