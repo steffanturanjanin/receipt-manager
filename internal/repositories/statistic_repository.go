@@ -9,6 +9,7 @@ import (
 
 type StatisticRepositoryInterface interface {
 	GetCategoryStatistic(filters.CategoryStatisticFilters) (map[string]map[string]int, error)
+	GetStoreStatisticsForCategory(int, filters.StoreStatisticForCategoryFilters) ([]StoreStatisticItem, error)
 }
 
 type StatisticRepository struct {
@@ -69,4 +70,62 @@ func (r *StatisticRepository) formDateString(f filters.CategoryStatisticFilters,
 	}
 
 	return date
+}
+
+type StoreStatisticItem struct {
+	Store struct {
+		Tin  string
+		Name string
+	}
+	ReceiptItem struct {
+		Name  string
+		Price int
+	}
+}
+
+func (r *StatisticRepository) GetStoreStatisticsForCategory(categoryId int, f filters.StoreStatisticForCategoryFilters) ([]StoreStatisticItem, error) {
+	baseQuery := r.db.Table("categories as c").
+		Select("s.tin as store_tin", "s.name as store_name", "ri.name as article_name", "ri.total_amount as article_price").
+		Joins("INNER JOIN receipt_items as ri ON c.id = ri.category_id").
+		Joins("INNER JOIN receipts as r ON ri.receipt_id = r.id").
+		Joins("INNER JOIN stores as s ON r.store_id = s.tin").
+		Where("c.id = ?", categoryId)
+
+	rows, err := f.ApplyFilters(baseQuery).Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	result := []StoreStatisticItem{}
+
+	defer rows.Close()
+	for rows.Next() {
+		var storeTin string
+		var storeName string
+		var articleName string
+		var articlePrice int
+
+		if err := rows.Scan(&storeTin, &storeName, &articleName, &articlePrice); err != nil {
+			continue
+		}
+
+		result = append(result, StoreStatisticItem{
+			Store: struct {
+				Tin  string
+				Name string
+			}{
+				Tin:  storeTin,
+				Name: storeName,
+			},
+			ReceiptItem: struct {
+				Name  string
+				Price int
+			}{
+				Name:  articleName,
+				Price: articlePrice,
+			},
+		})
+	}
+
+	return result, nil
 }

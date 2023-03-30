@@ -17,7 +17,7 @@ type CategoryStatisticFilters struct {
 	categorizeBy string
 }
 
-func (f *CategoryStatisticFilters) createDefaultDateRangeFilter() FilterRange {
+func createDefaultDateRangeFilter() FilterRange {
 	currentTime := time.Now()
 	year, month, _ := currentTime.Date()
 	firstOfMonth := time.Date(year, month, 1, 0, 0, 0, 0, currentTime.Location())
@@ -40,7 +40,7 @@ func validateDateRangeFilter(f FilterRange) bool {
 	return errFrom != nil && errTo != nil
 }
 
-func (f *CategoryStatisticFilters) addMandatoryDateRangeFilter(filters []FilterRange) []FilterRange {
+func addMandatoryDateRangeFilter(filters []FilterRange) []FilterRange {
 	var filterDateRange *FilterRange
 
 	for _, fr := range filters {
@@ -51,7 +51,7 @@ func (f *CategoryStatisticFilters) addMandatoryDateRangeFilter(filters []FilterR
 	}
 
 	if filterDateRange != nil {
-		filters = append(filters, f.createDefaultDateRangeFilter())
+		filters = append(filters, createDefaultDateRangeFilter())
 	}
 
 	return filters
@@ -85,7 +85,7 @@ func (f *CategoryStatisticFilters) BuildFromRequest(r *http.Request) {
 	filtersList := make(FiltersList, 0)
 
 	frl := f.getFiltersRangeFromRequest(r, f.GetAllowedFilterRangeFields())
-	frl = f.addMandatoryDateRangeFilter(frl)
+	frl = addMandatoryDateRangeFilter(frl)
 
 	filtersList = append(filtersList, CastToFilters(frl)...)
 
@@ -102,4 +102,31 @@ func (f *CategoryStatisticFilters) BuildFromRequest(r *http.Request) {
 	}
 
 	f.categorizeBy = categorizeBy
+}
+
+type StoreStatisticForCategoryFilters struct {
+	abstractFilterable
+}
+
+func (f *StoreStatisticForCategoryFilters) GetAllowedFilterMatchFields() []string {
+	return []string{"id"}
+}
+func (f *StoreStatisticForCategoryFilters) GetAllowedFilterRangeFields() []string {
+	return []string{"date"}
+}
+func (f *StoreStatisticForCategoryFilters) GetAllowedFilterInFields() []string {
+	return []string{}
+}
+
+func (f *StoreStatisticForCategoryFilters) BuildFromRequest(r *http.Request) {
+	filterList := make(FiltersList, 0)
+
+	frl := f.getFiltersRangeFromRequest(r, f.GetAllowedFilterRangeFields())
+	frl = addMandatoryDateRangeFilter(frl)
+	fml := f.getFiltersMatchFromRequest(r, f.GetAllowedFilterMatchFields())
+
+	filterList = append(filterList, CastToFilters(frl)...)
+	filterList = append(filterList, CastToFilters(fml)...)
+
+	f.FiltersList = filterList
 }

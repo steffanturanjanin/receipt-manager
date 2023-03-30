@@ -20,6 +20,58 @@ func NewStatisticService(sr repositories.StatisticRepositoryInterface, cs *Categ
 	}
 }
 
+type StoreStatisticsForCategory struct {
+	StoreTin     string `json:"store_tin"`
+	StoreName    string `json:"store_name"`
+	Total        int    `json:"total"`
+	ProductItems []struct {
+		ProductName  string `json:"name"`
+		ProductPrice int    `json:"price"`
+	} `json:"product_items"`
+}
+
+func (s *StatisticService) GetStoreStatisticsForCategory(categoryId int, f filters.StoreStatisticForCategoryFilters) ([]StoreStatisticsForCategory, error) {
+	storeStatisticItems, err := s.statisticRepository.GetStoreStatisticsForCategory(categoryId, f)
+	if err != nil {
+		return nil, err
+	}
+
+	storeTracker := map[string]StoreStatisticsForCategory{}
+
+	for _, storeStatisticItem := range storeStatisticItems {
+		stat, ok := storeTracker[storeStatisticItem.Store.Tin]
+		if !ok {
+			stat = StoreStatisticsForCategory{
+				StoreTin:  storeStatisticItem.Store.Tin,
+				StoreName: storeStatisticItem.Store.Name,
+				ProductItems: make([]struct {
+					ProductName  string `json:"name"`
+					ProductPrice int    `json:"price"`
+				}, 0),
+			}
+		}
+
+		stat.ProductItems = append(stat.ProductItems, struct {
+			ProductName  string `json:"name"`
+			ProductPrice int    `json:"price"`
+		}{
+			ProductName:  storeStatisticItem.ReceiptItem.Name,
+			ProductPrice: storeStatisticItem.ReceiptItem.Price,
+		})
+
+		stat.Total += storeStatisticItem.ReceiptItem.Price
+
+		storeTracker[storeStatisticItem.Store.Tin] = stat
+	}
+
+	statistics := []StoreStatisticsForCategory{}
+	for _, store := range storeTracker {
+		statistics = append(statistics, store)
+	}
+
+	return statistics, nil
+}
+
 func (s *StatisticService) GetCategoryStatistic(f filters.CategoryStatisticFilters) (*CategoryStatistics, error) {
 	categoryStatisticMap, err := s.statisticRepository.GetCategoryStatistic(f)
 	if err != nil {

@@ -75,7 +75,8 @@ func main() {
 	// Receipt Item routes
 	mux.HandleFunc("/receipt-items/{id}", receiptItemController.UpdateCategory).Methods("PUT")
 	// Statistics routes
-	mux.HandleFunc("/statistics/categories", statisticController.ListCategoriesStatistic).Methods("GET")
+	mux.HandleFunc("/statistics/categories", statisticController.ListCategoriesStatistics).Methods("GET")
+	mux.HandleFunc("/statistics/categories/{id}/stores", statisticController.ListStoreStatisticsForCategory).Methods("GET")
 
 	// Workers
 	receiptUrlQueueWorker, err := queue.NewReceiptUrlQueueWorker(queueService)
