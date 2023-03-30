@@ -24,13 +24,13 @@ func NewStatisticRepository(db *gorm.DB) *StatisticRepository {
 func (r *StatisticRepository) GetCategoryStatistic(f filters.CategoryStatisticFilters) (map[string]map[string]int, error) {
 	categoryStatistics := make(map[string]map[string]int)
 
-	rows, err := r.db.Table("categories as c").
+	baseQuery := r.db.Table("categories as c").
 		Select("c.name as name", "SUM(ri.total_amount) as total", fmt.Sprintf("%s as date", r.formDateString(f, "r.date"))).
 		Joins("LEFT JOIN receipt_items as ri ON c.id = ri.category_id").
 		Joins("LEFT JOIN receipts as r ON ri.receipt_id = r.id").
-		Where("r.date BETWEEN ? AND ?", f.FilterDateRange.From, f.FilterDateRange.To).
-		Group("c.id, date").
-		Rows()
+		Group("c.id, date")
+
+	rows, err := f.ApplyFilters(baseQuery).Rows()
 
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (r *StatisticRepository) GetCategoryStatistic(f filters.CategoryStatisticFi
 func (r *StatisticRepository) formDateString(f filters.CategoryStatisticFilters, field string) string {
 	var date string
 
-	switch f.CategorizeBy {
+	switch f.GetCategorizedBy() {
 	case filters.CATEGORIZE_BY_YEAR:
 		date = fmt.Sprintf("CONCAT_WS('-', YEAR(%[1]v))", field)
 	case filters.CATEGORIZE_BY_MONTH:

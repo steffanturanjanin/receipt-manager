@@ -4,37 +4,41 @@ import (
 	"net/http"
 )
 
-var (
-	AllowedFilterRangeFields = []string{
+type ReceiptFilters struct {
+	abstractFilterable
+}
+
+func (f *ReceiptFilters) GetAllowedFilterRangeFields() []string {
+	return []string{
 		"total_purchase_amount",
 		"date",
 	}
+}
 
-	AllowedFilterMatchFields = []string{
+func (f *ReceiptFilters) GetAllowedFilterMatchFields() []string {
+	return []string{
 		"total_purchase_amount",
 		"date",
 	}
+}
 
-	AllowedFilterInFields = []string{
+func (f *ReceiptFilters) GetAllowedFilterInFields() []string {
+	return []string{
 		"date",
 		"store_id",
 	}
-)
-
-type ReceiptFilters struct {
-	abstractFilterable
 }
 
 func (f *ReceiptFilters) BuildFromRequest(r *http.Request) {
 	filtersList := make(FiltersList, 0)
 
-	frl := f.getFiltersRangeFromRequest(r, AllowedFilterRangeFields)
-	fml := f.getFiltersMatchFromRequest(r, AllowedFilterMatchFields)
-	fil := f.getFiltersInFromRequest(r, AllowedFilterInFields)
+	frl := f.getFiltersRangeFromRequest(r, f.GetAllowedFilterRangeFields())
+	fml := f.getFiltersMatchFromRequest(r, f.GetAllowedFilterMatchFields())
+	fil := f.getFiltersInFromRequest(r, f.GetAllowedFilterInFields())
 
-	filtersList = append(filtersList, frl...)
-	filtersList = append(filtersList, fml...)
-	filtersList = append(filtersList, fil...)
+	filtersList = append(filtersList, CastToFilters(frl)...)
+	filtersList = append(filtersList, CastToFilters(fml)...)
+	filtersList = append(filtersList, CastToFilters(fil)...)
 
 	f.FiltersList = filtersList
 }

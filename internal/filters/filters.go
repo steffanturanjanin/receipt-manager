@@ -77,7 +77,10 @@ func (f FilterIn) Filter(query *gorm.DB) *gorm.DB {
 }
 
 type FilterableInterface interface {
-	BuildFromRequest(r *http.Request) FilterableInterface
+	BuildFromRequest(r *http.Request)
+	GetAllowedFilterMatchFields() []string
+	GetAllowedFilterRangeFields() []string
+	GetAllowedFilterInFields() []string
 }
 
 type abstractFilterable struct {
@@ -93,8 +96,8 @@ func (f abstractFilterable) ApplyFilters(query *gorm.DB) *gorm.DB {
 	return query
 }
 
-func (f abstractFilterable) getFiltersRangeFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
-	filtersList := make([]FilterInterface, 0)
+func (f abstractFilterable) getFiltersRangeFromRequest(r *http.Request, allowedFields []string) []FilterRange {
+	filtersList := make([]FilterRange, 0)
 
 	if filtersRange, ok := r.URL.Query()[FILTER_RANGE]; ok {
 		for _, filterRange := range filtersRange {
@@ -125,8 +128,8 @@ func getFilterRangeFromRequest(filterRange string, allowedFields []string) *Filt
 	}
 }
 
-func (f abstractFilterable) getFiltersMatchFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
-	filtersList := make([]FilterInterface, 0)
+func (f abstractFilterable) getFiltersMatchFromRequest(r *http.Request, allowedFields []string) []FilterMatch {
+	filtersList := make([]FilterMatch, 0)
 
 	if filtersMatch, ok := r.URL.Query()[FILTER_MATCH]; ok {
 		for _, filterMatch := range filtersMatch {
@@ -158,8 +161,8 @@ func getFilterMatchFromRequest(filterMatch string, allowedFields []string) *Filt
 	return nil
 }
 
-func (f abstractFilterable) getFiltersInFromRequest(r *http.Request, allowedFields []string) []FilterInterface {
-	filterList := make([]FilterInterface, 0)
+func (f abstractFilterable) getFiltersInFromRequest(r *http.Request, allowedFields []string) []FilterIn {
+	filterList := make([]FilterIn, 0)
 
 	if filtersIn, ok := r.URL.Query()[FILTER_IN]; ok {
 		for _, filterIn := range filtersIn {
@@ -188,4 +191,13 @@ func getFilterInFromRequest(filterMatch string, allowedFields []string) *FilterI
 	}
 
 	return nil
+}
+
+func CastToFilters[T FilterInterface](filters []T) []FilterInterface {
+	result := []FilterInterface{}
+	for _, f := range filters {
+		result = append(result, f)
+	}
+
+	return result
 }

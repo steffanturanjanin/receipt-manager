@@ -43,14 +43,16 @@ const (
 )
 
 func (s *StatisticService) createCategoryStatistics(c []dto.Category, f filters.CategoryStatisticFilters, m map[string]map[string]int) CategoryStatistics {
-	dateFrom, _ := time.Parse("2006-01-02", f.FilterDateRange.From)
-	dateTo, _ := time.Parse("2006-01-02", f.FilterDateRange.To)
+	dateFromString, dateToString := f.GetDateRange()
+
+	dateFrom, _ := time.Parse("2006-01-02", *dateFromString)
+	dateTo, _ := time.Parse("2006-01-02", *dateToString)
 
 	categoryStatistics := CategoryStatistics{
 		CategoryStatistics: make([]CategoryStatistic, 0),
 	}
 
-	categoryDateStatistic := newCategoryDateStatistic(f.CategorizeBy)
+	categoryDateStatistic := newCategoryDateStatistic(f.GetCategorizedBy())
 
 	for _, category := range c {
 		categoryName := category.Name
