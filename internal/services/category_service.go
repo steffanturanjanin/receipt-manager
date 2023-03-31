@@ -36,3 +36,15 @@ func (s *CategoryService) GetAll() ([]dto.Category, error) {
 func (s *CategoryService) GetIds() ([]int, error) {
 	return s.categoryRepository.GetIds()
 }
+
+func (s *CategoryService) GetById(id int) (*dto.Category, error) {
+	categoryModel, err := s.categoryRepository.GetById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Category{
+		Id:   categoryModel.ID,
+		Name: categoryModel.Name,
+	}, nil
+}

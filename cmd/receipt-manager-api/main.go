@@ -45,6 +45,7 @@ func main() {
 	categoryRepository := repositories.NewCategoryRepository(database.Instance)
 	receiptRepository := repositories.NewReceiptRepository(database.Instance)
 	receiptItemRepository := repositories.NewReceiptItemRepository(database.Instance)
+	storeRepository := repositories.NewStoreRepository(database.Instance)
 	statisticRepository := repositories.NewStatisticRepository(database.Instance)
 
 	// Services
@@ -52,7 +53,8 @@ func main() {
 	categoryService := services.NewCategoryService(categoryRepository)
 	receiptService := services.NewReceiptService(receiptRepository)
 	receiptItemService := services.NewReceiptItemService(receiptItemRepository, categoryService)
-	statisticService := services.NewStatisticService(statisticRepository, categoryService)
+	storeService := services.NewStoreService(storeRepository)
+	statisticService := services.NewStatisticService(statisticRepository, categoryService, storeService)
 	queueService := queue.NewQueueService(SqsService)
 
 	// Controllers
@@ -77,6 +79,7 @@ func main() {
 	// Statistics routes
 	mux.HandleFunc("/statistics/categories", statisticController.ListCategoriesStatistics).Methods("GET")
 	mux.HandleFunc("/statistics/categories/{id}/stores", statisticController.ListStoreStatisticsForCategory).Methods("GET")
+	mux.HandleFunc("/statistics/stores/{id}/categories", statisticController.ListCategoryStatisticsForStore).Methods("GET")
 
 	// Workers
 	receiptUrlQueueWorker, err := queue.NewReceiptUrlQueueWorker(queueService)

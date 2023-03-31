@@ -10,6 +10,7 @@ import (
 type StatisticRepositoryInterface interface {
 	GetCategoryStatistic(filters.CategoryStatisticFilters) (map[string]map[string]int, error)
 	GetStoreStatisticsForCategory(int, filters.StoreStatisticForCategoryFilters) ([]StoreStatisticItem, error)
+	GetCategoryStatisticsForStore(string, filters.CategoryStatisticsForStoreFilters) ([]CategoryStatisticForStore, error)
 }
 
 type StatisticRepository struct {
@@ -124,6 +125,48 @@ func (r *StatisticRepository) GetStoreStatisticsForCategory(categoryId int, f fi
 				Name:  articleName,
 				Price: articlePrice,
 			},
+		})
+	}
+
+	return result, nil
+}
+
+type CategoryStatisticForStore struct {
+	CategoryId   int
+	CategoryName string
+	Total        int
+}
+
+func (r *StatisticRepository) GetCategoryStatisticsForStore(storeTin string, f filters.CategoryStatisticsForStoreFilters) ([]CategoryStatisticForStore, error) {
+	baseQuery := r.db.Table("stores as s").
+		Select("c.id as category_id", "c.name as category_name", "sum(ri.total_amount) as total").
+		Joins("INNER JOIN receipts as r ON s.tin = r.store_id").
+		Joins("INNER JOIN receipt_items as ri ON r.id = ri.receipt_id").
+		Joins("INNER JOIN categories as c ON ri.category_id = c.id").
+		Where("s.tin = ?", storeTin).
+		Group("c.id")
+
+	rows, err := f.ApplyFilters(baseQuery).Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	result := []CategoryStatisticForStore{}
+
+	defer rows.Close()
+	for rows.Next() {
+		var categoryId int
+		var categoryName string
+		var total int
+
+		if err := rows.Scan(&categoryId, &categoryName, &total); err != nil {
+			continue
+		}
+
+		result = append(result, CategoryStatisticForStore{
+			CategoryId:   categoryId,
+			CategoryName: categoryName,
+			Total:        total,
 		})
 	}
 

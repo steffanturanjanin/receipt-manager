@@ -47,3 +47,18 @@ func (c *StatisticController) ListStoreStatisticsForCategory(w http.ResponseWrit
 
 	JsonResponse(w, result, http.StatusOK)
 }
+
+func (c *StatisticController) ListCategoryStatisticsForStore(w http.ResponseWriter, r *http.Request) {
+	storeTin := mux.Vars(r)["id"]
+
+	filters := filters.CategoryStatisticsForStoreFilters{}
+	filters.BuildFromRequest(r)
+
+	result, err := c.statisticService.GetCategoryStatisticsForStore(storeTin, filters)
+	if err != nil {
+		JsonErrorResponse(w, errors.NewHttpError(err))
+		return
+	}
+
+	JsonResponse(w, result, http.StatusOK)
+}

@@ -130,3 +130,30 @@ func (f *StoreStatisticForCategoryFilters) BuildFromRequest(r *http.Request) {
 
 	f.FiltersList = filterList
 }
+
+type CategoryStatisticsForStoreFilters struct {
+	abstractFilterable
+}
+
+func (f *CategoryStatisticsForStoreFilters) GetAllowedFilterMatchFields() []string {
+	return []string{"id"}
+}
+func (f *CategoryStatisticsForStoreFilters) GetAllowedFilterRangeFields() []string {
+	return []string{"date"}
+}
+func (f *CategoryStatisticsForStoreFilters) GetAllowedFilterInFields() []string {
+	return []string{}
+}
+
+func (f *CategoryStatisticsForStoreFilters) BuildFromRequest(r *http.Request) {
+	filterList := make(FiltersList, 0)
+
+	frl := f.getFiltersRangeFromRequest(r, f.GetAllowedFilterRangeFields())
+	frl = addMandatoryDateRangeFilter(frl)
+	fml := f.getFiltersMatchFromRequest(r, f.GetAllowedFilterMatchFields())
+
+	filterList = append(filterList, CastToFilters(frl)...)
+	filterList = append(filterList, CastToFilters(fml)...)
+
+	f.FiltersList = filterList
+}

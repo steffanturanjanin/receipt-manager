@@ -11,12 +11,14 @@ import (
 type StatisticService struct {
 	statisticRepository repositories.StatisticRepositoryInterface
 	categoryService     *CategoryService
+	storeService        *StoreService
 }
 
-func NewStatisticService(sr repositories.StatisticRepositoryInterface, cs *CategoryService) *StatisticService {
+func NewStatisticService(sr repositories.StatisticRepositoryInterface, cs *CategoryService, ss *StoreService) *StatisticService {
 	return &StatisticService{
 		statisticRepository: sr,
 		categoryService:     cs,
+		storeService:        ss,
 	}
 }
 
@@ -70,6 +72,35 @@ func (s *StatisticService) GetStoreStatisticsForCategory(categoryId int, f filte
 	}
 
 	return statistics, nil
+}
+
+type categoryStatisticsForStore struct {
+	Id    int    `json:"id"`
+	Name  string `json:"name"`
+	Total int    `json:"total"`
+}
+
+func (s *StatisticService) GetCategoryStatisticsForStore(storeTin string, f filters.CategoryStatisticsForStoreFilters) ([]categoryStatisticsForStore, error) {
+	_, err := s.storeService.GetByTin(storeTin)
+	if err != nil {
+		return nil, err
+	}
+
+	statistics, err := s.statisticRepository.GetCategoryStatisticsForStore(storeTin, f)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []categoryStatisticsForStore{}
+	for _, statistic := range statistics {
+		result = append(result, categoryStatisticsForStore{
+			Id:    statistic.CategoryId,
+			Name:  statistic.CategoryName,
+			Total: statistic.Total,
+		})
+	}
+
+	return result, nil
 }
 
 func (s *StatisticService) GetCategoryStatistic(f filters.CategoryStatisticFilters) (*CategoryStatistics, error) {
