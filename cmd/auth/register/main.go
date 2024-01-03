@@ -12,12 +12,11 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
+	"github.com/steffanturanjanin/receipt-manager/internal/auth"
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
-	transport "github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
-	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
-	"github.com/steffanturanjanin/receipt-manager/internal/services"
+	"github.com/steffanturanjanin/receipt-manager/internal/user"
 	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
@@ -30,8 +29,8 @@ var (
 
 	db             *gorm.DB
 	err            error
-	userRepository *repositories.UserRepository
-	authService    *services.AuthService
+	userRepository *user.UserRepository
+	authService    *auth.AuthService
 	validator      *validation.Validator
 	gorillaLambda  *gorillamux.GorillaMuxAdapter
 )
@@ -42,14 +41,14 @@ func init() {
 		os.Exit(1)
 	}
 
-	userRepository = repositories.NewUserRepository(db)
-	authService = services.NewAuthService(userRepository)
+	userRepository = user.NewUserRepository(db)
+	authService = auth.NewAuthService(userRepository)
 	validator = validation.NewDefaultValidator()
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/auth/register", func(w http.ResponseWriter, r *http.Request) {
-		registerRequest := new(transport.RegisterUserRequest)
+		registerRequest := new(user.RegisterUserRequest)
 
 		if err := controllers.ParseBody(registerRequest, r); err != nil {
 			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
