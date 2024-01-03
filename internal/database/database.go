@@ -11,6 +11,28 @@ import (
 
 var Instance *gorm.DB
 
+func InitDB(dbName string, dbUser string, dbPassword string, dbHost string, dbPort string) (*gorm.DB, error) {
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+		dbUser,
+		dbPassword,
+		dbHost,
+		dbPort,
+		dbName,
+	)
+
+	db, err := gorm.Open(mysql.Open(connectionString))
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := AutoMigrate(db); err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
 func InitializeDB() error {
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")

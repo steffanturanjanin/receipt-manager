@@ -7,7 +7,7 @@ type AppErrorInterface interface {
 	GetMessage() string
 }
 
-// Base Aplication level error
+// Base Application level error
 type ErrBase struct {
 	Err     error  `json:"-"`
 	Message string `json:"message"`

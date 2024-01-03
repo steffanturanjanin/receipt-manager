@@ -1,12 +1,15 @@
 package validator
 
 import (
+	"fmt"
+	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
 
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/validator/v10"
+	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 
 	ut "github.com/go-playground/universal-translator"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
@@ -24,11 +27,40 @@ func NewValidator(translator ut.Translator) *Validator {
 	}
 }
 
+func NewDefaultValidator() *Validator {
+	validator := NewValidator(NewEnglishTranslator())
+	validator.ConfigureValidator()
+
+	return validator
+}
+
+func (v *Validator) ValidateEvent(event interface{}) error {
+	err := v.Validate(event)
+	if err == nil {
+		return nil
+	}
+
+	validationErrors := make(map[string]string)
+
+	for _, err := range err.(validator.ValidationErrors) {
+		fieldName := err.Field()
+		validationErrors[fieldName] = err.Translate(v.GetTranslator())
+	}
+
+	fmt.Printf("%+v\n", validationErrors)
+
+	return &errors.HttpError{
+		ErrBase: errors.ErrBase{Err: err, Message: "Request validation failed."},
+		Code:    http.StatusBadRequest,
+		Errors:  validationErrors,
+	}
+}
+
 func (v *Validator) GetTranslator() ut.Translator {
 	return v.translator
 }
 
-func (v *Validator) Struct(s interface{}) error {
+func (v *Validator) Validate(s interface{}) error {
 	return v.validator.Struct(s)
 }
 

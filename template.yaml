@@ -1,26 +1,56 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  receipt-manager
-  
-  Sample SAM Template for receipt-manager
+  Receipt Manager API
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 5
     MemorySize: 128
+    Architectures:
+      - x86_64
+    Policies:
+      - AWSLambdaBasicExecutionRole
 
-Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldAPI:
-    Description: "API Gateway endpoint URL for Prod environment for First Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "First Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+Resources:
+  ReceiptManagerApi:
+    Type: AWS::Serverless::Api
+
+  AuthRegister:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "auth_register"
+      CodeUri: ./cmd/auth/register
+      Handler: main
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /auth/register
+            Method: POST
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-00a0e19705f6d834d
+        SubnetIds:
+          - subnet-0b4845541148845cb
+          - subnet-0918e83fb4a36172a
+          - subnet-034427c65ed7f4713
+          - subnet-0b753744d35f1d81d
+          - subnet-06732001e6b1c879f
+          - subnet-0639260e9b4ca7aba
+
+# Outputs:
+#   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+#   # Find out more about other implicit resources you can reference within SAM
+#   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+#   HelloWorldAPI:
+#     Description: "API Gateway endpoint URL for Prod environment for First Function"
+#     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+#   HelloWorldFunction:
+#     Description: "First Lambda Function ARN"
+#     Value: !GetAtt HelloWorldFunction.Arn
+#   HelloWorldFunctionIamRole:
+#     Description: "Implicit IAM Role created for Hello World function"
+#     Value: !GetAtt HelloWorldFunctionRole.Arn

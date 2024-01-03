@@ -77,7 +77,7 @@ func handleInternalServerError(w http.ResponseWriter, e error) {
 
 // Valid validates the given struct.
 func ValidateRequest(request interface{}, v *v.Validator) error {
-	err := v.Struct(request)
+	err := v.Validate(request)
 	if err == nil {
 		return nil
 	}

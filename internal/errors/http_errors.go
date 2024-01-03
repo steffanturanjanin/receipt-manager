@@ -47,7 +47,7 @@ func NewHttpError(err error) *HttpError {
 	}
 }
 
-func NewHttpValidationEror(err error, trans ut.Translator) *HttpError {
+func NewHttpValidationError(err error, trans ut.Translator) *HttpError {
 	validationErrors, ok := err.(validator.ValidationErrors)
 	if !ok {
 		return nil
