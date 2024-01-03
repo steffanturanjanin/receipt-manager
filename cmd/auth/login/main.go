@@ -47,24 +47,28 @@ func init() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/auth/register", func(w http.ResponseWriter, r *http.Request) {
-		registerRequest := new(user.RegisterUserRequest)
+	r.HandleFunc("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+		loginRequest := new(user.LoginUserRequest)
 
-		if err := controllers.ParseBody(registerRequest, r); err != nil {
+		if err := controllers.ParseBody(loginRequest, r); err != nil {
 			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
 			return
 		}
 
-		if err := controllers.ValidateRequest(registerRequest, validator); err != nil {
+		if err := controllers.ValidateRequest(loginRequest, validator); err != nil {
 			controllers.JsonErrorResponse(w, err)
 			return
 		}
 
-		response, err := authService.RegisterUser(*registerRequest)
+		response, authCookies, err := authService.LoginUser(*loginRequest)
 		if err != nil {
 			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
 			return
 		}
+
+		http.SetCookie(w, (*http.Cookie)(&authCookies.AccessTokenCookie))
+		http.SetCookie(w, (*http.Cookie)(&authCookies.RefreshTokenCookie))
+		http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
 
 		controllers.JsonResponse(w, response, http.StatusCreated)
 	})
@@ -72,8 +76,8 @@ func init() {
 	gorillaLambda = gorillamux.New(r)
 }
 
-func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	r, err := gorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
+func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	r, err := gorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&req))
 	return *r.Version1(), err
 }
 

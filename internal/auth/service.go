@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
-	//"github.com/steffanturanjanin/receipt-manager/internal/user/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/user"
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 )
