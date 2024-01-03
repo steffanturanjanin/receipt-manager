@@ -15,12 +15,10 @@ import (
 )
 
 const (
-	START_DELIMITER = "========================================"
-	END_DELIMITER   = "----------------------------------------"
-
+	START_DELIMITER           = "========================================"
+	END_DELIMITER             = "----------------------------------------"
 	FISCAL_RECEIPT_IDENTIFIER = "============ ФИСКАЛНИ РАЧУН ============"
-
-	FISACLIZATION_SYSTEM_HOST = "suf.purs.gov.rs"
+	FISCALIZATION_SYSTEM_HOST = "suf.purs.gov.rs"
 )
 
 var (
@@ -116,6 +114,7 @@ func parseReceipt(receiptContent string) (*Receipt, error) {
 
 			break
 		}
+
 		parts := strings.Fields(taxLines[i])
 
 		identifier := parts[0]
@@ -307,5 +306,5 @@ func isHostValid(u string) bool {
 
 	hostname := strings.TrimPrefix(url.Hostname(), "www.")
 
-	return hostname == FISACLIZATION_SYSTEM_HOST
+	return hostname == FISCALIZATION_SYSTEM_HOST
 }
