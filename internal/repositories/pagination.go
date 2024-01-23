@@ -18,7 +18,7 @@ func Paginate(query *gorm.DB, p *pagination.Pagination, s pagination.Sortable) *
 
 	totalPages = int(math.Ceil(float64(totalRecords) / float64(p.Limit)))
 
-	p.TotalEnties = int(totalRecords)
+	p.TotalEntries = int(totalRecords)
 	p.TotalPages = totalPages
 
 	offset := (p.Page - 1) * p.Limit

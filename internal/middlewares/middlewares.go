@@ -4,6 +4,7 @@ import (
 	"context"
 	native_errors "errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -17,6 +18,12 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 )
 
+type ContextKey string
+
+const (
+	CURRENT_USER ContextKey = "CURRENT_USER"
+)
+
 func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -24,13 +31,7 @@ func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-type contextKey string
-
-const (
-	CURRENT_USER contextKey = "currentUser"
-)
-
-func setAuthMIddleware(next http.HandlerFunc) http.HandlerFunc {
+func SetAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	db := database.Instance
 	userRepository := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepository)
@@ -38,6 +39,7 @@ func setAuthMIddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var accessToken string
 		accessTokenCookie, err := r.Cookie("access_token")
+		fmt.Printf("access token cookie: %v\n", accessTokenCookie)
 
 		authorizationHeader := r.Header.Get("Authorization")
 		fields := strings.Fields(authorizationHeader)
@@ -50,12 +52,14 @@ func setAuthMIddleware(next http.HandlerFunc) http.HandlerFunc {
 
 		if accessToken == "" {
 			controllers.JsonErrorResponse(w, errors.NewErrUnauthorized(nil, "No Access Token."))
+			return
 		}
 
 		accessTokenPublicKey := os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
 		sub, err := utils.ValidateToken(accessToken, accessTokenPublicKey)
 		if err != nil {
 			controllers.JsonErrorResponse(w, errors.NewErrUnauthorized(err, "Invalid access token."))
+			return
 		}
 
 		userId, _ := strconv.Atoi(fmt.Sprint(sub))
@@ -70,8 +74,10 @@ func setAuthMIddleware(next http.HandlerFunc) http.HandlerFunc {
 			}
 
 			controllers.JsonErrorResponse(w, errors.NewErrForbidden(nil, "Forbidden"))
+			return
 		}
 
+		log.Printf("Context user: %+v\n", userResponse)
 		ctx := context.WithValue(r.Context(), CURRENT_USER, *userResponse)
 		requestWithContext := r.WithContext(ctx)
 

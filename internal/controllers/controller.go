@@ -34,7 +34,6 @@ func JsonResponse(w http.ResponseWriter, payload interface{}, status int) {
 	encoded, err := json.Marshal(payload)
 	if err != nil {
 		handleInternalServerError(w, err)
-
 		return
 	}
 
@@ -103,7 +102,7 @@ func JsonPaginatedResponse(w http.ResponseWriter, data interface{}, p pagination
 			CurrentPage:  p.Page,
 			PerPage:      p.Limit,
 			TotalPages:   p.TotalPages,
-			TotalEntries: p.TotalEnties,
+			TotalEntries: p.TotalEntries,
 		},
 	}
 

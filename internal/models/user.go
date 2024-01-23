@@ -7,13 +7,13 @@ import (
 )
 
 type User struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	FirstName string    `gorm:"size:255;not null" json:"first_name"`
-	LastName  string    `gorm:"size:255;not null" json:"last_name"`
-	Email     string    `gorm:"size:100;not null;unique" json:"email"`
-	Password  string    `gorm:"size:100;not null;"`
-	CreatedAt time.Time `gorm:"not null;autoCreateTime" json:"created_at"`
-	UpdatedAt time.Time `gorm:"not null;autoCreateTime" json:"updated_at"`
+	ID        uint      `gorm:"primaryKey; autoIncrement" json:"id"`
+	FirstName string    `gorm:"not null; size:255" json:"firstName"`
+	LastName  string    `gorm:"not null; size:255" json:"lastName"`
+	Email     string    `gorm:"unique; not null; size:100" json:"email"`
+	Password  string    `gorm:"not null; size:100"`
+	CreatedAt time.Time `gorm:"not null; autoCreateTime" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"not null; autoCreateTime" json:"updatedAt"`
 }
 
 func NewUserResponseDTOFromUserModel(user User) dto.User {

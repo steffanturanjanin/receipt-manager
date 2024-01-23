@@ -15,11 +15,13 @@ import (
 
 type ReceiptService struct {
 	receiptRepository repositories.ReceiptRepositoryInterface
+	storeService      *StoreService
 }
 
-func NewReceiptService(receiptRepository repositories.ReceiptRepositoryInterface) *ReceiptService {
+func NewReceiptService(receiptRepository repositories.ReceiptRepositoryInterface, storeService *StoreService) *ReceiptService {
 	return &ReceiptService{
 		receiptRepository: receiptRepository,
+		storeService:      storeService,
 	}
 }
 
@@ -59,6 +61,28 @@ func (service *ReceiptService) CreatePendingReceipt() (*dto.Receipt, error) {
 	return &receiptDTO, nil
 }
 
+func (s *ReceiptService) CreatePendingReceipt2(receiptDto receipt_fetcher.Receipt, userId uint) (*dto.Receipt, error) {
+	store, _ := s.storeService.FirstOrCreateFromDto(receiptDto.Store)
+	receipt, _ := s.receiptRepository.CreatePendingFromDto(receiptDto, userId, store.Tin)
+	// taxes := make([]dto.Tax, 0)
+	// for _, taxItem := range receipt.Taxes {
+	// 	tax := taxItem.NewTaxDTO()
+	// 	taxes = append(taxes, *tax)
+	// }
+
+	return &dto.Receipt{
+		ID:                  receipt.ID,
+		Status:              receipt.Status,
+		Counter:             *receipt.Counter,
+		TotalPurchaseAmount: float64(receipt.TotalPurchaseAmount),
+		TotalTaxAmount:      float64(receipt.TotalTaxAmount),
+		Date:                receipt.Date,
+		QrCode:              *receipt.QrCode,
+		//Taxes:               taxes,
+		CreatedAt: receipt.CreatedAt,
+	}, nil
+}
+
 func (service *ReceiptService) Delete(id int) error {
 	return service.receiptRepository.Delete(id)
 }
@@ -86,7 +110,7 @@ func (service *ReceiptService) GetAll(f filters.ReceiptFilters, p *pagination.Pa
 func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 	receiptItems := make([]models.ReceiptItem, 0)
 	for _, item := range r.ReceiptItems {
-		taxId := dto.TaxIdentifierMapper[item.Tax.Identifier]
+		//taxId := dto.TaxIdentifierMapper[item.Tax.Identifier]
 
 		var cateogoryId *uint
 		if item.Category != nil {
@@ -99,18 +123,18 @@ func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 			Quantity:     item.Quantity,
 			SingleAmount: int(math.Round(item.SingleAmount * 100)),
 			TotalAmount:  int(math.Round(item.TotalAmount * 100)),
-			Tax:          int(taxId),
-			CategoryID:   cateogoryId,
+			//Tax:          int(taxId),
+			CategoryID: cateogoryId,
 		})
 	}
 
-	taxes := make([]models.Tax, 0)
-	for _, tax := range r.Taxes {
-		taxId := dto.TaxIdentifierMapper[tax.Identifier]
-		taxes = append(taxes, models.Tax{
-			TaxIdentifier: int(taxId),
-		})
-	}
+	// taxes := make([]models.Tax, 0)
+	// for _, tax := range r.Taxes {
+	// 	taxId := dto.TaxIdentifierMapper[tax.Identifier]
+	// 	taxes = append(taxes, models.Tax{
+	// 		TaxIdentifier: int(taxId),
+	// 	})
+	// }
 
 	metaData, _ := json.Marshal(r.Meta)
 	receipt := &models.Receipt{
@@ -132,7 +156,7 @@ func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 			City:         r.Store.City,
 		},
 		ReceiptItems: receiptItems,
-		Taxes:        taxes,
+		//Taxes:        taxes,
 	}
 
 	return s.receiptRepository.Update(receipt)
@@ -173,15 +197,15 @@ func (s *ReceiptService) GetById(id int) (*dto.Receipt, error) {
 			Unit:         receiptItem.Unit,
 			SingleAmount: math.Round(float64(receiptItem.SingleAmount)) / 100,
 			TotalAmount:  math.Round(float64(receiptItem.TotalAmount)) / 100,
-			Tax:          *dto.TaxIdentifier(receiptItem.Tax).Tax(),
+			//Tax:          *dto.TaxIdentifier(receiptItem.Tax).Tax(),
 		})
 	}
 
-	taxes := make([]dto.Tax, 0)
-	for _, taxModel := range receipt.Taxes {
-		tax := dto.TaxIdentifier(taxModel.TaxIdentifier).Tax()
-		taxes = append(taxes, *tax)
-	}
+	// taxes := make([]dto.Tax, 0)
+	// for _, taxModel := range receipt.Taxes {
+	// 	tax := dto.TaxIdentifier(taxModel.TaxIdentifier).Tax()
+	// 	taxes = append(taxes, *tax)
+	// }
 
 	var meta map[string]string
 	json.Unmarshal(receipt.Meta, &meta)
@@ -196,8 +220,8 @@ func (s *ReceiptService) GetById(id int) (*dto.Receipt, error) {
 		QrCode:              *receipt.QrCode,
 		Meta:                meta,
 		ReceiptItems:        receiptItems,
-		Taxes:               taxes,
-		CreatedAt:           receipt.CreatedAt,
+		//Taxes:               taxes,
+		CreatedAt: receipt.CreatedAt,
 		Store: dto.Store{
 			Tin:          receipt.Store.Tin,
 			Name:         receipt.Store.Name,

@@ -2,7 +2,9 @@ package services
 
 import (
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
+	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
+	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
 )
 
 type StoreService struct {
@@ -29,4 +31,8 @@ func (s *StoreService) GetByTin(tin string) (*dto.Store, error) {
 		Address:      storeModel.Address,
 		City:         storeModel.City,
 	}, nil
+}
+
+func (s *StoreService) FirstOrCreateFromDto(storeDto receipt_fetcher.Store) (*models.Store, error) {
+	return s.storeRepository.FirstOrCreateFromDto(storeDto)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/filters"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
+	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -21,6 +22,7 @@ type ReceiptRepositoryInterface interface {
 	GetById(int) (*models.Receipt, error)
 	Create(receiptDTO dto.ReceiptData) (*models.Receipt, error)
 	Create2(*models.Receipt) error
+	CreatePendingFromDto(receiptDto receipt_fetcher.Receipt, userId uint, storeId string) (*models.Receipt, error)
 	Delete(id int) error
 	Update(receipt *models.Receipt) error
 }
@@ -55,20 +57,20 @@ func (repository *ReceiptRepository) Create(receiptData dto.ReceiptData) (*model
 			Quantity:     receiptItemDTO.Quantity,
 			SingleAmount: receiptItemDTO.SingleAmount.GetParas(),
 			TotalAmount:  receiptItemDTO.TotalAmount.GetParas(),
-			Tax:          int(dto.TaxIdentifierMapper[receiptItemDTO.Tax.Identifier]),
+			//Tax:          int(dto.TaxIdentifierMapper[receiptItemDTO.Tax.Identifier]),
 		}
 
 		receiptItems = append(receiptItems, receiptItem)
 	}
 
-	taxes := make([]models.Tax, 0)
-	for _, taxItem := range receiptData.Taxes {
-		taxModel := models.Tax{
-			TaxIdentifier: int(dto.TaxIdentifierMapper[taxItem.Tax.Identifier]),
-		}
+	// taxes := make([]models.Tax, 0)
+	// for _, taxItem := range receiptData.Taxes {
+	// 	taxModel := models.Tax{
+	// 		TaxIdentifier: int(dto.TaxIdentifierMapper[taxItem.Tax.Identifier]),
+	// 	}
 
-		taxes = append(taxes, taxModel)
-	}
+	// 	taxes = append(taxes, taxModel)
+	// }
 
 	metaJson, _ := json.Marshal(receiptData.MetaData)
 
@@ -81,8 +83,8 @@ func (repository *ReceiptRepository) Create(receiptData dto.ReceiptData) (*model
 		Date:                receiptData.Date,
 		QrCode:              &receiptData.QrCod,
 		ReceiptItems:        receiptItems,
-		Taxes:               taxes,
-		Meta:                datatypes.JSON(metaJson),
+		//Taxes:               taxes,
+		Meta: datatypes.JSON(metaJson),
 	}
 
 	if result := repository.db.Create(&receipt).Preload("Store"); result.Error != nil {
@@ -100,6 +102,46 @@ func (repository *ReceiptRepository) Create(receiptData dto.ReceiptData) (*model
 
 func (receiptRepository *ReceiptRepository) Create2(r *models.Receipt) error {
 	return receiptRepository.db.Create(&r).Error
+}
+
+func (receiptRepository *ReceiptRepository) CreatePendingFromDto(
+	receiptDto receipt_fetcher.Receipt,
+	userId uint,
+	storeId string,
+) (*models.Receipt, error) {
+	var receipt *models.Receipt
+	receiptRepository.db.Where(&models.Receipt{PfrNumber: &receiptDto.Number, UserID: userId}).First(receipt)
+
+	if receipt != nil {
+		return nil, errors.NewErrResourceNotFound(native_errors.New("receipt already exists"), "receipt already exists")
+	}
+
+	// taxes := make([]models.Tax, 0)
+	// for _, taxItem := range receiptDto.Taxes {
+	// 	taxModel := models.Tax{
+	// 		TaxIdentifier: int(dto.TaxIdentifierMapper[taxItem.Tax.Identifier]),
+	// 	}
+
+	// 	taxes = append(taxes, taxModel)
+	// }
+
+	receiptModelMeta, _ := json.Marshal(map[string]string(receiptDto.MetaData))
+	receipt = &models.Receipt{
+		StoreID:             &storeId,
+		Status:              models.RECEIPT_STATUS_PENDING,
+		PfrNumber:           &receiptDto.Number,
+		Counter:             &receiptDto.Counter,
+		TotalPurchaseAmount: receiptDto.TotalPurchaseAmount.GetParas(),
+		TotalTaxAmount:      receiptDto.TotalTaxAmount.GetParas(),
+		Date:                receiptDto.Date,
+		QrCode:              &receiptDto.QrCod,
+		Meta:                receiptModelMeta,
+		//Taxes:               taxes,
+	}
+
+	receiptRepository.db.Create(&receipt)
+
+	return receipt, nil
 }
 
 func (repository *ReceiptRepository) Delete(id int) error {

@@ -51,9 +51,9 @@ func main() {
 	// Services
 	authService := services.NewAuthService(userRepository)
 	categoryService := services.NewCategoryService(categoryRepository)
-	receiptService := services.NewReceiptService(receiptRepository)
 	receiptItemService := services.NewReceiptItemService(receiptItemRepository, categoryService)
 	storeService := services.NewStoreService(storeRepository)
+	receiptService := services.NewReceiptService(receiptRepository, storeService)
 	statisticService := services.NewStatisticService(statisticRepository, categoryService, storeService)
 	queueService := queue.NewQueueService(SqsService)
 

@@ -54,11 +54,11 @@ func (s *ReceiptItemService) UpdateCategory(data UpdateReceiptItemCategory) (*dt
 	}
 
 	receiptItemDto := dto.ReceiptItem{
-		ID:           receiptItem.ID,
-		Name:         receiptItem.Name,
-		Category:     category,
-		Unit:         receiptItem.Unit,
-		Tax:          *dto.TaxIdentifier(receiptItem.Tax).Tax(),
+		ID:       receiptItem.ID,
+		Name:     receiptItem.Name,
+		Category: category,
+		Unit:     receiptItem.Unit,
+		//Tax:          *dto.TaxIdentifier(receiptItem.Tax).Tax(),
 		SingleAmount: math.Round(float64(receiptItem.SingleAmount)) / 100,
 		TotalAmount:  math.Round(float64(receiptItem.TotalAmount)) / 100,
 	}

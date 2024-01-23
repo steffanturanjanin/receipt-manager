@@ -27,7 +27,7 @@ type Receipt struct {
 
 // StoreDTO
 type Store struct {
-	Tin          string `jsontin:"tin"`
+	Tin          string `json:"tin"`
 	Name         string `json:"name"`
 	LocationName string `json:"location_name"`
 	LocationId   string `json:"location_id"`

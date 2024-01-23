@@ -29,6 +29,19 @@ var (
 		"Zdravlje",
 		"Domaćinstvo",
 	}
+
+	taxes = []models.Tax{
+		{
+			Identifier: "Ђ",
+			Name:       "О-ПДВ",
+			Rate:       20,
+		},
+		{
+			Identifier: "Е",
+			Name:       "П-ПДВ",
+			Rate:       10,
+		},
+	}
 )
 
 func SeedCategories(db *gorm.DB) error {
@@ -41,42 +54,20 @@ func SeedCategories(db *gorm.DB) error {
 	return nil
 }
 
-// type Seed struct {
-// 	Run func(*gorm.DB) error
-// }
+func SeedTaxes(db *gorm.DB) error {
+	for _, tax := range taxes {
+		if err := createTax(db, &tax); err != nil {
+			return err
+		}
+	}
 
-// type SeederInterface interface {
-// 	Seed(*gorm.DB)
-// }
-
-// type seeder struct {
-// 	seeds []Seed
-// }
-
-// func (s seeder) Seed(db *gorm.DB) {
-// 	for _, seed := range s.seeds {
-// 		seed.Run(db)
-// 	}
-// }
-
-// type CategorySeeder struct {
-// 	seeder
-// }
-
-// func NewCategorySeeder() CategorySeeder {
-// 	categorySeeds := make([]Seed, 0)
-
-// 	for _, category := range categories {
-// 		categorySeeds = append(categorySeeds, Seed{
-// 			Run: func(db *gorm.DB) error {
-// 				return createCategory(db, category)
-// 			},
-// 		})
-// 	}
-
-// 	return CategorySeeder{seeder{seeds: categorySeeds}}
-// }
+	return nil
+}
 
 func createCategory(db *gorm.DB, name string) error {
 	return db.Create(&models.Category{Name: name}).Error
+}
+
+func createTax(db *gorm.DB, tax *models.Tax) error {
+	return db.Create(&tax).Error
 }

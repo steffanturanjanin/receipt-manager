@@ -27,11 +27,11 @@ func isLimitValueValid(limit int) bool {
 }
 
 type Pagination struct {
-	Limit       int
-	Page        int
-	Sort        SortList
-	TotalEnties int
-	TotalPages  int
+	Limit        int
+	Page         int
+	Sort         SortList
+	TotalEntries int
+	TotalPages   int
 }
 
 type SortList []Sort
