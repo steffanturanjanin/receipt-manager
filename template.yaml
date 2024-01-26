@@ -6,21 +6,80 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 5
+    Timeout: 300
     MemorySize: 128
     Architectures:
       - x86_64
-    Policies:
-      - AWSLambdaBasicExecutionRole
+    Runtime: go1.x
+
+Parameters:
+  DB_HOST:
+    Type: String
+    Description: DB Host
+    Default:
+  DB_PORT:
+    Type: String
+    Description: DB Port
+    Default:
+  DB_NAME:
+    Type: String
+    Description: DB Name
+    Default:
+  DB_USER:
+    Type: String
+    Description: DB User
+    Default:
+  DB_PASSWORD:
+    Type: String
+    Description: DB Password
+    Default:
+  API_SECRET:
+    Type: String
+    Description: Api Secret
+    Default: 
+  ACCESS_TOKEN_PUBLIC_KEY:
+    Type: String
+    Description: Access Token Public Key
+    Default:
+  ACCESS_TOKEN_PRIVATE_KEY:
+    Type: String
+    Description: Access Token Private Key
+    Default:
+  ACCESS_TOKEN_MAX_AGE:
+    Type: String
+    Description: Access Token Max Age
+    Default: 21600
+  ACCESS_TOKEN_EXPIRES_IN:
+    Type: String
+    Description: Access Token Expires In
+    Default: 360h
+  REFRESH_TOKEN_PUBLIC_KEY:
+    Type: String
+    Description: Refresh Token Public Key
+    Default:
+  REFRESH_TOKEN_PRIVATE_KEY:
+    Type: String
+    Description: Refresh Token Private Key
+    Default:
+  REFRESH_TOKEN_MAX_AGE:
+    Type: String
+    Description: Refresh Token Max Age
+    Default: 21600
+  REFRESH_TOKEN_EXPIRES_IN:
+    Type: String
+    Description: Refresh Token Expires In
+    Default: 360h
 
 Resources:
   ReceiptManagerApi:
     Type: AWS::Serverless::Api
+    Properties:
+      StageName: ReceiptManagerApi.Test
 
   AuthRegister:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: "auth_register"
+      FunctionName: "AuthRegister"
       CodeUri: ./cmd/auth/register
       Handler: main
       Events:
@@ -30,16 +89,74 @@ Resources:
             RestApiId: !Ref ReceiptManagerApi
             Path: /auth/register
             Method: POST
-      VpcConfig:
-        SecurityGroupIds:
-          - sg-00a0e19705f6d834d
-        SubnetIds:
-          - subnet-0b4845541148845cb
-          - subnet-0918e83fb4a36172a
-          - subnet-034427c65ed7f4713
-          - subnet-0b753744d35f1d81d
-          - subnet-06732001e6b1c879f
-          - subnet-0639260e9b4ca7aba
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
+
+  AuthLogin:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "AuthLogin"
+      CodeUri: ./cmd/auth/login
+      Handler: main
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /auth/login
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
+          API_SECRET: !Ref API_SECRET
+          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
+          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
+          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
+          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
+          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
+          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
+          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
+          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+
+  ReceiptsUrlCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ReceiptUrlCreate
+      CodeUri: ./cmd/receipts/url
+      Handler: main
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /receipts/url
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
+          API_SECRET: !Ref API_SECRET
+          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
+          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
+          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
+          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
+          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
+          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
+          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
+          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+
 
 # Outputs:
 #   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

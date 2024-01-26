@@ -1,3 +1,5 @@
-.env
 .vscode
+.aws-sam
+.env
+env.json
 /bin

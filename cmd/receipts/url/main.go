@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -22,7 +21,6 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	app_errors "github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
 )
 
 type ReceiptUrlRequest struct {
@@ -30,8 +28,7 @@ type ReceiptUrlRequest struct {
 }
 
 const (
-	RECEIPT_URLS_QUEUE   = "receipt_urls"
-	RECEIPT_PARSED_QUEUE = "receipt_parsed"
+	RECEIPT_URLS_QUEUE = "receipt_urls"
 )
 
 var (
@@ -58,69 +55,18 @@ func init() {
 
 var handler = func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(middlewares.CURRENT_USER).(dto.User)
+	log.Printf("User: %+v\n", user)
 
-	parseReceiptRequest := new(ReceiptUrlRequest)
-	if err := controllers.ParseBody(parseReceiptRequest, r); err != nil {
-		controllers.JsonErrorResponse(w, app_errors.NewHttpError(err))
-		return
-	}
-
-	receipt, err := receipt_fetcher.Get(parseReceiptRequest.Url)
-	if err != nil {
-		// If url is invalid return error response
-		if errors.Is(err, receipt_fetcher.ErrInvalidReceiptUrl) {
-			errBadRequest := app_errors.NewErrBadRequest(err, err.Error())
-			controllers.JsonErrorResponse(w, app_errors.NewHttpError(errBadRequest))
-			return
-		}
-
-		// If receipt is not available at the moment, push it to the pending_receipts queue
-		// Message should contain current user's id and receipt url
-		if errors.Is(err, receipt_fetcher.ErrReceiptDataNotAvailable) {
-			urlResult, err := SqsService.GetQueueUrl(&sqs.GetQueueUrlInput{
-				QueueName: aws.String(RECEIPT_URLS_QUEUE),
-			})
-
-			if err != nil {
-				controllers.JsonErrorResponse(w, app_errors.NewHttpError(err))
-				return
-			}
-
-			sqsMessageInput := &sqs.SendMessageInput{
-				DelaySeconds: aws.Int64(0),
-				MessageAttributes: map[string]*sqs.MessageAttributeValue{
-					"UserId": {
-						DataType:    aws.String("Number"),
-						StringValue: aws.String(fmt.Sprint(user.Id)),
-					},
-				},
-				MessageBody: aws.String(parseReceiptRequest.Url),
-				QueueUrl:    urlResult.QueueUrl,
-			}
-
-			_, err = SqsService.SendMessage(sqsMessageInput)
-			if err != nil {
-				controllers.JsonErrorResponse(w, app_errors.NewHttpError(err))
-				return
-			}
-
-			controllers.JsonResponse(w, "Receipt data currently unavailable. It will be processed as soon as possible.", http.StatusOK)
-		}
-
+	receiptUrlRequest := &ReceiptUrlRequest{}
+	if err := controllers.ParseBody(receiptUrlRequest, r); err != nil {
 		controllers.JsonErrorResponse(w, app_errors.NewHttpError(err))
 		return
 	}
 
 	urlResult, err := SqsService.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String(RECEIPT_PARSED_QUEUE),
+		QueueName: aws.String(RECEIPT_URLS_QUEUE),
 	})
 
-	if err != nil {
-		controllers.JsonErrorResponse(w, app_errors.NewHttpError(err))
-		return
-	}
-
-	receiptParsedMsg, err := json.Marshal(receipt)
 	if err != nil {
 		controllers.JsonErrorResponse(w, app_errors.NewHttpError(err))
 		return
@@ -134,7 +80,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 				StringValue: aws.String(fmt.Sprint(user.Id)),
 			},
 		},
-		MessageBody: aws.String(string(receiptParsedMsg)),
+		MessageBody: aws.String(receiptUrlRequest.Url),
 		QueueUrl:    urlResult.QueueUrl,
 	}
 
