@@ -1,0 +1,25 @@
+{
+    "Records": [
+        {
+            "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
+            "receiptHandle": "MessageReceiptHandle",
+            "body": "{'url':'https://suf.purs.gov.rs/v/?vl=A04zVE1LTDhKTjNUTUtMOErBTAgAkT4IAFQzdQMAAAAAAAABjGNpnLgAAAASynvYMRyqXFiaK5Pf87zAdEajBSJ6uedAjjU9nVrWFJCa9yfnTeJB2Mws5nfzBTH6dkb1XztVt4BVJtBlEGPOY7a1SluzxJaQvc1mq%2bWuUPTRpjCwourCAoT88Ha3w8vTkE0%2bfEBS63j3lw4wh8J75Q2Bda2awJaIPt4VbuIUZ%2bX7NtywirhM%2fLVic4MyqVNey7%2bCMKg%2b1m1CChs4LVn9sziQjLv7mMmK%2f6NAE54RQ8S30EbmmxnJgbH5XnuFnXQP%2fQ6oZOo3pnhjBa2yMgO79VkWT7lvZBKc9jsi8e41Xb9FiRpvadBEFjtNYpFhETHFLDs5Gi155Blk5aOybsHTom9oR8KWtpAm6fEn8gcM%2fE920vmMEkHo%2fP0BRo1yR087lCfUrcgw9GNH3mltVGkKo07mAh3WoJS01Jn1%2btNeUeAJJjLtI76Wb2OMkszQ0MNXDu2y%2f7nh%2bmEdUN%2bCrryn8NOUlse1eZaLvd7DGeXJx2pay6TezYj32Sh%2bcsExsSEZtdBJsi8NC5AqlHV2ooJ2LwauBbu6B%2f93X2IkY3KMPjcMuEOP%2ft2fpWYdLhEtqLiD2lY5WSxQNSQC38BUfrqeqRXkiFRSbDqUxnPZ5LOPB4ozXR7yRRYrVGxZLODeNNih8P%2feefFwG%2finDEjr0GyChZFMo4s4dKJx4wNF%2fUPUisVfyTIbW1I%2fXGA3Q%2f83B%2fk%3d'}",
+            "attributes": {
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1523232000000",
+                "SenderId": "123456789012",
+                "ApproximateFirstReceiveTimestamp": "1523232000001"
+            },
+            "messageAttributes": {
+                "UserId": {
+                    "stringValue": "1",
+                    "dataType": "string"
+                }
+            },
+            "md5OfBody": "7b270e59b47ff90a553787216d55d91d",
+            "eventSource": "aws:sqs",
+            "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
+            "awsRegion": "us-east-1"
+        }
+    ]
+}
