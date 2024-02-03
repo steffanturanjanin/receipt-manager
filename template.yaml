@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  Receipt Manager API
+Description: Receipt Manager API
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -71,11 +70,29 @@ Parameters:
     Default: 360h
 
 Resources:
+  #ApiGateway
   ReceiptManagerApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: ReceiptManagerApi.Test
 
+  #SQS
+  ReceiptUrlQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: receipt_url
+
+  ReceiptParsedQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: receipt_parsed
+
+  ReceiptItemQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: receipt_items
+
+  #Lambdas
   AuthRegister:
     Type: AWS::Serverless::Function
     Properties:
@@ -127,19 +144,6 @@ Resources:
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
 
-  ReceiptsProcessUrls:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: ReceiptsProcessUrls
-      CodeUri: ./cmd/receipts/process-urls
-      Handler: main
-      Events:
-        ReceiptsUrlsSqsQueue:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt ReceiptUrlQueue.Arn
-            BatchSize: 10
-
   ReceiptsCreateFromUrl:
     Type: AWS::Serverless::Function
     Properties:
@@ -170,10 +174,38 @@ Resources:
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
 
-  ReceiptUrlQueue:
-    Type: AWS::SQS::Queue
+  ReceiptsProcessUrls:
+    Type: AWS::Serverless::Function
     Properties:
-      QueueName: receipt-url
+      FunctionName: ReceiptsProcessUrls
+      CodeUri: ./cmd/receipts/process-urls
+      Handler: main
+      Events:
+        ReceiptUrlQueueWrite:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ReceiptUrlQueue.Arn
+            BatchSize: 10
+  
+  ReceiptsProcessParsed:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ReceiptsProcessParsed
+      CodeUri: ./cmd/receipts/process-parsed
+      Handler: main
+      Events:
+        ReceiptParsedQueueWrite:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ReceiptParsedQueue.Arn
+            BatchSize: 10
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
 
 # Outputs:
 #   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
