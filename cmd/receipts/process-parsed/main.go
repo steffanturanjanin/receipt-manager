@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"strconv"
 
 	"gorm.io/datatypes"
@@ -47,31 +47,31 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		return err
 	}
 
-	parsedReceipt := &receipt_fetcher.Receipt{}
-	err = json.Unmarshal([]byte(message.Body), parsedReceipt)
-	log.Printf("PARSED RECEIPT %+v\n", parsedReceipt)
+	receipt := &receipt_fetcher.Receipt{}
+	err = json.Unmarshal([]byte(message.Body), receipt)
 	if err != nil {
 		return err
 	}
 
-	store := models.Store{
-		Tin:          parsedReceipt.Store.Tin,
-		Name:         parsedReceipt.Store.Name,
-		LocationId:   parsedReceipt.Store.LocationId,
-		LocationName: parsedReceipt.Store.LocationName,
-		Address:      parsedReceipt.Store.Address,
-		City:         parsedReceipt.Store.City,
+	// Check if user has scanned this receipt before
+	var dbReceipt *models.Receipt
+	database.Instance.Where(&models.Receipt{UserID: uint(userId), PfrNumber: receipt.Number}).First(&dbReceipt)
+	if dbReceipt != nil {
+		return errors.New("user has already scanned this receipt")
 	}
 
-	//Save store
-	// dbResult := database.Instance.Create(&store)
-	// if dbResult.Error != nil {
-	// 	return dbResult.Error
-	// }
+	dbStore := models.Store{
+		Tin:          receipt.Store.Tin,
+		Name:         receipt.Store.Name,
+		LocationId:   receipt.Store.LocationId,
+		LocationName: receipt.Store.LocationName,
+		Address:      receipt.Store.Address,
+		City:         receipt.Store.City,
+	}
 
-	receiptItems := make([]models.ReceiptItem, 0)
-	for _, receiptItemDto := range parsedReceipt.Items {
-		receiptItems = append(receiptItems, models.ReceiptItem{
+	dbReceiptItems := make([]models.ReceiptItem, 0)
+	for _, receiptItemDto := range receipt.Items {
+		dbReceiptItems = append(dbReceiptItems, models.ReceiptItem{
 			Name:         receiptItemDto.Name,
 			Unit:         receiptItemDto.Unit,
 			Quantity:     receiptItemDto.Quantity,
@@ -85,23 +85,23 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		})
 	}
 
-	metaData, _ := json.Marshal(parsedReceipt.MetaData)
-	receipt := &models.Receipt{
+	metaData, _ := json.Marshal(receipt.MetaData)
+	dbReceipt = &models.Receipt{
 		UserID:              uint(userId),
 		Status:              models.RECEIPT_STATUS_PENDING,
-		PfrNumber:           parsedReceipt.Number,
-		Counter:             parsedReceipt.Counter,
-		TotalPurchaseAmount: parsedReceipt.TotalPurchaseAmount.GetParas(),
-		TotalTaxAmount:      parsedReceipt.TotalTaxAmount.GetParas(),
-		Date:                parsedReceipt.Date,
-		QrCode:              parsedReceipt.QrCod,
+		PfrNumber:           receipt.Number,
+		Counter:             receipt.Counter,
+		TotalPurchaseAmount: receipt.TotalPurchaseAmount.GetParas(),
+		TotalTaxAmount:      receipt.TotalTaxAmount.GetParas(),
+		Date:                receipt.Date,
+		QrCode:              receipt.QrCod,
 		Meta:                datatypes.JSON(metaData),
-		Store:               store,
-		ReceiptItems:        receiptItems,
+		Store:               dbStore,
+		ReceiptItems:        dbReceiptItems,
 	}
 
 	// Write receipt to database
-	dbResult := database.Instance.Create(receipt)
+	dbResult := database.Instance.Create(&dbReceipt)
 	if dbResult.Error != nil {
 		return dbResult.Error
 	}
@@ -115,7 +115,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 	}
 
 	// Serialize receipt items to json string
-	serializedReceiptItems, err := json.Marshal(receipt.ReceiptItems)
+	serializedReceiptItems, err := json.Marshal(dbReceipt.ReceiptItems)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
 			"ReceiptId": {
 				DataType:    aws.String("Number"),
-				StringValue: aws.String(fmt.Sprint(receipt.ID)),
+				StringValue: aws.String(fmt.Sprint(dbReceipt.ID)),
 			},
 		},
 		MessageBody: aws.String(string(serializedReceiptItems)),
