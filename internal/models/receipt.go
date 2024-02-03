@@ -18,14 +18,14 @@ const (
 type Receipt struct {
 	ID                  uint           `gorm:"primaryKey; autoIncrement" json:"id"`
 	UserID              uint           `gorm:"not null" json:"userId"`
-	StoreID             *string        `gorm:"nullable" json:"storeId"`
+	StoreID             string         `gorm:"nullable" json:"storeId"`
 	Status              string         `gorm:"not null" json:"status"`
-	PfrNumber           *string        `gorm:"unique" json:"pfrNumber"`
-	Counter             *string        `gorm:"unique" json:"counter"`
+	PfrNumber           string         `gorm:"unique" json:"pfrNumber"`
+	Counter             string         `gorm:"unique" json:"counter"`
 	TotalPurchaseAmount int            `gorm:"not null; default:0" json:"totalPurchaseAmount"`
 	TotalTaxAmount      int            `gorm:"not null; default:0" json:"totalTaxAmount"`
 	Date                time.Time      `gorm:"not null" json:"date"`
-	QrCode              *string        `gorm:"type:text" json:"qrCode"`
+	QrCode              string         `gorm:"type:text" json:"qrCode"`
 	Meta                datatypes.JSON `gorm:"nullable" json:"metaData"`
 	CreatedAt           time.Time      `gorm:"not null; autoCreateTime" json:"createdAt"`
 	UpdatedAt           time.Time      `gorm:"not null; autoCreateTime" json:"updatedAt"`
@@ -57,16 +57,15 @@ func (r Receipt) NewReceiptDTO() (*dto.Receipt, error) {
 	receiptDTO := dto.Receipt{
 		ID:                  r.ID,
 		Store:               r.Store.NewStoreDTO(),
-		PfrNumber:           *r.PfrNumber,
-		Counter:             *r.Counter,
+		PfrNumber:           r.PfrNumber,
+		Counter:             r.Counter,
 		TotalPurchaseAmount: math.Round(float64(r.TotalPurchaseAmount)) / 100,
 		TotalTaxAmount:      math.Round(float64(r.TotalTaxAmount)) / 100,
 		ReceiptItems:        receiptItems,
-		//Taxes:               taxes,
-		Date:      r.Date,
-		QrCode:    *r.QrCode,
-		Meta:      meta,
-		CreatedAt: r.Date,
+		Date:                r.Date,
+		QrCode:              r.QrCode,
+		Meta:                meta,
+		CreatedAt:           r.Date,
 	}
 
 	return &receiptDTO, nil

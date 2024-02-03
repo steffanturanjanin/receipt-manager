@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
+
+	"gorm.io/datatypes"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -14,7 +17,6 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
-	"gorm.io/datatypes"
 )
 
 const (
@@ -47,11 +49,12 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 
 	parsedReceipt := &receipt_fetcher.Receipt{}
 	err = json.Unmarshal([]byte(message.Body), parsedReceipt)
+	log.Printf("PARSED RECEIPT %+v\n", parsedReceipt)
 	if err != nil {
 		return err
 	}
 
-	store := &models.Store{
+	store := models.Store{
 		Tin:          parsedReceipt.Store.Tin,
 		Name:         parsedReceipt.Store.Name,
 		LocationId:   parsedReceipt.Store.LocationId,
@@ -59,6 +62,12 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		Address:      parsedReceipt.Store.Address,
 		City:         parsedReceipt.Store.City,
 	}
+
+	//Save store
+	// dbResult := database.Instance.Create(&store)
+	// if dbResult.Error != nil {
+	// 	return dbResult.Error
+	// }
 
 	receiptItems := make([]models.ReceiptItem, 0)
 	for _, receiptItemDto := range parsedReceipt.Items {
@@ -80,21 +89,21 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 	receipt := &models.Receipt{
 		UserID:              uint(userId),
 		Status:              models.RECEIPT_STATUS_PENDING,
-		PfrNumber:           &parsedReceipt.Number,
-		Counter:             &parsedReceipt.Counter,
+		PfrNumber:           parsedReceipt.Number,
+		Counter:             parsedReceipt.Counter,
 		TotalPurchaseAmount: parsedReceipt.TotalPurchaseAmount.GetParas(),
 		TotalTaxAmount:      parsedReceipt.TotalTaxAmount.GetParas(),
 		Date:                parsedReceipt.Date,
-		QrCode:              &parsedReceipt.QrCod,
+		QrCode:              parsedReceipt.QrCod,
 		Meta:                datatypes.JSON(metaData),
-		Store:               *store,
+		Store:               store,
 		ReceiptItems:        receiptItems,
 	}
 
 	// Write receipt to database
-	result := database.Instance.Create(receipt)
-	if result.Error != nil {
-		return result.Error
+	dbResult := database.Instance.Create(receipt)
+	if dbResult.Error != nil {
+		return dbResult.Error
 	}
 
 	// Send message to `receipt_items` SQS queue to categorize receipt items

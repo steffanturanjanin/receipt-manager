@@ -144,6 +144,20 @@ Resources:
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
 
+  ReceiptsParse:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ReceiptsParse
+      CodeUri: ./cmd/receipts/parse
+      Handler: main
+      Events:
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /receipts/parse
+            Method: POST
+
   ReceiptsCreateFromUrl:
     Type: AWS::Serverless::Function
     Properties:
@@ -151,7 +165,7 @@ Resources:
       CodeUri: ./cmd/receipts/create-from-url
       Handler: main
       Events:
-        CatchAll:
+        Post:
           Type: Api
           Properties:
             RestApiId: !Ref ReceiptManagerApi
