@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -55,7 +54,6 @@ func init() {
 
 var handler = func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(middlewares.CURRENT_USER).(dto.User)
-	log.Printf("User: %+v\n", user)
 
 	receiptUrlRequest := &ReceiptUrlRequest{}
 	if err := controllers.ParseBody(receiptUrlRequest, r); err != nil {
