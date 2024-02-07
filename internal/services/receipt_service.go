@@ -11,6 +11,7 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
 	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	"gorm.io/datatypes"
 )
 
 type ReceiptService struct {
@@ -73,11 +74,11 @@ func (s *ReceiptService) CreatePendingReceipt2(receiptDto receipt_fetcher.Receip
 	return &dto.Receipt{
 		ID:                  receipt.ID,
 		Status:              receipt.Status,
-		Counter:             receipt.Counter,
-		TotalPurchaseAmount: float64(receipt.TotalPurchaseAmount),
-		TotalTaxAmount:      float64(receipt.TotalTaxAmount),
-		Date:                receipt.Date,
-		QrCode:              receipt.QrCode,
+		Counter:             *receipt.Counter,
+		TotalPurchaseAmount: float64(*receipt.TotalPurchaseAmount),
+		TotalTaxAmount:      float64(*receipt.TotalTaxAmount),
+		Date:                *receipt.Date,
+		QrCode:              *receipt.QrCode,
 		//Taxes:               taxes,
 		CreatedAt: receipt.CreatedAt,
 	}, nil
@@ -136,18 +137,21 @@ func (s *ReceiptService) UpdateProcessedReceipt(r dto.ReceiptParams) error {
 	// 	})
 	// }
 
-	metaData, _ := json.Marshal(r.Meta)
+	meta, _ := json.Marshal(r.Meta)
+	var metaJson datatypes.JSON
+	json.Unmarshal(meta, &metaJson)
+
 	receipt := &models.Receipt{
 		ID:                  *r.Id,
 		Status:              models.RECEIPT_STATUS_PROCESSED,
-		PfrNumber:           *r.PfrNumber,
-		Counter:             *r.Counter,
-		TotalPurchaseAmount: *r.TotalPurchaseAmount,
-		TotalTaxAmount:      *r.TotalTaxAmount,
-		Date:                *r.Date,
-		QrCode:              *r.QrCode,
-		Meta:                metaData,
-		Store: models.Store{
+		PfrNumber:           r.PfrNumber,
+		Counter:             r.Counter,
+		TotalPurchaseAmount: r.TotalPurchaseAmount,
+		TotalTaxAmount:      r.TotalTaxAmount,
+		Date:                r.Date,
+		QrCode:              r.QrCode,
+		Meta:                &metaJson,
+		Store: &models.Store{
 			Tin:          r.Store.Tin,
 			Name:         r.Store.Name,
 			LocationName: r.Store.LocationName,
@@ -208,16 +212,17 @@ func (s *ReceiptService) GetById(id int) (*dto.Receipt, error) {
 	// }
 
 	var meta map[string]string
-	json.Unmarshal(receipt.Meta, &meta)
+	json.Unmarshal(*receipt.Meta, &meta)
+
 	receiptDto := dto.Receipt{
 		ID:                  receipt.ID,
 		Status:              receipt.Status,
-		PfrNumber:           receipt.PfrNumber,
-		Counter:             receipt.Counter,
-		TotalPurchaseAmount: math.Round(float64(receipt.TotalPurchaseAmount)) / 100,
-		TotalTaxAmount:      math.Round(float64(receipt.TotalTaxAmount)) / 100,
-		Date:                receipt.Date,
-		QrCode:              receipt.QrCode,
+		PfrNumber:           *receipt.PfrNumber,
+		Counter:             *receipt.Counter,
+		TotalPurchaseAmount: math.Round(float64(*receipt.TotalPurchaseAmount)) / 100,
+		TotalTaxAmount:      math.Round(float64(*receipt.TotalTaxAmount)) / 100,
+		Date:                *receipt.Date,
+		QrCode:              *receipt.QrCode,
 		Meta:                meta,
 		ReceiptItems:        receiptItems,
 		//Taxes:               taxes,

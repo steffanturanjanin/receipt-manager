@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -20,135 +19,136 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
-	appErrors "github.com/steffanturanjanin/receipt-manager/internal/errors"
 	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
-	receiptFetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	"github.com/steffanturanjanin/receipt-manager/internal/transport"
+	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
 type ReceiptUrlRequest struct {
-	Url string `validate:"url" json:"url"`
+	Url string `validate:"required,url,url_host=suf.purs.gov.rs,url_query_params=vl" json:"url"`
 }
 
-const (
-	RECEIPT_URLS_QUEUE   = "receipt_urls"
-	RECEIPT_PARSED_QUEUE = "receipt_parsed"
-)
+const RECEIPT_URLS_QUEUE = "receipt_urls"
 
 var (
-	session       *awsSession.Session
-	client        *sqs.SQS
+	// AWS SQS
+	session          *awsSession.Session
+	client           *sqs.SQS
+	receiptUrlSqsUrl *string
+
+	// Router
 	gorillaLambda *gorillamux.GorillaMuxAdapter
 
-	receiptUrlQueueUrl    *string
-	receiptParsedQueueUrl *string
+	// Validator
+	validator *validation.Validator
+
+	// Errors
+	ErrReceiptAlreadyScanned = transport.NewBadRequestResponse(errors.New("receipt already scanned"))
+	ErrCannotCreateReceipt   = transport.NewBadRequestResponse(errors.New("receipt cannot be created"))
 )
 
 func init() {
+	// Initialize database
 	err := database.InitializeDB()
 	if err != nil {
 		os.Exit(1)
 	}
 
+	// Initialize router
 	router := mux.NewRouter()
 	router.HandleFunc("/receipts/url", middlewares.SetAuthMiddleware(handler)).Methods("POST")
 	gorillaLambda = gorillamux.New(router)
 
+	// Initialize AWS session and SQS client
 	sessionOptions := awsSession.Options{SharedConfigState: awsSession.SharedConfigDisable}
 	session = awsSession.Must(awsSession.NewSessionWithOptions(sessionOptions))
 	client = sqs.New(session)
 
+	// Initialize SQS urls
 	if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
 		QueueName: aws.String(RECEIPT_URLS_QUEUE),
 	}); err != nil {
 		panic(1)
 	} else {
-		receiptUrlQueueUrl = urlResult.QueueUrl
+		receiptUrlSqsUrl = urlResult.QueueUrl
 	}
 
-	if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String(RECEIPT_PARSED_QUEUE),
-	}); err != nil {
-		panic(1)
-	} else {
-		receiptParsedQueueUrl = urlResult.QueueUrl
-	}
+	// Initialize validator
+	validator = validation.NewDefaultValidator()
 }
 
+/*
+1) Check if user is logged-in
+2) Validate submitted URL:
+- check if URL is present
+- check if URL starts with "https://suf.purs.gov.rs"
+- check if URL has ?vl= query string
+
+3) Extract ?vl= query string parameter from URL
+4) Check if database has an entry with this user_id and vl query string
+- if there is an entry, return validation error: Receipt is already submitted.
+
+5) Add new entry to the receipts table:
+- user_id
+- vl query string parameter
+- status: pending
+
+6) Write URL to SQS queue for further processing
+7) Return 201 Created HTTP response code
+*/
 var handler = func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(middlewares.CURRENT_USER).(dto.User)
 
+	// Parse request body to struct
 	receiptUrlRequest := &ReceiptUrlRequest{}
 	if err := controllers.ParseBody(receiptUrlRequest, r); err != nil {
-		controllers.JsonErrorResponse(w, appErrors.NewHttpError(err))
-		return
-	}
-
-	receipt, err := receiptFetcher.Get(receiptUrlRequest.Url)
-	if err != nil {
-		// If url is invalid
-		if errors.Is(err, receiptFetcher.ErrInvalidReceiptUrl) {
-			clientError := appErrors.NewErrBadRequest(err, "invalid receipt url")
-			controllers.JsonErrorResponse(w, appErrors.NewHttpError(clientError))
-			return
-		}
-
-		// If receipt data is not available at the moment
-		// push message to `receipt_url` queue where it will periodically be checked
-		// and eventually processed or rejected
-		if errors.Is(err, receiptFetcher.ErrReceiptDataNotAvailable) {
-			sqsMessageInput := &sqs.SendMessageInput{
-				DelaySeconds: aws.Int64(0),
-				MessageAttributes: map[string]*sqs.MessageAttributeValue{
-					"UserId": {
-						DataType:    aws.String("Number"),
-						StringValue: aws.String(fmt.Sprint(user.Id)),
-					},
-				},
-				MessageBody: aws.String(receiptUrlRequest.Url),
-				QueueUrl:    receiptUrlQueueUrl,
-			}
-
-			_, err := client.SendMessage(sqsMessageInput)
-			if err != nil {
-				controllers.JsonErrorResponse(w, appErrors.NewHttpError(err))
-				return
-			}
-		}
-	}
-
-	// Check if user has scanned this receipt before
-	var dbReceipt *models.Receipt
-	database.Instance.Where(&models.Receipt{UserID: user.Id, PfrNumber: receipt.Number}).First(&dbReceipt)
-	if dbReceipt != nil {
-		controllers.JsonInfoResponse(w, "Receipt has already been scanned", http.StatusUnprocessableEntity)
-		return
-	}
-
-	receiptJsonSerialized, err := json.Marshal(receipt)
-	if err != nil {
 		panic(1)
 	}
 
-	sqsMessageInput := &sqs.SendMessageInput{
-		DelaySeconds: aws.Int64(0),
-		MessageAttributes: map[string]*sqs.MessageAttributeValue{
-			"UserId": {
-				DataType:    aws.String("Number"),
-				StringValue: aws.String(fmt.Sprint(user.Id)),
-			},
-		},
-		MessageBody: aws.String(string(receiptJsonSerialized)),
-		QueueUrl:    receiptParsedQueueUrl,
-	}
-
-	_, err = client.SendMessage(sqsMessageInput)
-	if err != nil {
-		controllers.JsonErrorResponse(w, err)
+	// Validate request
+	// If failed return 422 Unprocessed Entity with error map
+	if err := validator.GetValidationErrors(receiptUrlRequest); err != nil {
+		controllers.JsonResponse(w, transport.NewValidationError(err), http.StatusUnprocessableEntity)
 		return
 	}
 
-	controllers.JsonInfoResponse(w, "Receipt is set to be processed.", http.StatusOK)
+	// Extract vl parameter
+	url, _ := url.Parse(receiptUrlRequest.Url)
+	queryParams := url.Query()
+	vl := queryParams.Get("vl")
+
+	// Check if receipt with vl param exists in database and if related with authenticated user
+	var dbReceipt *models.Receipt
+	if dbErr := database.Instance.Where(&models.Receipt{UserID: &user.Id, Vl: vl}).First(&dbReceipt).Error; dbErr == nil {
+		// User has already scanned this receipt
+		// Return appropriate error response
+		controllers.JsonResponse(w, ErrReceiptAlreadyScanned, http.StatusBadRequest)
+		return
+	}
+
+	// Create receipt with status `pending`
+	dbReceipt = &models.Receipt{UserID: &user.Id, Vl: vl, Status: models.RECEIPT_STATUS_PENDING}
+	dbResult := database.Instance.Create(dbReceipt)
+	if dbResult.Error != nil {
+		// Error while creating receipt
+		controllers.JsonResponse(w, ErrCannotCreateReceipt, http.StatusBadRequest)
+		return
+	}
+
+	// Push message receipt urp to SQS
+	sqsMessageInput := &sqs.SendMessageInput{
+		DelaySeconds: aws.Int64(0),
+		MessageBody:  aws.String(receiptUrlRequest.Url),
+		QueueUrl:     receiptUrlSqsUrl,
+	}
+
+	if _, err := client.SendMessage(sqsMessageInput); err != nil {
+		panic(1)
+	}
+
+	// Receipt created successfully
+	controllers.JsonInfoResponse(w, "Receipt created and set to be processed", http.StatusCreated)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

@@ -68,6 +68,10 @@ Parameters:
     Type: String
     Description: Refresh Token Expires In
     Default: 360h
+  OPEN_AI_API_KEY:
+    Type: String
+    Description: Open AI API Key
+    Default:
 
 Resources:
   #ApiGateway
@@ -93,6 +97,7 @@ Resources:
       QueueName: receipt_items
 
   #Lambdas
+  #Auth
   AuthRegister:
     Type: AWS::Serverless::Function
     Properties:
@@ -100,7 +105,7 @@ Resources:
       CodeUri: ./cmd/auth/register
       Handler: main
       Events:
-        CatchAll:
+        Post:
           Type: Api
           Properties:
             RestApiId: !Ref ReceiptManagerApi
@@ -113,7 +118,6 @@ Resources:
           DB_NAME: !Ref DB_NAME
           DB_USER: !Ref DB_USER
           DB_PASSWORD: !Ref DB_PASSWORD
-
   AuthLogin:
     Type: AWS::Serverless::Function
     Properties:
@@ -121,7 +125,7 @@ Resources:
       CodeUri: ./cmd/auth/login
       Handler: main
       Events:
-        CatchAll:
+        Post:
           Type: Api
           Properties:
             RestApiId: !Ref ReceiptManagerApi
@@ -143,6 +147,42 @@ Resources:
           REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+  AuthLogout:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AuthLogout
+      CodeUri: ./cmd/auth/logout
+      Handler: main
+      Events:
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /auth/logout
+            Method: POST
+
+  #Receipts
+  ReceiptItemsCategorize:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ReceiptsItemsCategorize
+      CodeUri: ./cmd/receipts/categorize
+      Handler: main
+      Events:
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /receipts/categorize
+            Method: POST
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
+          OPEN_AI_API_KEY: !Ref OPEN_AI_API_KEY
 
   ReceiptsParse:
     Type: AWS::Serverless::Function
@@ -157,7 +197,6 @@ Resources:
             RestApiId: !Ref ReceiptManagerApi
             Path: /receipts/parse
             Method: POST
-
   ReceiptsCreateFromUrl:
     Type: AWS::Serverless::Function
     Properties:
@@ -187,7 +226,6 @@ Resources:
           REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
-
   ReceiptsProcessUrls:
     Type: AWS::Serverless::Function
     Properties:
@@ -200,7 +238,6 @@ Resources:
           Properties:
             Queue: !GetAtt ReceiptUrlQueue.Arn
             BatchSize: 10
-  
   ReceiptsProcessParsed:
     Type: AWS::Serverless::Function
     Properties:

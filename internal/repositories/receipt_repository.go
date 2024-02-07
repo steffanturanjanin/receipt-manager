@@ -72,18 +72,21 @@ func (repository *ReceiptRepository) Create(receiptData dto.ReceiptData) (*model
 	// 	taxes = append(taxes, taxModel)
 	// }
 
+	totalPurchaseAmount := receiptData.TotalPurchaseAmount.GetParas()
+	totalTaxAmount := receiptData.TotalTaxAmount.GetParas()
 	metaJson, _ := json.Marshal(receiptData.MetaData)
+	meta := datatypes.JSON(metaJson)
 
 	receipt := models.Receipt{
-		PfrNumber:           receiptData.Number,
-		Counter:             receiptData.Counter,
-		TotalPurchaseAmount: receiptData.TotalPurchaseAmount.GetParas(),
-		TotalTaxAmount:      receiptData.TotalTaxAmount.GetParas(),
-		Date:                receiptData.Date,
-		QrCode:              receiptData.QrCod,
+		PfrNumber:           &receiptData.Number,
+		Counter:             &receiptData.Counter,
+		TotalPurchaseAmount: &totalPurchaseAmount,
+		TotalTaxAmount:      &totalTaxAmount,
+		Date:                &receiptData.Date,
+		QrCode:              &receiptData.QrCod,
+		Meta:                &meta,
 		ReceiptItems:        receiptItems,
 		//Taxes:               taxes,
-		Meta: datatypes.JSON(metaJson),
 	}
 
 	if result := repository.db.Create(&receipt).Preload("Store"); result.Error != nil {
@@ -109,7 +112,7 @@ func (receiptRepository *ReceiptRepository) CreatePendingFromDto(
 	storeId string,
 ) (*models.Receipt, error) {
 	var receipt *models.Receipt
-	receiptRepository.db.Where(&models.Receipt{PfrNumber: receiptDto.Number, UserID: userId}).First(receipt)
+	receiptRepository.db.Where(&models.Receipt{PfrNumber: &receiptDto.Number, UserID: &userId}).First(receipt)
 
 	if receipt != nil {
 		return nil, errors.NewErrResourceNotFound(native_errors.New("receipt already exists"), "receipt already exists")
@@ -124,17 +127,23 @@ func (receiptRepository *ReceiptRepository) CreatePendingFromDto(
 	// 	taxes = append(taxes, taxModel)
 	// }
 
-	receiptModelMeta, _ := json.Marshal(map[string]string(receiptDto.MetaData))
+	totalPurchaseAmount := receiptDto.TotalPurchaseAmount.GetParas()
+	totalTaxAmount := receiptDto.TotalTaxAmount.GetParas()
+
+	meta, _ := json.Marshal(map[string]string(receiptDto.MetaData))
+	var jsonMeta datatypes.JSON
+	json.Unmarshal(meta, &jsonMeta)
+
 	receipt = &models.Receipt{
-		StoreID:             storeId,
+		StoreID:             &storeId,
 		Status:              models.RECEIPT_STATUS_PENDING,
-		PfrNumber:           receiptDto.Number,
-		Counter:             receiptDto.Counter,
-		TotalPurchaseAmount: receiptDto.TotalPurchaseAmount.GetParas(),
-		TotalTaxAmount:      receiptDto.TotalTaxAmount.GetParas(),
-		Date:                receiptDto.Date,
-		QrCode:              receiptDto.QrCod,
-		Meta:                receiptModelMeta,
+		PfrNumber:           &receiptDto.Number,
+		Counter:             &receiptDto.Counter,
+		TotalPurchaseAmount: &totalPurchaseAmount,
+		TotalTaxAmount:      &totalTaxAmount,
+		Date:                &receiptDto.Date,
+		QrCode:              &receiptDto.QrCod,
+		Meta:                &jsonMeta,
 		//Taxes:               taxes,
 	}
 
@@ -186,7 +195,7 @@ func (r *ReceiptRepository) Update(receipt *models.Receipt) error {
 
 func (r *ReceiptRepository) GetByPfr(pfr string) (*models.Receipt, error) {
 	var receipt *models.Receipt
-	if err := r.db.Where(&models.Receipt{PfrNumber: pfr}).First(&receipt).Error; err != nil {
+	if err := r.db.Where(&models.Receipt{PfrNumber: &pfr}).First(&receipt).Error; err != nil {
 		return nil, err
 	}
 

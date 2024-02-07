@@ -16,23 +16,23 @@ const (
 )
 
 type Receipt struct {
-	ID                  uint           `gorm:"primaryKey; autoIncrement" json:"id"`
-	UserID              uint           `gorm:"not null" json:"userId"`
-	StoreID             string         `gorm:"nullable" json:"storeId"`
-	Status              string         `gorm:"not null" json:"status"`
-	PfrNumber           string         `gorm:"unique" json:"pfrNumber"`
-	Counter             string         `gorm:"unique" json:"counter"`
-	TotalPurchaseAmount int            `gorm:"not null; default:0" json:"totalPurchaseAmount"`
-	TotalTaxAmount      int            `gorm:"not null; default:0" json:"totalTaxAmount"`
-	Date                time.Time      `gorm:"not null" json:"date"`
-	QrCode              string         `gorm:"type:text" json:"qrCode"`
-	Meta                datatypes.JSON `gorm:"nullable" json:"metaData"`
-	CreatedAt           time.Time      `gorm:"not null; autoCreateTime" json:"createdAt"`
-	UpdatedAt           time.Time      `gorm:"not null; autoCreateTime" json:"updatedAt"`
-	User                User           `gorm:"foreignKey:UserID; references:ID" json:"user"`
-	Store               Store          `gorm:"foreignKey:StoreID; references:ID" json:"store"`
-	ReceiptItems        []ReceiptItem  `gorm:"foreignKey:ReceiptID; references:ID; constraint:OnDelete:CASCADE" json:"receiptItems"`
-	//Taxes               []Tax          `gorm:"foreignKey:ReceiptID;references:ID;constraint:OnDelete:CASCADE" json:"taxes"`
+	ID                  uint            `gorm:"primaryKey; autoIncrement" json:"id"`
+	Vl                  string          `gorm:"type:text; not null" json:"vl"`
+	UserID              *uint           `gorm:"nullable" json:"userId"`
+	StoreID             *string         `gorm:"nullable" json:"storeId"`
+	Status              string          `gorm:"not null" json:"status"`
+	PfrNumber           *string         `gorm:"unique; nullable" json:"pfrNumber"`
+	Counter             *string         `gorm:"unique; nullable" json:"counter"`
+	TotalPurchaseAmount *int            `gorm:"nullable; default:0" json:"totalPurchaseAmount"`
+	TotalTaxAmount      *int            `gorm:"nullable; default:0" json:"totalTaxAmount"`
+	Date                *time.Time      `gorm:"nullable" json:"date"`
+	QrCode              *string         `gorm:"type:text; nullable" json:"qrCode"`
+	Meta                *datatypes.JSON `gorm:"nullable" json:"metaData"`
+	CreatedAt           time.Time       `gorm:"not null; autoCreateTime" json:"createdAt"`
+	UpdatedAt           time.Time       `gorm:"not null; autoCreateTime" json:"updatedAt"`
+	User                *User           `gorm:"foreignKey:UserID; references:ID; nullable" json:"user"`
+	Store               *Store          `gorm:"foreignKey:StoreID; references:ID; nullable" json:"store"`
+	ReceiptItems        []ReceiptItem   `gorm:"foreignKey:ReceiptID; references:ID; constraint:OnDelete:CASCADE; nullable" json:"receiptItems"`
 }
 
 func (r Receipt) NewReceiptDTO() (*dto.Receipt, error) {
@@ -50,22 +50,22 @@ func (r Receipt) NewReceiptDTO() (*dto.Receipt, error) {
 	// }
 
 	meta := make(map[string]string)
-	if err := json.Unmarshal(r.Meta, &meta); err != nil {
+	if err := json.Unmarshal(*r.Meta, &meta); err != nil {
 		return nil, err
 	}
 
 	receiptDTO := dto.Receipt{
 		ID:                  r.ID,
 		Store:               r.Store.NewStoreDTO(),
-		PfrNumber:           r.PfrNumber,
-		Counter:             r.Counter,
-		TotalPurchaseAmount: math.Round(float64(r.TotalPurchaseAmount)) / 100,
-		TotalTaxAmount:      math.Round(float64(r.TotalTaxAmount)) / 100,
+		PfrNumber:           *r.PfrNumber,
+		Counter:             *r.Counter,
+		TotalPurchaseAmount: math.Round(float64(*r.TotalPurchaseAmount)) / 100,
+		TotalTaxAmount:      math.Round(float64(*r.TotalTaxAmount)) / 100,
 		ReceiptItems:        receiptItems,
-		Date:                r.Date,
-		QrCode:              r.QrCode,
+		Date:                *r.Date,
+		QrCode:              *r.QrCode,
 		Meta:                meta,
-		CreatedAt:           r.Date,
+		CreatedAt:           *r.Date,
 	}
 
 	return &receiptDTO, nil

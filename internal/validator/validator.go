@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -47,13 +46,27 @@ func (v *Validator) ValidateEvent(event interface{}) error {
 		validationErrors[fieldName] = err.Translate(v.GetTranslator())
 	}
 
-	fmt.Printf("%+v\n", validationErrors)
-
 	return &errors.HttpError{
 		ErrBase: errors.ErrBase{Err: err, Message: "Request validation failed."},
 		Code:    http.StatusBadRequest,
 		Errors:  validationErrors,
 	}
+}
+
+func (v *Validator) GetValidationErrors(s interface{}) map[string]string {
+	err := v.Validate(s)
+	if err == nil {
+		return nil
+	}
+
+	validationErrors := make(map[string]string)
+
+	for _, err := range err.(validator.ValidationErrors) {
+		fieldName := err.Field()
+		validationErrors[fieldName] = err.Translate(v.GetTranslator())
+	}
+
+	return validationErrors
 }
 
 func (v *Validator) GetTranslator() ut.Translator {
@@ -80,7 +93,9 @@ func (v *Validator) ConfigureValidator() {
 }
 
 func (v *Validator) RegisterCustomTagValidations() {
-	v.validator.RegisterValidation("receiptUrl", receiptUrlValidation)
+	v.validator.RegisterValidation("receipt_url", receiptUrlValidation)
+	v.validator.RegisterValidation("url_query_params", urlQueryParamsValidation)
+	v.validator.RegisterValidation("url_host", urlHostValidation)
 }
 
 func (v *Validator) RegisterTranslations() {
@@ -90,7 +105,7 @@ func (v *Validator) RegisterTranslations() {
 	// v.RegisterTranslation("min", "{0} should have at least {1} character(s).")
 
 	_ = v.validator.RegisterTranslation("required", v.translator, func(ut ut.Translator) error {
-		return ut.Add("required", "{0} is a required field", true)
+		return ut.Add("required", "{0} is a required field.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("required", fe.Field())
 		return t
@@ -117,10 +132,24 @@ func (v *Validator) RegisterTranslations() {
 		return t
 	})
 
-	_ = v.validator.RegisterTranslation("receiptUrl", v.translator, func(ut ut.Translator) error {
-		return ut.Add("receiptUrl", "{0} is not valid.", true)
+	_ = v.validator.RegisterTranslation("receipt_url", v.translator, func(ut ut.Translator) error {
+		return ut.Add("receipt_url", "{0} is not valid.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("receiptUrl", fe.Field())
+		t, _ := ut.T("receipt_url", fe.Field())
+		return t
+	})
+
+	_ = v.validator.RegisterTranslation("url_query_params", v.translator, func(ut ut.Translator) error {
+		return ut.Add("url_query_params", "Missing url query params: {0}.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("url_query_params", fe.Param())
+		return t
+	})
+
+	_ = v.validator.RegisterTranslation("url_host", v.translator, func(ut ut.Translator) error {
+		return ut.Add("url_host", "Invalid url host. Valid host is: {0}.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("url_host", fe.Param())
 		return t
 	})
 }
@@ -162,9 +191,11 @@ func lowerCaseTagNameFunction(field reflect.StructField) string {
 	return name
 }
 
+// Custom validation functions
+
 // Custom tag validation functions
 func receiptUrlValidation(fl validator.FieldLevel) bool {
-	const FISACLIZATION_SYSTEM_HOST = "suf.purs.gov.rs"
+	const FISCALIZATION_SYSTEM_HOST = "suf.purs.gov.rs"
 	url, err := url.Parse(fl.Field().String())
 	if err != nil {
 		return false
@@ -172,5 +203,47 @@ func receiptUrlValidation(fl validator.FieldLevel) bool {
 
 	hostname := strings.TrimPrefix(url.Hostname(), "www.")
 
-	return hostname == FISACLIZATION_SYSTEM_HOST
+	return hostname == FISCALIZATION_SYSTEM_HOST
+}
+
+func urlQueryParamsValidation(fl validator.FieldLevel) bool {
+	// Get the URL string from the field
+	rawUrl := fl.Field().String()
+
+	// Parse the URL
+	parsedUrl, err := url.Parse(rawUrl)
+	if err != nil {
+		return false
+	}
+
+	// Get the query parameters from the parsed URL
+	queryParams := parsedUrl.Query()
+	// Get the required query parameters from the validation tag
+	requiredQueryParams := strings.Split(fl.Param(), ",")
+
+	for _, param := range requiredQueryParams {
+		if _, exists := queryParams[param]; !exists {
+			return false
+		}
+	}
+
+	return true
+}
+
+func urlHostValidation(fl validator.FieldLevel) bool {
+	// Get the URL string from the field
+	rawUrl := fl.Field().String()
+
+	// Parse the URL
+	parsedUrl, err := url.Parse(rawUrl)
+	if err != nil {
+		return false
+	}
+
+	// Check for host
+	expectedHostname := fl.Param()
+	// Actual hostname with trimmed www part
+	actualHostname := strings.TrimPrefix(parsedUrl.Hostname(), "www")
+
+	return expectedHostname == actualHostname
 }

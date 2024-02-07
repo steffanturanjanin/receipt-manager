@@ -47,22 +47,23 @@ type (
 )
 
 func (s CategorizeService) Categorize(rilin ReceiptItemInList, clin CategoryInList) (CategorizedReceiptItemsMap, error) {
-	formatedPrompt := fmt.Sprintf(CATEGORIZE_PROMPT_SERBIAN, rilin.toString(), clin.toString())
+	formattedPrompt := fmt.Sprintf(CATEGORIZE_PROMPT_SERBIAN, rilin.toString(), clin.toString())
 
 	ctx := context.Background()
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := openai.NewClient(os.Getenv("OPEN_AI_API_KEY"))
 	response, err := client.CreateCompletion(ctx, openai.CompletionRequest{
 		Model:       openai.GPT3TextDavinci003,
 		MaxTokens:   2000,
 		Temperature: 0.2,
-		Prompt:      formatedPrompt,
+		Prompt:      formattedPrompt,
 	})
 
 	if err != nil {
-		return nil, ErrUnprocessableCategorization
+		return nil, err
 	}
 
 	categorizationMap := response.Choices[0].Text
+
 	cat := processCategorizationMap(categorizationMap, clin)
 
 	return cat, nil

@@ -12,22 +12,22 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
+	awsSession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	receiptFetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
 )
 
 const (
-	RECEIPT_PARSED_QUEUE = "receipt_parsed"
-	RECEIPT_ITEMS_QUEUE  = "receipt_items"
+	RECEIPT_ITEMS_QUEUE = "receipt_items"
 )
 
 var (
-	SessionOptions *session.Options
-	Session        *session.Session
-	SqsService     *sqs.SQS
+	session *awsSession.Session
+	client  *sqs.SQS
+
+	receiptItemsQueueUrl *string
 )
 
 func init() {
@@ -36,9 +36,17 @@ func init() {
 		panic(1)
 	}
 
-	SessionOptions := session.Options{SharedConfigState: session.SharedConfigDisable}
-	Session = session.Must(session.NewSessionWithOptions(SessionOptions))
-	SqsService = sqs.New(Session)
+	sessionOptions := awsSession.Options{SharedConfigState: awsSession.SharedConfigDisable}
+	session = awsSession.Must(awsSession.NewSessionWithOptions(sessionOptions))
+	client = sqs.New(session)
+
+	if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
+		QueueName: aws.String(RECEIPT_ITEMS_QUEUE),
+	}); err != nil {
+		panic(1)
+	} else {
+		receiptItemsQueueUrl = urlResult.QueueUrl
+	}
 }
 
 func processMessage(ctx context.Context, message events.SQSMessage) error {
@@ -47,7 +55,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		return err
 	}
 
-	receipt := &receipt_fetcher.Receipt{}
+	receipt := &receiptFetcher.Receipt{}
 	err = json.Unmarshal([]byte(message.Body), receipt)
 	if err != nil {
 		return err
@@ -55,11 +63,14 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 
 	// Check if user has scanned this receipt before
 	var dbReceipt *models.Receipt
-	database.Instance.Where(&models.Receipt{UserID: uint(userId), PfrNumber: receipt.Number}).First(&dbReceipt)
+	userID := uint(userId)
+
+	database.Instance.Where(&models.Receipt{UserID: &userID, PfrNumber: &receipt.Number}).First(&dbReceipt)
 	if dbReceipt != nil {
 		return errors.New("user has already scanned this receipt")
 	}
 
+	// TODO: combination oo Tin and LocationId should be unique
 	dbStore := models.Store{
 		Tin:          receipt.Store.Tin,
 		Name:         receipt.Store.Name,
@@ -85,18 +96,24 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		})
 	}
 
+	totalPurchaseAmount := receipt.TotalPurchaseAmount.GetParas()
+	totalTaxAmount := receipt.TotalTaxAmount.GetParas()
+
 	metaData, _ := json.Marshal(receipt.MetaData)
+	var metaJson datatypes.JSON
+	json.Unmarshal(metaData, &metaJson)
+
 	dbReceipt = &models.Receipt{
-		UserID:              uint(userId),
+		UserID:              &userID,
 		Status:              models.RECEIPT_STATUS_PENDING,
-		PfrNumber:           receipt.Number,
-		Counter:             receipt.Counter,
-		TotalPurchaseAmount: receipt.TotalPurchaseAmount.GetParas(),
-		TotalTaxAmount:      receipt.TotalTaxAmount.GetParas(),
-		Date:                receipt.Date,
-		QrCode:              receipt.QrCod,
-		Meta:                datatypes.JSON(metaData),
-		Store:               dbStore,
+		PfrNumber:           &receipt.Number,
+		Counter:             &receipt.Counter,
+		TotalPurchaseAmount: &totalPurchaseAmount,
+		TotalTaxAmount:      &totalTaxAmount,
+		Date:                &receipt.Date,
+		QrCode:              &receipt.QrCod,
+		Meta:                &metaJson,
+		Store:               &dbStore,
 		ReceiptItems:        dbReceiptItems,
 	}
 
@@ -106,20 +123,13 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		return dbResult.Error
 	}
 
-	// Send message to `receipt_items` SQS queue to categorize receipt items
-	urlResult, err := SqsService.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String(RECEIPT_ITEMS_QUEUE),
-	})
-	if err != nil {
-		return err
-	}
-
 	// Serialize receipt items to json string
 	serializedReceiptItems, err := json.Marshal(dbReceipt.ReceiptItems)
 	if err != nil {
 		return err
 	}
 
+	// Send message to `receipt_items` SQS queue to categorize receipt items
 	sqsMessageInput := &sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(0),
 		MessageAttributes: map[string]*sqs.MessageAttributeValue{
@@ -129,10 +139,10 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 			},
 		},
 		MessageBody: aws.String(string(serializedReceiptItems)),
-		QueueUrl:    urlResult.QueueUrl,
+		QueueUrl:    receiptItemsQueueUrl,
 	}
 
-	_, err = SqsService.SendMessage(sqsMessageInput)
+	_, err = client.SendMessage(sqsMessageInput)
 	if err != nil {
 		return err
 	}
