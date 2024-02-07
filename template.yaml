@@ -118,6 +118,7 @@ Resources:
           DB_NAME: !Ref DB_NAME
           DB_USER: !Ref DB_USER
           DB_PASSWORD: !Ref DB_PASSWORD
+
   AuthLogin:
     Type: AWS::Serverless::Function
     Properties:
@@ -147,6 +148,7 @@ Resources:
           REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+
   AuthLogout:
     Type: AWS::Serverless::Function
     Properties:
@@ -197,6 +199,7 @@ Resources:
             RestApiId: !Ref ReceiptManagerApi
             Path: /receipts/parse
             Method: POST
+
   ReceiptsCreateFromUrl:
     Type: AWS::Serverless::Function
     Properties:
@@ -208,7 +211,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ReceiptManagerApi
-            Path: /receipts/url
+            Path: /receipts
             Method: POST
       Environment:
         Variables:
@@ -226,6 +229,37 @@ Resources:
           REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+  
+  ReceiptsDelete:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ReceiptsDelete
+      CodeUri: ./cmd/receipts/delete
+      Handler: main
+      Events:
+        Delete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /receipts/{id}
+            Method: DELETE
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
+          API_SECRET: !Ref API_SECRET
+          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
+          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
+          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
+          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
+          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
+          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
+          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
+          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+
   ReceiptsProcessUrls:
     Type: AWS::Serverless::Function
     Properties:
@@ -245,6 +279,7 @@ Resources:
           DB_NAME: !Ref DB_NAME
           DB_USER: !Ref DB_USER
           DB_PASSWORD: !Ref DB_PASSWORD
+
   ReceiptsProcessParsed:
     Type: AWS::Serverless::Function
     Properties:

@@ -13,6 +13,7 @@ type ErrorResponse struct {
 	Code  int    `json:"code"`
 }
 
+// Bad Request - 400
 func NewBadRequestResponse(err error) ErrorResponse {
 	return ErrorResponse{
 		Error: err.Error(),
@@ -20,6 +21,23 @@ func NewBadRequestResponse(err error) ErrorResponse {
 	}
 }
 
+// Forbidden - 403
+func NewForbiddenError() ErrorResponse {
+	return ErrorResponse{
+		Error: "Forbidden",
+		Code:  http.StatusForbidden,
+	}
+}
+
+// Not Found - 404
+func NewNotFoundError() ErrorResponse {
+	return ErrorResponse{
+		Error: "Not found",
+		Code:  http.StatusNotFound,
+	}
+}
+
+// Unprocessable entity - 422
 func NewValidationError(errors map[string]string) ValidationError {
 	return ValidationError{
 		Message: "Validation error.",
