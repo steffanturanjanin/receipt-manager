@@ -64,7 +64,7 @@ func (service *ReceiptService) CreatePendingReceipt() (*dto.Receipt, error) {
 
 func (s *ReceiptService) CreatePendingReceipt2(receiptDto receipt_fetcher.Receipt, userId uint) (*dto.Receipt, error) {
 	store, _ := s.storeService.FirstOrCreateFromDto(receiptDto.Store)
-	receipt, _ := s.receiptRepository.CreatePendingFromDto(receiptDto, userId, store.Tin)
+	receipt, _ := s.receiptRepository.CreatePendingFromDto(receiptDto, userId, store.ID)
 	// taxes := make([]dto.Tax, 0)
 	// for _, taxItem := range receipt.Taxes {
 	// 	tax := taxItem.NewTaxDTO()

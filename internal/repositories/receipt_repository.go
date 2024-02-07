@@ -22,7 +22,7 @@ type ReceiptRepositoryInterface interface {
 	GetById(int) (*models.Receipt, error)
 	Create(receiptDTO dto.ReceiptData) (*models.Receipt, error)
 	Create2(*models.Receipt) error
-	CreatePendingFromDto(receiptDto receipt_fetcher.Receipt, userId uint, storeId string) (*models.Receipt, error)
+	CreatePendingFromDto(receiptDto receipt_fetcher.Receipt, userId uint, storeId uint) (*models.Receipt, error)
 	Delete(id int) error
 	Update(receipt *models.Receipt) error
 }
@@ -109,7 +109,7 @@ func (receiptRepository *ReceiptRepository) Create2(r *models.Receipt) error {
 func (receiptRepository *ReceiptRepository) CreatePendingFromDto(
 	receiptDto receipt_fetcher.Receipt,
 	userId uint,
-	storeId string,
+	storeId uint,
 ) (*models.Receipt, error) {
 	var receipt *models.Receipt
 	receiptRepository.db.Where(&models.Receipt{PfrNumber: &receiptDto.Number, UserID: &userId}).First(receipt)

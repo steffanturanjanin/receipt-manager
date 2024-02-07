@@ -19,7 +19,7 @@ type Receipt struct {
 	ID                  uint            `gorm:"primaryKey; autoIncrement" json:"id"`
 	Vl                  string          `gorm:"type:text; not null" json:"vl"`
 	UserID              *uint           `gorm:"nullable" json:"userId"`
-	StoreID             *string         `gorm:"nullable" json:"storeId"`
+	StoreID             *uint           `gorm:"nullable" json:"storeId"`
 	Status              string          `gorm:"not null" json:"status"`
 	PfrNumber           *string         `gorm:"unique; nullable" json:"pfrNumber"`
 	Counter             *string         `gorm:"unique; nullable" json:"counter"`

@@ -70,7 +70,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		return errors.New("user has already scanned this receipt")
 	}
 
-	// TODO: combination oo Tin and LocationId should be unique
+	// TODO: combination of Tin and LocationId should be unique
 	dbStore := models.Store{
 		Tin:          receipt.Store.Tin,
 		Name:         receipt.Store.Name,

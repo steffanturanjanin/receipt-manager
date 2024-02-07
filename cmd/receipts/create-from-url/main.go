@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -10,7 +11,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
-	awsSession "github.com/aws/aws-sdk-go/aws/session"
+	aws_session "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
@@ -25,6 +26,26 @@ import (
 	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
+/**
+1) Check if user is logged-in
+2) Validate submitted URL:
+- check if URL is present
+- check if URL starts with "https://suf.purs.gov.rs"
+- check if URL has ?vl= query string
+
+3) Extract ?vl= query string parameter from URL
+4) Check if database has an entry with this user_id and vl query string
+- if there is an entry, return validation error: Receipt is already submitted.
+
+5) Add new entry to the receipts table:
+- user_id
+- vl query string parameter
+- status: pending
+
+6) Write URL to SQS queue for further processing
+7) Return 201 Created HTTP response code
+*/
+
 type ReceiptUrlRequest struct {
 	Url string `validate:"required,url,url_host=suf.purs.gov.rs,url_query_params=vl" json:"url"`
 }
@@ -33,7 +54,7 @@ const RECEIPT_URLS_QUEUE = "receipt_urls"
 
 var (
 	// AWS SQS
-	session          *awsSession.Session
+	session          *aws_session.Session
 	client           *sqs.SQS
 	receiptUrlSqsUrl *string
 
@@ -61,8 +82,8 @@ func init() {
 	gorillaLambda = gorillamux.New(router)
 
 	// Initialize AWS session and SQS client
-	sessionOptions := awsSession.Options{SharedConfigState: awsSession.SharedConfigDisable}
-	session = awsSession.Must(awsSession.NewSessionWithOptions(sessionOptions))
+	sessionOptions := aws_session.Options{SharedConfigState: aws_session.SharedConfigDisable}
+	session = aws_session.Must(aws_session.NewSessionWithOptions(sessionOptions))
 	client = sqs.New(session)
 
 	// Initialize SQS urls
@@ -78,25 +99,6 @@ func init() {
 	validator = validation.NewDefaultValidator()
 }
 
-/*
-1) Check if user is logged-in
-2) Validate submitted URL:
-- check if URL is present
-- check if URL starts with "https://suf.purs.gov.rs"
-- check if URL has ?vl= query string
-
-3) Extract ?vl= query string parameter from URL
-4) Check if database has an entry with this user_id and vl query string
-- if there is an entry, return validation error: Receipt is already submitted.
-
-5) Add new entry to the receipts table:
-- user_id
-- vl query string parameter
-- status: pending
-
-6) Write URL to SQS queue for further processing
-7) Return 201 Created HTTP response code
-*/
 var handler = func(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(middlewares.CURRENT_USER).(dto.User)
 
@@ -136,11 +138,18 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Push message receipt urp to SQS
+	// Push message Receipt url to SQS
+	// And add Receipt ID to message attributes
 	sqsMessageInput := &sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(0),
-		MessageBody:  aws.String(receiptUrlRequest.Url),
-		QueueUrl:     receiptUrlSqsUrl,
+		MessageAttributes: map[string]*sqs.MessageAttributeValue{
+			"ReceiptId": {
+				DataType:    aws.String("Number"),
+				StringValue: aws.String(fmt.Sprint((dbReceipt.ID))),
+			},
+		},
+		MessageBody: aws.String(receiptUrlRequest.Url),
+		QueueUrl:    receiptUrlSqsUrl,
 	}
 
 	if _, err := client.SendMessage(sqsMessageInput); err != nil {

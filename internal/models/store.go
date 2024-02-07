@@ -16,7 +16,7 @@ type Store struct {
 	City         string    `gorm:"not null; size:255" json:"city"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt    time.Time `gorm:"autoCreateTime" json:"updatedAt"`
-	Receipts     []Receipt `gorm:"foreignKey:StoreID; references:ID; constraint:OnDelete:SET NULL" json:"receipts"`
+	Receipts     []Receipt `gorm:"foreignKey:StoreID; references:ID" json:"receipts"`
 }
 
 func NewStoreFromStoreDTO(storeDTO dto.Store) Store {
