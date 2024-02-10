@@ -35,13 +35,16 @@ import (
 4) Write Receipt ID to SQS queue for item categorization
 */
 
-const RECEIPT_PARSED_QUEUE = "receipt_parsed"
+const RECEIPT_ITEMS_CATEGORIZE_QUEUE = "receipt_items_categorize"
 
 var (
+	//Environment
+	env = os.Getenv("ENVIRONMENT")
+
 	// AWS SQS
-	session             *aws_session.Session
-	client              *sqs.SQS
-	receiptParsedSqsUrl *string
+	session                      *aws_session.Session
+	client                       *sqs.SQS
+	receiptItemsCategorizeSqsUrl *string
 )
 
 func init() {
@@ -57,12 +60,17 @@ func init() {
 	client = sqs.New(session)
 
 	// Initialize SQS urls
-	if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String(RECEIPT_PARSED_QUEUE),
-	}); err != nil {
-		panic(1)
+	if env == "dev" {
+		localStackSqsUrl := "https://localhost.localstack.cloud:4566/000000000000/receipt_items_categorize"
+		receiptItemsCategorizeSqsUrl = &localStackSqsUrl
 	} else {
-		receiptParsedSqsUrl = urlResult.QueueUrl
+		if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
+			QueueName: aws.String(RECEIPT_ITEMS_CATEGORIZE_QUEUE),
+		}); err != nil {
+			panic(1)
+		} else {
+			receiptItemsCategorizeSqsUrl = urlResult.QueueUrl
+		}
 	}
 }
 
@@ -156,7 +164,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 	sqsMessageInput := &sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(0),
 		MessageBody:  aws.String(string(receiptID)),
-		QueueUrl:     receiptParsedSqsUrl,
+		QueueUrl:     receiptItemsCategorizeSqsUrl,
 	}
 
 	if _, err = client.SendMessage(sqsMessageInput); err != nil {

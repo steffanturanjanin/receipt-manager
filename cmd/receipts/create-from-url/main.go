@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -50,13 +51,16 @@ type ReceiptUrlRequest struct {
 	Url string `validate:"required,url,url_host=suf.purs.gov.rs,url_query_params=vl" json:"url"`
 }
 
-const RECEIPT_URLS_QUEUE = "receipt_urls"
+const PENDING_RECEIPTS_QUEUE = "pending_receipts"
 
 var (
+	// Execution
+	env = os.Getenv("ENVIRONMENT")
+
 	// AWS SQS
-	session          *aws_session.Session
-	client           *sqs.SQS
-	receiptUrlSqsUrl *string
+	session               *aws_session.Session
+	client                *sqs.SQS
+	pendingReceiptsSqsUrl *string
 
 	// Router
 	gorillaLambda *gorillamux.GorillaMuxAdapter
@@ -78,7 +82,7 @@ func init() {
 
 	// Initialize router
 	router := mux.NewRouter()
-	router.HandleFunc("/receipts/url", middlewares.SetAuthMiddleware(handler)).Methods("POST")
+	router.HandleFunc("/receipts", middlewares.SetAuthMiddleware(handler)).Methods("POST")
 	gorillaLambda = gorillamux.New(router)
 
 	// Initialize AWS session and SQS client
@@ -87,12 +91,17 @@ func init() {
 	client = sqs.New(session)
 
 	// Initialize SQS urls
-	if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String(RECEIPT_URLS_QUEUE),
-	}); err != nil {
-		panic(1)
+	if env == "dev" {
+		localStackSqsUrl := "https://localhost.localstack.cloud:4566/000000000000/pending_receipts"
+		pendingReceiptsSqsUrl = &localStackSqsUrl
 	} else {
-		receiptUrlSqsUrl = urlResult.QueueUrl
+		if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
+			QueueName: aws.String(PENDING_RECEIPTS_QUEUE),
+		}); err != nil {
+			panic(1)
+		} else {
+			pendingReceiptsSqsUrl = urlResult.QueueUrl
+		}
 	}
 
 	// Initialize validator
@@ -149,10 +158,11 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 		MessageBody: aws.String(receiptUrlRequest.Url),
-		QueueUrl:    receiptUrlSqsUrl,
+		QueueUrl:    pendingReceiptsSqsUrl,
 	}
 
 	if _, err := client.SendMessage(sqsMessageInput); err != nil {
+		log.Printf("Could not send sqs message: %+v\n", err)
 		panic(1)
 	}
 

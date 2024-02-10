@@ -1,5 +1,6 @@
+/bin
 .vscode
 .aws-sam
 .env
 env.json
-/bin
+samconfig.toml

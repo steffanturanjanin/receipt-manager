@@ -10,8 +10,15 @@ Globals:
     Architectures:
       - x86_64
     Runtime: go1.x
+    Environment:
+      Variables:
+        ENVIRONMENT: dev
 
 Parameters:
+  ENVIRONMENT:
+    Type: String
+    Description: Environment 
+    Default: dev
   DB_HOST:
     Type: String
     Description: DB Host
@@ -81,20 +88,15 @@ Resources:
       StageName: ReceiptManagerApi.Test
 
   #SQS
-  ReceiptUrlQueue:
+  PendingReceiptsQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: receipt_url
+      QueueName: pending_receipts
 
-  ReceiptParsedQueue:
+  ReceiptItemsCategorizeQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: receipt_parsed
-
-  ReceiptItemQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: receipt_items
+      QueueName: receipt_items_categorize
 
   #Lambdas
   #Auth
@@ -164,28 +166,6 @@ Resources:
             Method: POST
 
   #Receipts
-  ReceiptItemsCategorize:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: ReceiptsItemsCategorize
-      CodeUri: ./cmd/receipts/categorize
-      Handler: main
-      Events:
-        Post:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ReceiptManagerApi
-            Path: /receipts/categorize
-            Method: POST
-      Environment:
-        Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          OPEN_AI_API_KEY: !Ref OPEN_AI_API_KEY
-
   ReceiptsParse:
     Type: AWS::Serverless::Function
     Properties:
@@ -260,17 +240,39 @@ Resources:
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
 
-  ReceiptsProcessUrls:
+  # ReceiptItemsCategorize:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     FunctionName: ReceiptsItemsCategorize
+  #     CodeUri: ./cmd/receipts/categorize
+  #     Handler: main
+  #     Events:
+  #       Post:
+  #         Type: Api
+  #         Properties:
+  #           RestApiId: !Ref ReceiptManagerApi
+  #           Path: /receipt/categorize
+  #           Method: POST
+  #     Environment:
+  #       Variables:
+  #         DB_HOST: !Ref DB_HOST
+  #         DB_PORT: !Ref DB_PORT
+  #         DB_NAME: !Ref DB_NAME
+  #         DB_USER: !Ref DB_USER
+  #         DB_PASSWORD: !Ref DB_PASSWORD
+  #         OPEN_AI_API_KEY: !Ref OPEN_AI_API_KEY
+
+  WorkerPendingReceipts:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ReceiptsProcessUrls
-      CodeUri: ./cmd/receipts/process-urls
+      FunctionName: WorkerPendingReceipts
+      CodeUri: ./cmd/receipts/worker-pending-receipts
       Handler: main
       Events:
-        ReceiptUrlQueueWrite:
+        PendingReceiptsQueueWrite:
           Type: SQS
           Properties:
-            Queue: !GetAtt ReceiptUrlQueue.Arn
+            Queue: !GetAtt PendingReceiptsQueue.Arn
             BatchSize: 10
       Environment:
         Variables:
@@ -280,17 +282,17 @@ Resources:
           DB_USER: !Ref DB_USER
           DB_PASSWORD: !Ref DB_PASSWORD
 
-  ReceiptsProcessParsed:
+  WorkerCategorizeReceiptItems:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ReceiptsProcessParsed
-      CodeUri: ./cmd/receipts/process-parsed
+      FunctionName: WorkerCategorizeReceiptItems
+      CodeUri: ./cmd/receipts/worker-categorize-receipt-items
       Handler: main
       Events:
-        ReceiptParsedQueueWrite:
+        ReceiptItemsCategorizeQueueWrite:
           Type: SQS
           Properties:
-            Queue: !GetAtt ReceiptParsedQueue.Arn
+            Queue: !GetAtt ReceiptItemsCategorizeQueue.Arn
             BatchSize: 10
       Environment:
         Variables:
@@ -299,6 +301,26 @@ Resources:
           DB_NAME: !Ref DB_NAME
           DB_USER: !Ref DB_USER
           DB_PASSWORD: !Ref DB_PASSWORD
+
+  # ReceiptsProcessParsed:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     FunctionName: ReceiptsProcessParsed
+  #     CodeUri: ./cmd/receipts/process-parsed
+  #     Handler: main
+  #     Events:
+  #       ReceiptParsedQueueWrite:
+  #         Type: SQS
+  #         Properties:
+  #           Queue: !GetAtt ReceiptParsedQueue.Arn
+  #           BatchSize: 10
+  #     Environment:
+  #       Variables:
+  #         DB_HOST: !Ref DB_HOST
+  #         DB_PORT: !Ref DB_PORT
+  #         DB_NAME: !Ref DB_NAME
+  #         DB_USER: !Ref DB_USER
+  #         DB_PASSWORD: !Ref DB_PASSWORD
 
 # Outputs:
 #   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
