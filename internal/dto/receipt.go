@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/pkg/receipt-fetcher"
 )
 
 type ReceiptData receipt_fetcher.Receipt

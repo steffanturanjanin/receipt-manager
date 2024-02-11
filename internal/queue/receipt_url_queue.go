@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/qhenkart/gosqs"
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/pkg/receipt-fetcher"
 )
 
 const (

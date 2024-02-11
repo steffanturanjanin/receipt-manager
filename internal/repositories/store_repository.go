@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/pkg/receipt-fetcher"
 	"gorm.io/gorm"
 )
 

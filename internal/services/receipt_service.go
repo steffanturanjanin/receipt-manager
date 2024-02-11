@@ -10,7 +10,7 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/pagination"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/pkg/receipt-fetcher"
 	"gorm.io/datatypes"
 )
 
