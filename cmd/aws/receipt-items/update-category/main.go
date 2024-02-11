@@ -11,6 +11,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
+	ut "github.com/go-playground/universal-translator"
+	v "github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
@@ -19,24 +21,33 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
-	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
+	"github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
 type UpdateReceiptItemCategoryRequest struct {
-	CategoryId uint `validate:"required" json:"categoryId"`
+	CategoryId uint `validate:"required,category_exists" json:"categoryId"`
 }
 
 var (
 	// Router
-	gorillaLambda *gorillamux.GorillaMuxAdapter
+	GorillaLambda *gorillamux.GorillaMuxAdapter
 
 	// Validator
-	validator *validation.Validator
+	V *validator.Validator
 
 	//Errors
 	ErrReceiptItemNotFound = transport.NewNotFoundError()
 	ErrCategoryNotFound    = transport.NewNotFoundError()
 )
+
+func validateCategoryExistence(fl v.FieldLevel) bool {
+	categoryId := fl.Field().Uint()
+	if dbErr := db.Instance.Find(&models.Category{}, categoryId).Error; dbErr != nil {
+		return false
+	}
+
+	return true
+}
 
 func init() {
 	// Initialize database
@@ -45,9 +56,20 @@ func init() {
 	}
 
 	// Initialize router
-	router := mux.NewRouter()
-	router.HandleFunc("/receipt-items/{id}", middlewares.SetAuthMiddleware(handler)).Methods("PATCH")
-	gorillaLambda = gorillamux.New(router)
+	Router := mux.NewRouter()
+	Router.HandleFunc("/receipt-items/{id}", middlewares.SetAuthMiddleware(handler)).Methods("PATCH")
+	GorillaLambda = gorillamux.New(Router)
+
+	// Initialize validator
+	V = validator.NewDefaultValidator()
+	V.Validator.RegisterValidation("category_exists", validateCategoryExistence)
+	V.Validator.RegisterTranslation("category_exists", V.Translator, func(ut ut.Translator) error {
+		return ut.Add("category_exists", "Category with id {0} does not exist.", true)
+	}, func(ut ut.Translator, fe v.FieldError) string {
+		value, _ := fe.Value().(string)
+		t, _ := ut.T("category_exists", value)
+		return t
+	})
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +81,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate request
 	// If failed return 422 Unprocessed Entity with error map
-	if err := validator.GetValidationErrors(updateReceiptItemCategoryRequest); err != nil {
+	if err := V.GetValidationErrors(updateReceiptItemCategoryRequest); err != nil {
 		controllers.JsonResponse(w, transport.NewValidationError(err), http.StatusUnprocessableEntity)
 		return
 	}
 
+	// Extract receipt item {id} path parameter
 	pathParams := mux.Vars(r)
 	receiptItemId, err := strconv.ParseInt(pathParams["id"], 10, 64)
 	if err != nil {
@@ -82,18 +105,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		panic(1)
 	}
 
-	// Hydrate Category
-	// If Not Found - return 404 HTTP status code
-	var dbCategory models.Category
-	if dbErr := db.Instance.Find(&dbCategory, updateReceiptItemCategoryRequest.CategoryId).Error; dbErr != nil {
-		if errors.Is(dbErr, gorm.ErrRecordNotFound) {
-			controllers.JsonResponse(w, ErrCategoryNotFound, http.StatusNotFound)
-			return
-		}
-
-		panic(1)
-	}
-
 	// Update Receipt Item Category
 	*dbReceiptItem.CategoryID = updateReceiptItemCategoryRequest.CategoryId
 	if db.Instance.Save(&dbReceiptItem).Error != nil {
@@ -104,7 +115,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	response, err := gorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
+	response, err := GorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
 	return *response.Version1(), err
 }
 
