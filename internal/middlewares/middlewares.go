@@ -4,7 +4,6 @@ import (
 	"context"
 	native_errors "errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -12,7 +11,9 @@ import (
 
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
+	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	"github.com/steffanturanjanin/receipt-manager/internal/query"
 	"github.com/steffanturanjanin/receipt-manager/internal/repositories"
 	"github.com/steffanturanjanin/receipt-manager/internal/services"
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
@@ -21,7 +22,9 @@ import (
 type ContextKey string
 
 const (
-	CURRENT_USER ContextKey = "CURRENT_USER"
+	CURRENT_USER     ContextKey = "CURRENT_USER"
+	PAGINATION_QUERY ContextKey = "PAGINATION_QUERY"
+	SORT_QUERY       ContextKey = "SORT_QUERY"
 )
 
 func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {
@@ -39,7 +42,6 @@ func SetAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var accessToken string
 		accessTokenCookie, err := r.Cookie("access_token")
-		fmt.Printf("access token cookie: %v\n", accessTokenCookie)
 
 		authorizationHeader := r.Header.Get("Authorization")
 		fields := strings.Fields(authorizationHeader)
@@ -77,10 +79,34 @@ func SetAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		log.Printf("Context user: %+v\n", userResponse)
 		ctx := context.WithValue(r.Context(), CURRENT_USER, *userResponse)
 		requestWithContext := r.WithContext(ctx)
 
 		next(w, requestWithContext)
 	}
+}
+
+func SetQueryParamsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sortQuery := query.SortQueryFromRequest(*r)
+		paginationQuery := query.PaginationQueryFromRequest(*r)
+
+		var ctx context.Context
+		ctx = context.WithValue(r.Context(), PAGINATION_QUERY, paginationQuery)
+		ctx = context.WithValue(ctx, SORT_QUERY, sortQuery)
+
+		next(w, r.WithContext(ctx))
+	}
+}
+
+func GetAuthUser(r *http.Request) dto.User {
+	return r.Context().Value(CURRENT_USER).(dto.User)
+}
+
+func GetPaginationQueryParams(r *http.Request) *query.PaginationQuery {
+	return r.Context().Value(PAGINATION_QUERY).(*query.PaginationQuery)
+}
+
+func GetSortQueryParams(r *http.Request) *query.SortQuery {
+	return r.Context().Value(SORT_QUERY).(*query.SortQuery)
 }

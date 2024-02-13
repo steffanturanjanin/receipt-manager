@@ -1,7 +1,10 @@
 package transport
 
-import "net/http"
+import (
+	"net/http"
+)
 
+// ERRORS
 type ValidationError struct {
 	Message string            `json:"message"`
 	Code    int               `json:"code"`
@@ -44,4 +47,19 @@ func NewValidationError(errors map[string]string) ValidationError {
 		Code:    http.StatusUnprocessableEntity,
 		Errors:  errors,
 	}
+}
+
+// Responses
+type PaginationResponse struct {
+	Data []interface{} `json:"data"`
+	Meta interface{}   `json:"meta"`
+}
+
+func TransformResponseData[T any](models []T) []interface{} {
+	var data []interface{}
+	for _, model := range models {
+		data = append(data, model)
+	}
+
+	return data
 }
