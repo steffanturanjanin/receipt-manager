@@ -64,6 +64,6 @@ func TransformResponseData[T any](models []T) []interface{} {
 	return data
 }
 
-func CreatePaginationResponse(data []interface{}, meta interface{}) (*PaginationResponse, error) {
-	return &PaginationResponse{Data: data, Meta: meta}, nil
+func CreatePaginationResponse(data []interface{}, meta interface{}) PaginationResponse {
+	return PaginationResponse{Data: data, Meta: meta}
 }

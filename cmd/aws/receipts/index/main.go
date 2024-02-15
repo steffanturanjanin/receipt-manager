@@ -64,9 +64,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Execute paginated query
 	var receipts []models.Receipt
-	queryBuilder = queryBuilder.Filter(filterQuery).Sort(sortQuery)
-
-	result, err := queryBuilder.ExecutePaginatedQuery(&receipts, paginationQuery)
+	result, err := queryBuilder.Filter(filterQuery).Sort(sortQuery).ExecutePaginatedQuery(&receipts, paginationQuery)
 	if err != nil {
 		log.Println(err.Error())
 		panic(1)
@@ -86,11 +84,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create response object
-	response, err := transport.CreatePaginationResponse(result.Data, meta)
-	if err != nil {
-		log.Printf("Failed to build response: %s\n", err.Error())
-		panic(1)
-	}
+	response := transport.CreatePaginationResponse(result.Data, meta)
 
 	controllers.JsonResponse(w, &response, http.StatusOK)
 }

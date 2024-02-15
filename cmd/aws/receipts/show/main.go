@@ -48,7 +48,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Find Receipt
 	var dbReceipt models.Receipt
-	if dbErr := db.Instance.Find(&dbReceipt, receiptId).Error; dbErr != nil {
+	if dbErr := db.Instance.First(&dbReceipt, receiptId).Error; dbErr != nil {
 		if errors.Is(dbErr, gorm.ErrRecordNotFound) {
 			controllers.JsonResponse(w, ErrReceiptNotFound, http.StatusNotFound)
 			return
