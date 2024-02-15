@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"gorm.io/gorm"
 )
 
@@ -31,12 +32,16 @@ type ReceiptQueryBuilder struct {
 	BaseQueryBuilder
 }
 
-func NewReceiptQueryBuilder(query *gorm.DB) ReceiptQueryBuilder {
+func NewReceiptQueryBuilder(db *gorm.DB) ReceiptQueryBuilder {
 	return ReceiptQueryBuilder{
 		BaseQueryBuilder: BaseQueryBuilder{
-			Query: query,
+			Query: initializeQuery(db),
 		},
 	}
+}
+
+func initializeQuery(db *gorm.DB) *gorm.DB {
+	return db.Model(&models.Receipt{})
 }
 
 func (qb ReceiptQueryBuilder) Sort(sortQuery *SortQuery) ReceiptQueryBuilder {
@@ -162,9 +167,7 @@ func (qb ReceiptQueryBuilder) GetFilters(r *http.Request) ReceiptFilters {
 
 func (qb ReceiptQueryBuilder) GetTotalPurchaseAmount() (*int, error) {
 	var total *int
-
-	clonedQuery := qb.Query.Session(&gorm.Session{})
-	if dbErr := clonedQuery.Select("IFNULL(SUM(total_purchase_amount), 0)").Scan(&total).Error; dbErr != nil {
+	if dbErr := qb.cloneQuery().Select("IFNULL(SUM(total_purchase_amount), 0)").Scan(&total).Error; dbErr != nil {
 		return nil, dbErr
 	}
 

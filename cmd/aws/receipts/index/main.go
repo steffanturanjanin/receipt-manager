@@ -11,6 +11,7 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
@@ -28,6 +29,7 @@ type ReceiptsMeta struct {
 
 var (
 	GorillaLambda *gorillamux.GorillaMuxAdapter
+	DB            *gorm.DB
 )
 
 func init() {
@@ -35,6 +37,7 @@ func init() {
 	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
 	}
+	DB = db.Instance
 
 	// Build middleware chain
 	authMiddleware := middlewares.SetAuthMiddleware
@@ -52,8 +55,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	user := middlewares.GetAuthUser(r)
 
 	// Initialize query builder
-	baseQuery := db.Instance.Model(models.Receipt{}).Where("user_id = ?", user.Id)
-	queryBuilder := query.NewReceiptQueryBuilder(baseQuery)
+	queryBuilder := query.NewReceiptQueryBuilder(db.Instance.Where("user_id = ?", user.Id))
 
 	// Extract query params
 	sortQuery := middlewares.GetSortQueryParams(r)
@@ -64,14 +66,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	var receipts []models.Receipt
 	queryBuilder = queryBuilder.Filter(filterQuery).Sort(sortQuery)
 
-	// Total amount spent
-	total, err := queryBuilder.GetTotalPurchaseAmount()
+	result, err := queryBuilder.ExecutePaginatedQuery(&receipts, paginationQuery)
 	if err != nil {
 		log.Println(err.Error())
 		panic(1)
 	}
 
-	result, err := queryBuilder.ExecutePaginatedQuery(&receipts, paginationQuery)
+	// Total amount spent
+	total, err := queryBuilder.GetTotalPurchaseAmount()
 	if err != nil {
 		log.Println(err.Error())
 		panic(1)

@@ -32,16 +32,21 @@ func (qb BaseQueryBuilder) Sort(sortQuery *SortQuery) BaseQueryBuilder {
 }
 
 func (qb BaseQueryBuilder) ExecutePaginatedQuery(destination interface{}, pq PaginationQuery) (*PaginationData, error) {
+	// Check if destination is a pointer pointing to a slice
 	value := reflect.ValueOf(destination).Elem()
-
 	if value.Kind() != reflect.Slice {
 		return nil, errors.New("data must point to a slice")
 	}
 
+	// Build pagination meta object
 	meta := GetPaginationMeta(qb.Query, pq)
 
+	// Generate offset
 	offset := (pq.Page - 1) * pq.Limit
-	if err := qb.Query.Limit(pq.Limit).Offset(offset).Find(destination).Error; err != nil {
+
+	// Execute query but instead of applying pagination params on Query instance and mutating the Query,
+	// perform pagination on cloned query and prevent pollution
+	if err := qb.cloneQuery().Limit(pq.Limit).Offset(offset).Find(destination).Error; err != nil {
 		return nil, err
 	}
 
@@ -61,4 +66,8 @@ func (qb BaseQueryBuilder) Immutable() BaseQueryBuilder {
 
 func (qb BaseQueryBuilder) GetQuery() *gorm.DB {
 	return qb.Query
+}
+
+func (qb BaseQueryBuilder) cloneQuery() *gorm.DB {
+	return qb.Query.Session(&gorm.Session{})
 }
