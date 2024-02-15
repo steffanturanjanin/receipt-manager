@@ -18,7 +18,7 @@ import (
 
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
-	rf "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	rf "github.com/steffanturanjanin/receipt-manager/pkg/receipt-fetcher"
 )
 
 /*

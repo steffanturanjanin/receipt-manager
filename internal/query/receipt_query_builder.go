@@ -39,6 +39,12 @@ func NewReceiptQueryBuilder(query *gorm.DB) ReceiptQueryBuilder {
 	}
 }
 
+func (qb ReceiptQueryBuilder) Sort(sortQuery *SortQuery) ReceiptQueryBuilder {
+	qb.BaseQueryBuilder.Sort(sortQuery)
+
+	return qb
+}
+
 func (qb ReceiptQueryBuilder) SortableOptions() SortableOptions {
 	return []string{"total_purchase_amount", "date"}
 }
@@ -156,7 +162,9 @@ func (qb ReceiptQueryBuilder) GetFilters(r *http.Request) ReceiptFilters {
 
 func (qb ReceiptQueryBuilder) GetTotalPurchaseAmount() (*int, error) {
 	var total *int
-	if dbErr := qb.Query.Select("SUM(total_purchase_amount)").Scan(&total).Error; dbErr != nil {
+
+	clonedQuery := qb.Query.Session(&gorm.Session{})
+	if dbErr := clonedQuery.Select("IFNULL(SUM(total_purchase_amount), 0)").Scan(&total).Error; dbErr != nil {
 		return nil, dbErr
 	}
 

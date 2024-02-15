@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 
@@ -61,14 +62,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Execute paginated query
 	var receipts []models.Receipt
-	result, err := queryBuilder.Filter(filterQuery).Sort(sortQuery).ExecutePaginatedQuery(receipts, paginationQuery)
-	if err != nil {
-		panic(1)
-	}
+	queryBuilder = queryBuilder.Filter(filterQuery).Sort(sortQuery)
 
 	// Total amount spent
 	total, err := queryBuilder.GetTotalPurchaseAmount()
 	if err != nil {
+		log.Println(err.Error())
+		panic(1)
+	}
+
+	result, err := queryBuilder.ExecutePaginatedQuery(&receipts, paginationQuery)
+	if err != nil {
+		log.Println(err.Error())
 		panic(1)
 	}
 
@@ -78,10 +83,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		Total:      *total,
 	}
 
-	// Build final response
-	response := transport.PaginationResponse{
-		Data: result.Data,
-		Meta: meta,
+	// Create response object
+	response, err := transport.CreatePaginationResponse(result.Data, meta)
+	if err != nil {
+		log.Printf("Failed to build response: %s\n", err.Error())
+		panic(1)
 	}
 
 	controllers.JsonResponse(w, &response, http.StatusOK)

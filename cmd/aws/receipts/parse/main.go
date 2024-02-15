@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
-	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/receipt-fetcher"
+	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/pkg/receipt-fetcher"
 )
 
 type ParseReceiptRequest struct {

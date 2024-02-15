@@ -9,7 +9,11 @@ import (
 )
 
 const (
-	PAGE_PARAM    = "page"
+	// Page param
+	PAGE_PARAM         = "page"
+	DEFAULT_PAGE_PARAM = 1
+
+	// Limit Param
 	LIMIT_PARAM   = "limit"
 	DEFAULT_LIMIT = 25
 	MAX_LIMIT     = 100
@@ -34,14 +38,14 @@ type PaginationData struct {
 	Meta PaginationMeta
 }
 
-func PaginationQueryFromRequest(r http.Request) *PaginationQuery {
+func PaginationQueryFromRequest(r http.Request) PaginationQuery {
 	queryParams := r.URL.Query()
 	pageParam := queryParams.Get(PAGE_PARAM)
 	limitParam := queryParams.Get(LIMIT_PARAM)
 
 	page, err := strconv.Atoi(pageParam)
 	if err != nil {
-		return nil
+		page = 1
 	}
 
 	limit, err := strconv.Atoi(limitParam)
@@ -49,7 +53,7 @@ func PaginationQueryFromRequest(r http.Request) *PaginationQuery {
 		limit = DEFAULT_LIMIT
 	}
 
-	return &PaginationQuery{Page: page, Limit: limit}
+	return PaginationQuery{Page: page, Limit: limit}
 }
 
 func GetPaginationMeta(query *gorm.DB, pagination PaginationQuery) PaginationMeta {

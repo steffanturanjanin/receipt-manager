@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	encodedServerErrResp []byte = json.RawMessage(`{code: "500", "message":"Internal server error."}`)
+	encodedServerErrResp []byte = json.RawMessage(`{"code": "500", "message": "Internal server error."}`)
 )
 
 func ParseBody(destination interface{}, r *http.Request) error {
@@ -68,6 +69,8 @@ func JsonErrorResponse(w http.ResponseWriter, err error) {
 func handleInternalServerError(w http.ResponseWriter, e error) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
+
+	fmt.Printf("%s %s", "Internal server error:", e.Error())
 
 	if _, err := w.Write(encodedServerErrResp); err != nil {
 		panic(err)

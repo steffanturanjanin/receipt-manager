@@ -103,8 +103,8 @@ func GetAuthUser(r *http.Request) dto.User {
 	return r.Context().Value(CURRENT_USER).(dto.User)
 }
 
-func GetPaginationQueryParams(r *http.Request) *query.PaginationQuery {
-	return r.Context().Value(PAGINATION_QUERY).(*query.PaginationQuery)
+func GetPaginationQueryParams(r *http.Request) query.PaginationQuery {
+	return r.Context().Value(PAGINATION_QUERY).(query.PaginationQuery)
 }
 
 func GetSortQueryParams(r *http.Request) *query.SortQuery {

@@ -86,22 +86,20 @@ func init() {
 	gorillaLambda = gorillamux.New(router)
 
 	// Initialize AWS session and SQS client
-	sessionOptions := aws_session.Options{SharedConfigState: aws_session.SharedConfigDisable}
+	sessionOptions := aws_session.Options{
+		Config:            aws.Config{Endpoint: aws.String("http://docker.for.mac.localhost:9324")}, // TODO: configure this to run only in DEV environment
+		SharedConfigState: aws_session.SharedConfigDisable,
+	}
 	session = aws_session.Must(aws_session.NewSessionWithOptions(sessionOptions))
 	client = sqs.New(session)
 
 	// Initialize SQS urls
-	if env == "dev" {
-		localStackSqsUrl := "https://localhost.localstack.cloud:4566/000000000000/pending_receipts"
-		pendingReceiptsSqsUrl = &localStackSqsUrl
+	if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
+		QueueName: aws.String(PENDING_RECEIPTS_QUEUE),
+	}); err != nil {
+		panic(1)
 	} else {
-		if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
-			QueueName: aws.String(PENDING_RECEIPTS_QUEUE),
-		}); err != nil {
-			panic(1)
-		} else {
-			pendingReceiptsSqsUrl = urlResult.QueueUrl
-		}
+		pendingReceiptsSqsUrl = urlResult.QueueUrl
 	}
 
 	// Initialize validator
