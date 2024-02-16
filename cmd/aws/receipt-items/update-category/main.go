@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -38,6 +39,7 @@ var (
 	//Errors
 	ErrReceiptItemNotFound = transport.NewNotFoundError()
 	ErrCategoryNotFound    = transport.NewNotFoundError()
+	ErrServiceUnavailable  = transport.NewServiceUnavailableError()
 )
 
 func validateCategoryExistence(fl v.FieldLevel) bool {
@@ -76,7 +78,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Parse request body to struct
 	updateReceiptItemCategoryRequest := &UpdateReceiptItemCategoryRequest{}
 	if err := controllers.ParseBody(updateReceiptItemCategoryRequest, r); err != nil {
-		panic(1)
+		log.Printf("Error while parsing request body: %s\n", err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Validate request
@@ -90,7 +93,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	pathParams := mux.Vars(r)
 	receiptItemId, err := strconv.ParseInt(pathParams["id"], 10, 64)
 	if err != nil {
-		panic(1)
+		log.Printf("Error converting path param: %s\n", err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Hydrate Receipt Item
@@ -102,16 +106,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		panic(1)
+		log.Printf("Error fetching receipt item %+d: %s\n", receiptItemId, err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Update Receipt Item Category
 	*dbReceiptItem.CategoryID = updateReceiptItemCategoryRequest.CategoryId
 	if db.Instance.Save(&dbReceiptItem).Error != nil {
-		panic(1)
+		log.Printf("Error updating receipt item %+d: %s\n", receiptItemId, err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
-	controllers.JsonResponse(w, &dbReceiptItem, http.StatusOK)
+	response := transport.ReceiptItemResponse{}
+	response = response.FromModel(dbReceiptItem)
+
+	controllers.JsonResponse(w, &response, http.StatusOK)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

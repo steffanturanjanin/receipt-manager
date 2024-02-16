@@ -35,17 +35,23 @@ func (receipts ReceiptsResponse) FromModels(models []models.Receipt) ReceiptsRes
 	return receipts
 }
 
-func (receipt *ReceiptResponse) FromModel(model models.Receipt) {
-	userId := new(int)
+func (receipt ReceiptResponse) FromModel(model models.Receipt) ReceiptResponse {
+	//userId := new(int)
+	var userId *int
 	if model.UserID != nil {
+		userId = new(int)
 		*userId = int(*model.UserID)
 	}
 
-	store := new(StoreResponse)
-	*store = store.FromModel(*model.Store)
+	var store *StoreResponse
+	if model.Store != nil {
+		store = new(StoreResponse)
+		*store = store.FromModel(*model.Store)
+	}
 
 	var meta *map[string]string
 	if model.Meta != nil {
+		meta = new(map[string]string)
 		if err := json.Unmarshal(*model.Meta, meta); err != nil {
 			meta = nil
 		}
@@ -72,6 +78,8 @@ func (receipt *ReceiptResponse) FromModel(model models.Receipt) {
 	receipt.QrCode = model.QrCode
 	receipt.Meta = meta
 	receipt.ReceiptItems = receiptItems
+
+	return receipt
 }
 
 func ReceiptsResponseFromReceipt(models []models.Receipt) []ReceiptResponse {

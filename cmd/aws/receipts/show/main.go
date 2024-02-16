@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,7 +27,8 @@ var (
 	GorillaLambda *gorillamux.GorillaMuxAdapter
 
 	//Errors
-	ErrReceiptNotFound = transport.NewNotFoundError()
+	ErrReceiptNotFound    = transport.NewNotFoundError()
+	ErrServiceUnavailable = transport.NewServiceUnavailableError()
 )
 
 func init() {
@@ -54,11 +56,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		panic(1)
+		log.Printf("Error while finding receipt %d: %s", receiptId, dbErr.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
+	receiptResponse := transport.ReceiptResponse{}
+	receiptResponse = receiptResponse.FromModel(dbReceipt)
+
 	// Return response
-	controllers.JsonResponse(w, &dbReceipt, http.StatusOK)
+	controllers.JsonResponse(w, &receiptResponse, http.StatusOK)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

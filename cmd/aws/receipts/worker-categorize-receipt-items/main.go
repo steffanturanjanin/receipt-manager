@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -14,7 +15,7 @@ import (
 func init() {
 	// Initialize database
 	if err := db.InitializeDB(); err != nil {
-		panic(1)
+		os.Exit(1)
 	}
 }
 

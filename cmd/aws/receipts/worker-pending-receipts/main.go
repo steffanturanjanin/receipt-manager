@@ -39,37 +39,36 @@ const RECEIPT_ITEMS_CATEGORIZE_QUEUE = "receipt_items_categorize"
 
 var (
 	//Environment
-	env = os.Getenv("ENVIRONMENT")
+	Env = os.Getenv("ENVIRONMENT")
 
 	// AWS SQS
-	session                      *aws_session.Session
-	client                       *sqs.SQS
-	receiptItemsCategorizeSqsUrl *string
+	Session                      *aws_session.Session
+	Client                       *sqs.SQS
+	ReceiptItemsCategorizeSqsUrl *string
 )
 
 func init() {
 	// Initialize database
-	err := db.InitializeDB()
-	if err != nil {
+	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
 	}
 
 	// Initialize AWS session and SQS client
 	options := aws_session.Options{SharedConfigState: aws_session.SharedConfigDisable}
-	session = aws_session.Must(aws_session.NewSessionWithOptions(options))
-	client = sqs.New(session)
+	Session = aws_session.Must(aws_session.NewSessionWithOptions(options))
+	Client = sqs.New(Session)
 
 	// Initialize SQS urls
-	if env == "dev" {
+	if Env == "dev" {
 		localStackSqsUrl := "https://localhost.localstack.cloud:4566/000000000000/receipt_items_categorize"
-		receiptItemsCategorizeSqsUrl = &localStackSqsUrl
+		ReceiptItemsCategorizeSqsUrl = &localStackSqsUrl
 	} else {
-		if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
+		if urlResult, err := Client.GetQueueUrl(&sqs.GetQueueUrlInput{
 			QueueName: aws.String(RECEIPT_ITEMS_CATEGORIZE_QUEUE),
 		}); err != nil {
-			panic(1)
+			os.Exit(1)
 		} else {
-			receiptItemsCategorizeSqsUrl = urlResult.QueueUrl
+			ReceiptItemsCategorizeSqsUrl = urlResult.QueueUrl
 		}
 	}
 }
@@ -98,7 +97,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 				VisibilityTimeout: aws.Int64(120), // 2 minutes
 			}
 
-			if _, err = client.ChangeMessageVisibilityWithContext(ctx, changeVisibilityParams); err != nil {
+			if _, err = Client.ChangeMessageVisibilityWithContext(ctx, changeVisibilityParams); err != nil {
 				return fmt.Errorf("unable to change message visibility: %v", err)
 			}
 		}
@@ -164,10 +163,10 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 	sqsMessageInput := &sqs.SendMessageInput{
 		DelaySeconds: aws.Int64(0),
 		MessageBody:  aws.String(string(receiptID)),
-		QueueUrl:     receiptItemsCategorizeSqsUrl,
+		QueueUrl:     ReceiptItemsCategorizeSqsUrl,
 	}
 
-	if _, err = client.SendMessage(sqsMessageInput); err != nil {
+	if _, err = Client.SendMessage(sqsMessageInput); err != nil {
 		return err
 	}
 

@@ -38,11 +38,19 @@ func NewNotFoundError() ErrorResponse {
 	}
 }
 
-// Unprocessable entity - 422
+// Unprocessable Entity - 422
 func NewValidationError(errors map[string]string) ValidationError {
 	return ValidationError{
 		Message: "Validation error.",
 		Code:    http.StatusUnprocessableEntity,
 		Errors:  errors,
+	}
+}
+
+// Service Unavailable - 503
+func NewServiceUnavailableError() ErrorResponse {
+	return ErrorResponse{
+		Error: "Service unavailable",
+		Code:  http.StatusServiceUnavailable,
 	}
 }

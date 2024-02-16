@@ -55,55 +55,60 @@ const PENDING_RECEIPTS_QUEUE = "pending_receipts"
 
 var (
 	// Execution
-	env = os.Getenv("ENVIRONMENT")
+	Env = os.Getenv("ENVIRONMENT")
 
 	// AWS SQS
-	session               *aws_session.Session
-	client                *sqs.SQS
-	pendingReceiptsSqsUrl *string
+	Session               *aws_session.Session
+	Client                *sqs.SQS
+	PendingReceiptsSqsUrl *string
 
 	// Router
-	gorillaLambda *gorillamux.GorillaMuxAdapter
+	GorillaLambda *gorillamux.GorillaMuxAdapter
 
 	// Validator
-	validator *validation.Validator
+	Validator *validation.Validator
 
 	// Errors
 	ErrReceiptAlreadyScanned = transport.NewBadRequestResponse(errors.New("receipt already scanned"))
 	ErrCannotCreateReceipt   = transport.NewBadRequestResponse(errors.New("receipt cannot be created"))
+	ErrServiceUnavailable    = transport.NewServiceUnavailableError()
 )
 
 func init() {
 	// Initialize database
-	err := database.InitializeDB()
-	if err != nil {
+	if err := database.InitializeDB(); err != nil {
 		os.Exit(1)
 	}
 
-	// Initialize router
-	router := mux.NewRouter()
-	router.HandleFunc("/receipts", middlewares.SetAuthMiddleware(handler)).Methods("POST")
-	gorillaLambda = gorillamux.New(router)
+	// Initialize Router
+	Router := mux.NewRouter()
+	Router.HandleFunc("/receipts", middlewares.SetAuthMiddleware(handler)).Methods("POST")
+	GorillaLambda = gorillamux.New(Router)
 
 	// Initialize AWS session and SQS client
 	sessionOptions := aws_session.Options{
-		Config:            aws.Config{Endpoint: aws.String("http://docker.for.mac.localhost:9324")}, // TODO: configure this to run only in DEV environment
 		SharedConfigState: aws_session.SharedConfigDisable,
 	}
-	session = aws_session.Must(aws_session.NewSessionWithOptions(sessionOptions))
-	client = sqs.New(session)
+
+	// If environment is `dev` configure local endpoint
+	if Env == "dev" {
+		sessionOptions.Config = aws.Config{Endpoint: aws.String("http://docker.for.mac.localhost:9324")}
+	}
+
+	Session = aws_session.Must(aws_session.NewSessionWithOptions(sessionOptions))
+	Client = sqs.New(Session)
 
 	// Initialize SQS urls
-	if urlResult, err := client.GetQueueUrl(&sqs.GetQueueUrlInput{
+	if urlResult, err := Client.GetQueueUrl(&sqs.GetQueueUrlInput{
 		QueueName: aws.String(PENDING_RECEIPTS_QUEUE),
 	}); err != nil {
 		panic(1)
 	} else {
-		pendingReceiptsSqsUrl = urlResult.QueueUrl
+		PendingReceiptsSqsUrl = urlResult.QueueUrl
 	}
 
 	// Initialize validator
-	validator = validation.NewDefaultValidator()
+	Validator = validation.NewDefaultValidator()
 }
 
 var handler = func(w http.ResponseWriter, r *http.Request) {
@@ -112,12 +117,13 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	// Parse request body to struct
 	receiptUrlRequest := &ReceiptUrlRequest{}
 	if err := controllers.ParseBody(receiptUrlRequest, r); err != nil {
-		panic(1)
+		log.Printf("Error while parsing request: %s\n", err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Validate request
 	// If failed return 422 Unprocessed Entity with error map
-	if err := validator.GetValidationErrors(receiptUrlRequest); err != nil {
+	if err := Validator.GetValidationErrors(receiptUrlRequest); err != nil {
 		controllers.JsonResponse(w, transport.NewValidationError(err), http.StatusUnprocessableEntity)
 		return
 	}
@@ -156,11 +162,12 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 		MessageBody: aws.String(receiptUrlRequest.Url),
-		QueueUrl:    pendingReceiptsSqsUrl,
+		QueueUrl:    PendingReceiptsSqsUrl,
 	}
 
-	if _, err := client.SendMessage(sqsMessageInput); err != nil {
-		log.Printf("Could not send sqs message: %+v\n", err)
+	if _, err := Client.SendMessage(sqsMessageInput); err != nil {
+		log.Printf("Error while trying to send sqs message: %s\n", err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 		panic(1)
 	}
 
@@ -169,7 +176,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	response, err := gorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
+	response, err := GorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
 	return *response.Version1(), err
 }
 

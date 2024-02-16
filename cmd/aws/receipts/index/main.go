@@ -11,7 +11,6 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
@@ -28,8 +27,11 @@ type ReceiptsMeta struct {
 }
 
 var (
+	// Router
 	GorillaLambda *gorillamux.GorillaMuxAdapter
-	DB            *gorm.DB
+
+	// Errors
+	ErrServiceUnavailable = transport.NewServiceUnavailableError()
 )
 
 func init() {
@@ -37,7 +39,6 @@ func init() {
 	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
 	}
-	DB = db.Instance
 
 	// Build middleware chain
 	authMiddleware := middlewares.SetAuthMiddleware
@@ -66,8 +67,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	var receipts []models.Receipt
 	result, err := queryBuilder.Filter(filterQuery).Sort(sortQuery).ExecutePaginatedQuery(&receipts, paginationQuery)
 	if err != nil {
-		log.Println(err.Error())
-		panic(1)
+		log.Printf("Error while executing paginated query %+v: %s", queryBuilder.Query, err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Transformed receipts response
@@ -77,8 +78,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Total amount spent
 	total, err := queryBuilder.GetTotalPurchaseAmount()
 	if err != nil {
-		log.Println(err.Error())
-		panic(1)
+		log.Printf("Error while executing total purchase amount count %+v: %s", queryBuilder.Query, err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Include total in response meta along with pagination meta
@@ -90,7 +91,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Create response object
 	response, err := transport.CreatePaginationResponse(&receiptsResponse.Items, meta)
 	if err != nil {
-		panic(1)
+		log.Printf("Error while building response object: %s", err.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	controllers.JsonResponse(w, &response, http.StatusOK)

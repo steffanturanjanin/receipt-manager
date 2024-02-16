@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -24,20 +25,22 @@ import (
 
 var (
 	// Router
-	gorillaLambda *gorillamux.GorillaMuxAdapter
+	GorillaLambda *gorillamux.GorillaMuxAdapter
+
+	// Errors
+	ErrServiceUnavailable = transport.NewServiceUnavailableError()
 )
 
 func init() {
 	// Initialize database
-	err := db.InitializeDB()
-	if err != nil {
+	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
 	}
 
-	// Initialize router
-	router := mux.NewRouter()
-	router.HandleFunc("/receipts/{id}", middlewares.SetAuthMiddleware(handler)).Methods("DELETE")
-	gorillaLambda = gorillamux.New(router)
+	// Initialize Router
+	Router := mux.NewRouter()
+	Router.HandleFunc("/receipts/{id}", middlewares.SetAuthMiddleware(handler)).Methods("DELETE")
+	GorillaLambda = gorillamux.New(Router)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +56,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// Unknown error. Lambda cannot process this error.
-		panic(1)
+		log.Printf("Error while trying to fetch receipt %d: %s\n", receiptId, dbErr.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Check if user has permission to delete receipt
@@ -66,7 +70,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Delete Receipt
 	if dbErr := db.Instance.Delete(&dbReceipt).Error; dbErr != nil {
 		// Unknown error. Lambda cannot process this error.
-		panic(1)
+		log.Printf("Error while trying to delete receipt %d: %s\n", receiptId, dbErr.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
 	// Set No Content 204
@@ -74,7 +79,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func lambdaHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	response, err := gorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
+	response, err := GorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
 	return *response.Version1(), err
 }
 

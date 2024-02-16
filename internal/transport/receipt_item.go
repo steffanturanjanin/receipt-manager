@@ -15,15 +15,14 @@ type ReceiptItemResponse struct {
 }
 
 func (receiptItem ReceiptItemResponse) FromModel(model models.ReceiptItem) ReceiptItemResponse {
-	category := new(CategoryResponse)
+	var category *CategoryResponse
 	if model.Category != nil {
-		*category = CategoryResponse{}
+		category = new(CategoryResponse)
 		*category = category.FromModel(*model.Category)
 	}
-
-	tax := new(TaxResponse)
+	var tax *TaxResponse
 	if model.Tax != nil {
-		*tax = TaxResponse{}
+		tax = new(TaxResponse)
 		*tax = tax.FromModel(*model.Tax)
 	}
 
