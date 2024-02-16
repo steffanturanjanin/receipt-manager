@@ -1,69 +1,29 @@
 package transport
 
 import (
-	"net/http"
+	"errors"
+	"reflect"
 )
 
-// ERRORS
-type ValidationError struct {
-	Message string            `json:"message"`
-	Code    int               `json:"code"`
-	Errors  map[string]string `json:"errors"`
-}
-
-type ErrorResponse struct {
-	Error string `json:"error"`
-	Code  int    `json:"code"`
-}
-
-// Bad Request - 400
-func NewBadRequestResponse(err error) ErrorResponse {
-	return ErrorResponse{
-		Error: err.Error(),
-		Code:  http.StatusBadRequest,
-	}
-}
-
-// Forbidden - 403
-func NewForbiddenError() ErrorResponse {
-	return ErrorResponse{
-		Error: "Forbidden",
-		Code:  http.StatusForbidden,
-	}
-}
-
-// Not Found - 404
-func NewNotFoundError() ErrorResponse {
-	return ErrorResponse{
-		Error: "Not found",
-		Code:  http.StatusNotFound,
-	}
-}
-
-// Unprocessable entity - 422
-func NewValidationError(errors map[string]string) ValidationError {
-	return ValidationError{
-		Message: "Validation error.",
-		Code:    http.StatusUnprocessableEntity,
-		Errors:  errors,
-	}
-}
-
-// Responses
+// Pagination
 type PaginationResponse struct {
 	Data []interface{} `json:"data"`
 	Meta interface{}   `json:"meta"`
 }
 
-func TransformResponseData[T any](models []T) []interface{} {
-	var data []interface{}
-	for _, model := range models {
-		data = append(data, model)
+// Builds pagination response. Data param needs to be a slice.
+// Converts interface{} param to []interface{} expected by `PaginationResponse` struct.
+func CreatePaginationResponse(data interface{}, meta interface{}) (*PaginationResponse, error) {
+	// Check if destination is a pointer pointing to a slice
+	value := reflect.ValueOf(data).Elem()
+	if value.Kind() != reflect.Slice {
+		return nil, errors.New("data must point to a slice")
 	}
 
-	return data
-}
+	items := make([]interface{}, value.Len())
+	for i := 0; i < value.Len(); i++ {
+		items[i] = value.Index(i).Interface()
+	}
 
-func CreatePaginationResponse(data []interface{}, meta interface{}) PaginationResponse {
-	return PaginationResponse{Data: data, Meta: meta}
+	return &PaginationResponse{Data: items, Meta: meta}, nil
 }

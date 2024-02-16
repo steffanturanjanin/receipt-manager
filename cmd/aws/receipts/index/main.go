@@ -64,11 +64,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Execute paginated query
 	var receipts []models.Receipt
+	var receiptsResponse []transport.ReceiptResponse
 	result, err := queryBuilder.Filter(filterQuery).Sort(sortQuery).ExecutePaginatedQuery(&receipts, paginationQuery)
 	if err != nil {
 		log.Println(err.Error())
 		panic(1)
 	}
+
+	receiptsResponse = transport.ReceiptsResponseFromReceipt(receipts)
 
 	// Total amount spent
 	total, err := queryBuilder.GetTotalPurchaseAmount()
@@ -84,7 +87,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create response object
-	response := transport.CreatePaginationResponse(result.Data, meta)
+	response, err := transport.CreatePaginationResponse(&receiptsResponse, meta)
+	if err != nil {
+		panic(1)
+	}
 
 	controllers.JsonResponse(w, &response, http.StatusOK)
 }
