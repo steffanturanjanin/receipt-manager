@@ -22,6 +22,58 @@ type ReceiptResponse struct {
 	ReceiptItems        []ReceiptItemResponse `json:"receiptItems"`
 }
 
+type ReceiptsResponse struct {
+	Items []ReceiptResponse
+}
+
+func (receipts ReceiptsResponse) FromModels(models []models.Receipt) ReceiptsResponse {
+	for _, dbReceipt := range models {
+		receipt := ReceiptResponseFromReceipt(dbReceipt)
+		receipts.Items = append(receipts.Items, receipt)
+	}
+
+	return receipts
+}
+
+func (receipt *ReceiptResponse) FromModel(model models.Receipt) {
+	userId := new(int)
+	if model.UserID != nil {
+		*userId = int(*model.UserID)
+	}
+
+	store := new(StoreResponse)
+	*store = store.FromModel(*model.Store)
+
+	var meta *map[string]string
+	if model.Meta != nil {
+		if err := json.Unmarshal(*model.Meta, meta); err != nil {
+			meta = nil
+		}
+	}
+
+	receiptItems := make([]ReceiptItemResponse, 0)
+	if model.ReceiptItems != nil {
+		for _, dbReceiptItem := range model.ReceiptItems {
+			receiptItem := ReceiptItemResponse{}
+			receiptItem = receiptItem.FromModel(dbReceiptItem)
+			receiptItems = append(receiptItems, receiptItem)
+		}
+	}
+
+	receipt.ID = int(model.ID)
+	receipt.UserId = userId
+	receipt.Store = store
+	receipt.Status = model.Status
+	receipt.PfrNumber = model.PfrNumber
+	receipt.Counter = model.Counter
+	receipt.TotalPurchaseAmount = model.TotalPurchaseAmount
+	receipt.TotalTaxAmount = model.TotalTaxAmount
+	receipt.Date = model.Date
+	receipt.QrCode = model.QrCode
+	receipt.Meta = meta
+	receipt.ReceiptItems = receiptItems
+}
+
 func ReceiptsResponseFromReceipt(models []models.Receipt) []ReceiptResponse {
 	receipts := []ReceiptResponse{}
 
@@ -36,7 +88,6 @@ func ReceiptsResponseFromReceipt(models []models.Receipt) []ReceiptResponse {
 func ReceiptResponseFromReceipt(model models.Receipt) ReceiptResponse {
 	receipt := ReceiptResponse{}
 
-	//var userId *int
 	userId := new(int)
 	if model.UserID != nil {
 		*userId = int(*model.UserID)

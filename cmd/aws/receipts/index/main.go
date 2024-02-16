@@ -64,14 +64,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Execute paginated query
 	var receipts []models.Receipt
-	var receiptsResponse []transport.ReceiptResponse
 	result, err := queryBuilder.Filter(filterQuery).Sort(sortQuery).ExecutePaginatedQuery(&receipts, paginationQuery)
 	if err != nil {
 		log.Println(err.Error())
 		panic(1)
 	}
 
-	receiptsResponse = transport.ReceiptsResponseFromReceipt(receipts)
+	// Transformed receipts response
+	receiptsResponse := transport.ReceiptsResponse{}
+	receiptsResponse = receiptsResponse.FromModels(receipts)
 
 	// Total amount spent
 	total, err := queryBuilder.GetTotalPurchaseAmount()
@@ -87,7 +88,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create response object
-	response, err := transport.CreatePaginationResponse(&receiptsResponse, meta)
+	response, err := transport.CreatePaginationResponse(&receiptsResponse.Items, meta)
 	if err != nil {
 		panic(1)
 	}

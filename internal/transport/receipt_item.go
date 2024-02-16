@@ -1,5 +1,7 @@
 package transport
 
+import "github.com/steffanturanjanin/receipt-manager/internal/models"
+
 type ReceiptItemResponse struct {
 	ID           int               `json:"id"`
 	ReceiptId    int               `json:"receiptId"`
@@ -10,4 +12,30 @@ type ReceiptItemResponse struct {
 	TotalAmount  int               `json:"totalAmount"`
 	Category     *CategoryResponse `json:"category"`
 	Tax          *TaxResponse      `json:"tax"`
+}
+
+func (receiptItem ReceiptItemResponse) FromModel(model models.ReceiptItem) ReceiptItemResponse {
+	category := new(CategoryResponse)
+	if model.Category != nil {
+		*category = CategoryResponse{}
+		*category = category.FromModel(*model.Category)
+	}
+
+	tax := new(TaxResponse)
+	if model.Tax != nil {
+		*tax = TaxResponse{}
+		*tax = tax.FromModel(*model.Tax)
+	}
+
+	receiptItem.ID = int(model.ID)
+	receiptItem.ReceiptId = int(model.ReceiptID)
+	receiptItem.Name = model.Name
+	receiptItem.Unit = model.Unit
+	receiptItem.Quantity = model.Quantity
+	receiptItem.SingleAmount = model.SingleAmount
+	receiptItem.TotalAmount = model.TotalAmount
+	receiptItem.Category = category
+	receiptItem.Tax = tax
+
+	return receiptItem
 }
