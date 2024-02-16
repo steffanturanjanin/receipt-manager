@@ -17,7 +17,6 @@ import (
 
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
-	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
@@ -28,6 +27,8 @@ var (
 	GorillaLambda *gorillamux.GorillaMuxAdapter
 
 	// Errors
+	ErrNotFound           = transport.NewNotFoundError()
+	ErrForbidden          = transport.NewForbiddenError()
 	ErrServiceUnavailable = transport.NewServiceUnavailableError()
 )
 
@@ -44,7 +45,7 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(middlewares.CURRENT_USER).(dto.User)
+	user := middlewares.GetAuthUser(r)
 	receiptId, _ := strconv.Atoi(mux.Vars(r)["id"])
 
 	var dbReceipt models.Receipt
@@ -52,7 +53,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if dbErr := db.Instance.First(&dbReceipt, receiptId).Error; dbErr != nil {
 		if errors.Is(dbErr, gorm.ErrRecordNotFound) {
 			// Not Found 404
-			controllers.JsonResponse(w, transport.NewNotFoundError(), http.StatusNotFound)
+			controllers.JsonResponse(w, ErrNotFound, http.StatusNotFound)
 			return
 		}
 		// Unknown error. Lambda cannot process this error.
@@ -63,7 +64,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Check if user has permission to delete receipt
 	if *dbReceipt.UserID != user.Id {
 		// Forbidden 403
-		controllers.JsonResponse(w, transport.NewForbiddenError(), http.StatusForbidden)
+		controllers.JsonResponse(w, ErrForbidden, http.StatusForbidden)
 		return
 	}
 

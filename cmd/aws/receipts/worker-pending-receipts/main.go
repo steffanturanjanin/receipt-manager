@@ -35,7 +35,12 @@ import (
 4) Write Receipt ID to SQS queue for item categorization
 */
 
-const RECEIPT_ITEMS_CATEGORIZE_QUEUE = "receipt_items_categorize"
+const (
+	// SQS queues
+	RECEIPT_ITEMS_CATEGORIZE_QUEUE = "receipt_items_categorize"
+	// SQS mock
+	LOCAL_ELASTIC_MQ_SERVER_URL = "http://docker.for.mac.localhost:9324"
+)
 
 var (
 	//Environment
@@ -55,31 +60,33 @@ func init() {
 
 	// Initialize AWS session and SQS client
 	options := aws_session.Options{SharedConfigState: aws_session.SharedConfigDisable}
+
+	// If environment is `dev` configure local endpoint
+	if Env == "dev" {
+		options.Config = aws.Config{Endpoint: aws.String(LOCAL_ELASTIC_MQ_SERVER_URL)}
+	}
+
 	Session = aws_session.Must(aws_session.NewSessionWithOptions(options))
 	Client = sqs.New(Session)
 
 	// Initialize SQS urls
-	if Env == "dev" {
-		localStackSqsUrl := "https://localhost.localstack.cloud:4566/000000000000/receipt_items_categorize"
-		ReceiptItemsCategorizeSqsUrl = &localStackSqsUrl
+	if urlResult, err := Client.GetQueueUrl(&sqs.GetQueueUrlInput{
+		QueueName: aws.String(RECEIPT_ITEMS_CATEGORIZE_QUEUE),
+	}); err != nil {
+		os.Exit(1)
 	} else {
-		if urlResult, err := Client.GetQueueUrl(&sqs.GetQueueUrlInput{
-			QueueName: aws.String(RECEIPT_ITEMS_CATEGORIZE_QUEUE),
-		}); err != nil {
-			os.Exit(1)
-		} else {
-			ReceiptItemsCategorizeSqsUrl = urlResult.QueueUrl
-		}
+		ReceiptItemsCategorizeSqsUrl = urlResult.QueueUrl
 	}
+
 }
 
 func processMessage(ctx context.Context, message events.SQSMessage) error {
 	// Receipt url
 	url := message.Body
 	// Receipt ID
-	receiptIdPtr := message.MessageAttributes["ReceiptId"].StringValue
-	receiptID := *receiptIdPtr
+	receiptID := *message.MessageAttributes["ReceiptId"].StringValue
 
+	// Parse receipt
 	receipt, err := rf.Get(url)
 	if err != nil {
 		// If url is invalid

@@ -20,7 +20,6 @@ import (
 
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/database"
-	"github.com/steffanturanjanin/receipt-manager/internal/dto"
 	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
@@ -51,7 +50,12 @@ type ReceiptUrlRequest struct {
 	Url string `validate:"required,url,url_host=suf.purs.gov.rs,url_query_params=vl" json:"url"`
 }
 
-const PENDING_RECEIPTS_QUEUE = "pending_receipts"
+const (
+	// SQS queues
+	PENDING_RECEIPTS_QUEUE = "pending_receipts"
+	// SQS mock
+	LOCAL_ELASTIC_MQ_SERVER_URL = "http://docker.for.mac.localhost:9324"
+)
 
 var (
 	// Execution
@@ -92,7 +96,7 @@ func init() {
 
 	// If environment is `dev` configure local endpoint
 	if Env == "dev" {
-		sessionOptions.Config = aws.Config{Endpoint: aws.String("http://docker.for.mac.localhost:9324")}
+		sessionOptions.Config = aws.Config{Endpoint: aws.String(LOCAL_ELASTIC_MQ_SERVER_URL)}
 	}
 
 	Session = aws_session.Must(aws_session.NewSessionWithOptions(sessionOptions))
@@ -112,7 +116,8 @@ func init() {
 }
 
 var handler = func(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(middlewares.CURRENT_USER).(dto.User)
+	// Get Auth user
+	user := middlewares.GetAuthUser(r)
 
 	// Parse request body to struct
 	receiptUrlRequest := &ReceiptUrlRequest{}

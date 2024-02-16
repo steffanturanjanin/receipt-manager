@@ -44,13 +44,19 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	// Get Auth user
+	user := middlewares.GetAuthUser(r)
+
 	// Extract id from path params
 	pathParams := mux.Vars(r)
 	receiptId, _ := strconv.ParseInt(pathParams["id"], 10, 64)
 
+	// Initialize query
+	query := db.Instance.Where("user_id = ?", user.Id)
+
 	// Find Receipt
 	var dbReceipt models.Receipt
-	if dbErr := db.Instance.First(&dbReceipt, receiptId).Error; dbErr != nil {
+	if dbErr := query.First(&dbReceipt, receiptId).Error; dbErr != nil {
 		if errors.Is(dbErr, gorm.ErrRecordNotFound) {
 			controllers.JsonResponse(w, ErrReceiptNotFound, http.StatusNotFound)
 			return
@@ -60,6 +66,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
+	// Build response
 	receiptResponse := transport.ReceiptResponse{}
 	receiptResponse = receiptResponse.FromModel(dbReceipt)
 
