@@ -173,12 +173,73 @@ Resources:
       CodeUri: ./cmd/aws/stores/index
       Handler: main
       Events:
-        Post:
+        Get:
           Type: Api
           Properties:
             RestApiId: !Ref ReceiptManagerApi
             Path: /stores
             Method: GET
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
+          API_SECRET: !Ref API_SECRET
+          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
+          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
+          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
+          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
+          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
+          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
+          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
+          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+
+  StoresReceipts:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: StoresReceipts
+      CodeUri: ./cmd/aws/stores/receipts
+      Handler: main
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /stores/{id}/receipts
+            Method: GET
+      Environment:
+        Variables:
+          DB_HOST: !Ref DB_HOST
+          DB_PORT: !Ref DB_PORT
+          DB_NAME: !Ref DB_NAME
+          DB_USER: !Ref DB_USER
+          DB_PASSWORD: !Ref DB_PASSWORD
+          API_SECRET: !Ref API_SECRET
+          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
+          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
+          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
+          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
+          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
+          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
+          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
+          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+
+  # ReceiptItems
+  ReceiptItemsUpdateCategory:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ReceiptItemsUpdateCategory
+      CodeUri: ./cmd/aws/receipt-items/update-category
+      Handler: main
+      Events:
+        Patch:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /receipt-items/{id}
+            Method: PATCH
       Environment:
         Variables:
           DB_HOST: !Ref DB_HOST
@@ -218,7 +279,7 @@ Resources:
       CodeUri: ./cmd/aws/receipts/index
       Handler: main
       Events:
-        Post:
+        Get:
           Type: Api
           Properties:
             RestApiId: !Ref ReceiptManagerApi
@@ -248,7 +309,7 @@ Resources:
       CodeUri: ./cmd/aws/receipts/show
       Handler: main
       Events:
-        Post:
+        Get:
           Type: Api
           Properties:
             RestApiId: !Ref ReceiptManagerApi
@@ -300,7 +361,7 @@ Resources:
           REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
-  
+
   ReceiptsDelete:
     Type: AWS::Serverless::Function
     Properties:
@@ -330,38 +391,7 @@ Resources:
           REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
           REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
           REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
-    
-    #ReceiptItems
-    ReceiptItemsUpdateCategory:
-      Type: AWS::Serverless::Function
-      Properties:
-        FunctionName: ReceiptItemsUpdateCategory
-        CodeUri: ./cmd/aws/receipt-items/update-category
-        Handler: main
-        Events:
-          Delete:
-            Type: Api
-            Properties:
-              RestApiId: !Ref ReceiptManagerApi
-              Path: /receipt-items/{id}
-              Method: PATCH
-        Environment:
-          Variables:
-            DB_HOST: !Ref DB_HOST
-            DB_PORT: !Ref DB_PORT
-            DB_NAME: !Ref DB_NAME
-            DB_USER: !Ref DB_USER
-            DB_PASSWORD: !Ref DB_PASSWORD
-            API_SECRET: !Ref API_SECRET
-            ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-            ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-            ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-            ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-            REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-            REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-            REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-            REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
-
+  
   # ReceiptItemsCategorize:
   #   Type: AWS::Serverless::Function
   #   Properties:
