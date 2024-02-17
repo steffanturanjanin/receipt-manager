@@ -7,7 +7,10 @@ type CategoryResponse struct {
 	Name string `json:"name"`
 }
 
-func (category CategoryResponse) FromModel(model models.Category) CategoryResponse {
+type CategoryTransformer struct{}
+
+func (t CategoryTransformer) TransformSingle(model models.Category) CategoryResponse {
+	category := CategoryResponse{}
 	category.ID = int(model.ID)
 	category.Name = model.Name
 

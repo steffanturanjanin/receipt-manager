@@ -117,8 +117,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 	}
 
-	response := transport.ReceiptItemResponse{}
-	response = response.FromModel(dbReceiptItem)
+	// Transform response
+	transformer := transport.ReceiptItemTransformer{}
+	response := transformer.TransformSingle(dbReceiptItem)
 
 	controllers.JsonResponse(w, &response, http.StatusOK)
 }

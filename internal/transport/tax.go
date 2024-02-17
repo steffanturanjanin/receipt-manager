@@ -9,7 +9,10 @@ type TaxResponse struct {
 	Rate       int    `json:"rate"`
 }
 
-func (tax TaxResponse) FromModel(model models.Tax) TaxResponse {
+type TaxTransformer struct{}
+
+func (t TaxTransformer) TransformSingle(model models.Tax) TaxResponse {
+	tax := TaxResponse{}
 	tax.ID = int(model.ID)
 	tax.Identifier = model.Identifier
 	tax.Name = model.Name

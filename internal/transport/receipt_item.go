@@ -1,6 +1,8 @@
 package transport
 
-import "github.com/steffanturanjanin/receipt-manager/internal/models"
+import (
+	"github.com/steffanturanjanin/receipt-manager/internal/models"
+)
 
 type ReceiptItemResponse struct {
 	ID           int               `json:"id"`
@@ -14,16 +16,22 @@ type ReceiptItemResponse struct {
 	Tax          *TaxResponse      `json:"tax"`
 }
 
-func (receiptItem ReceiptItemResponse) FromModel(model models.ReceiptItem) ReceiptItemResponse {
+type ReceiptItemTransformer struct{}
+
+func (t ReceiptItemTransformer) TransformSingle(model models.ReceiptItem) ReceiptItemResponse {
+	receiptItem := ReceiptItemResponse{}
+
 	var category *CategoryResponse
 	if model.Category != nil {
+		transformer := CategoryTransformer{}
 		category = new(CategoryResponse)
-		*category = category.FromModel(*model.Category)
+		*category = transformer.TransformSingle(*model.Category)
 	}
 	var tax *TaxResponse
 	if model.Tax != nil {
+		transformer := TaxTransformer{}
 		tax = new(TaxResponse)
-		*tax = tax.FromModel(*model.Tax)
+		*tax = transformer.TransformSingle(*model.Tax)
 	}
 
 	receiptItem.ID = int(model.ID)

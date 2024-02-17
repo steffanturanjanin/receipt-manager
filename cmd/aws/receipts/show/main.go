@@ -67,8 +67,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build response
-	receiptResponse := transport.ReceiptResponse{}
-	receiptResponse = receiptResponse.FromModel(dbReceipt)
+	transformer := transport.ReceiptTransformer{}
+	receiptResponse := transformer.TransformSingle(dbReceipt)
 
 	// Return response
 	controllers.JsonResponse(w, &receiptResponse, http.StatusOK)

@@ -42,7 +42,7 @@ func init() {
 
 	// Initialize router
 	Router := mux.NewRouter()
-	Router.HandleFunc("/stores", middlewares.SetAuthMiddleware(handler)).Methods("GET")
+	Router.HandleFunc("/stores", handler).Methods("GET")
 	GorillaLambda = gorillamux.New(Router)
 }
 
@@ -56,7 +56,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Query builder
 	baseQuery := db.Instance.Preload("Receipts", func(query *gorm.DB) *gorm.DB {
 		return query.Select("user_id")
-	}).Where("receipts.user_id = ?", user.Id)
+	}).Where("receipts.user_id = ?", user.Id).Order("name desc")
+
 	queryBuilder := query.NewStoreQueryBuilder(baseQuery)
 
 	// Execute paginated query
@@ -70,10 +71,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build response
-	storesResponse := transport.StoresResponse{}
-	storesResponse = storesResponse.FromModels(stores)
+	transformer := transport.StoreTransformer{}
+	storesResponse := transformer.Transform(stores)
 
-	response, err := transport.CreatePaginationResponse(&storesResponse.Items, result.Meta)
+	response, err := transport.CreatePaginationResponse(&storesResponse, result.Meta)
 	if err != nil {
 		log.Printf("Error while building response: %s\n", err.Error())
 

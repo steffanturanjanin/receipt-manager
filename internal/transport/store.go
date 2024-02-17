@@ -12,11 +12,21 @@ type StoreResponse struct {
 	City         string `json:"city"`
 }
 
-type StoresResponse struct {
-	Items []StoreResponse
+type StoreTransformer struct{}
+
+func (t StoreTransformer) Transform(models []models.Store) []StoreResponse {
+	items := make([]StoreResponse, 0)
+
+	for _, model := range models {
+		store := t.TransformSingle(model)
+		items = append(items, store)
+	}
+
+	return items
 }
 
-func (store StoreResponse) FromModel(model models.Store) StoreResponse {
+func (t StoreTransformer) TransformSingle(model models.Store) StoreResponse {
+	store := StoreResponse{}
 	store.ID = int(model.ID)
 	store.Tin = model.Tin
 	store.LocationId = model.LocationId
@@ -25,14 +35,4 @@ func (store StoreResponse) FromModel(model models.Store) StoreResponse {
 	store.City = model.City
 
 	return store
-}
-
-func (stores StoresResponse) FromModels(models []models.Store) StoresResponse {
-	for _, model := range models {
-		store := StoreResponse{}
-		store = store.FromModel(model)
-		stores.Items = append(stores.Items, store)
-	}
-
-	return stores
 }
