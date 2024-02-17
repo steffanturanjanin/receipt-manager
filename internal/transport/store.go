@@ -12,6 +12,10 @@ type StoreResponse struct {
 	City         string `json:"city"`
 }
 
+type StoresResponse struct {
+	Items []StoreResponse
+}
+
 func (store StoreResponse) FromModel(model models.Store) StoreResponse {
 	store.ID = int(model.ID)
 	store.Tin = model.Tin
@@ -21,4 +25,14 @@ func (store StoreResponse) FromModel(model models.Store) StoreResponse {
 	store.City = model.City
 
 	return store
+}
+
+func (stores StoresResponse) FromModels(models []models.Store) StoresResponse {
+	for _, model := range models {
+		store := StoreResponse{}
+		store = store.FromModel(model)
+		stores.Items = append(stores.Items, store)
+	}
+
+	return stores
 }

@@ -58,7 +58,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		// Unknown error. Lambda cannot process this error.
 		log.Printf("Error while trying to fetch receipt %d: %s\n", receiptId, dbErr.Error())
+
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	// Check if user has permission to delete receipt
@@ -72,7 +74,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if dbErr := db.Instance.Delete(&dbReceipt).Error; dbErr != nil {
 		// Unknown error. Lambda cannot process this error.
 		log.Printf("Error while trying to delete receipt %d: %s\n", receiptId, dbErr.Error())
+
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	// Set No Content 204

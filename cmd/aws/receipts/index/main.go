@@ -56,7 +56,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	user := middlewares.GetAuthUser(r)
 
 	// Initialize query builder
-	queryBuilder := query.NewReceiptQueryBuilder(db.Instance.Where("user_id = ?", user.Id))
+	baseQuery := db.Instance.Preload("Store").Preload("ReceiptItems").Where("user_id = ?", user.Id)
+	queryBuilder := query.NewReceiptQueryBuilder(baseQuery)
 
 	// Extract query params
 	sortQuery := middlewares.GetSortQueryParams(r)
@@ -68,7 +69,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	result, err := queryBuilder.Filter(filterQuery).Sort(sortQuery).ExecutePaginatedQuery(&receipts, paginationQuery)
 	if err != nil {
 		log.Printf("Error while executing paginated query %+v: %s", queryBuilder.Query, err.Error())
+
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	// Transformed receipts response
@@ -79,7 +82,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	total, err := queryBuilder.GetTotalPurchaseAmount()
 	if err != nil {
 		log.Printf("Error while executing total purchase amount count %+v: %s", queryBuilder.Query, err.Error())
+
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	// Include total in response meta along with pagination meta
@@ -92,7 +97,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	response, err := transport.CreatePaginationResponse(&receiptsResponse.Items, meta)
 	if err != nil {
 		log.Printf("Error while building response object: %s", err.Error())
+
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	controllers.JsonResponse(w, &response, http.StatusOK)

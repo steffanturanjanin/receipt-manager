@@ -32,16 +32,13 @@ type ReceiptQueryBuilder struct {
 	BaseQueryBuilder
 }
 
-func NewReceiptQueryBuilder(db *gorm.DB) ReceiptQueryBuilder {
-	return ReceiptQueryBuilder{
-		BaseQueryBuilder: BaseQueryBuilder{
-			Query: initializeQuery(db),
-		},
-	}
-}
+func NewReceiptQueryBuilder(query *gorm.DB) ReceiptQueryBuilder {
+	query = query.Model(&models.Receipt{})
+	baseQueryBuilder := BaseQueryBuilder{Query: query}
 
-func initializeQuery(db *gorm.DB) *gorm.DB {
-	return db.Model(&models.Receipt{})
+	return ReceiptQueryBuilder{
+		BaseQueryBuilder: baseQueryBuilder,
+	}
 }
 
 func (qb ReceiptQueryBuilder) Sort(sortQuery *SortQuery) ReceiptQueryBuilder {

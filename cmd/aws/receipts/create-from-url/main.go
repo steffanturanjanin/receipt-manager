@@ -123,7 +123,9 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	receiptUrlRequest := &ReceiptUrlRequest{}
 	if err := controllers.ParseBody(receiptUrlRequest, r); err != nil {
 		log.Printf("Error while parsing request: %s\n", err.Error())
+
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	// Validate request
