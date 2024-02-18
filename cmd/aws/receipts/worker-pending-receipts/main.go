@@ -152,6 +152,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		return err
 	}
 
+	dbReceipt.Status = models.RECEIPT_STATUS_PROCESSED
 	dbReceipt.PfrNumber = &receipt.Number
 	dbReceipt.Counter = &receipt.Counter
 	dbReceipt.TotalPurchaseAmount = &totalPurchaseAmount

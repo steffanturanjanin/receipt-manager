@@ -57,7 +57,7 @@ func SetAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		accessTokenPublicKey := os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
+		accessTokenPublicKey := os.Getenv("AccessTokenPublicKey")
 		sub, err := utils.ValidateToken(accessToken, accessTokenPublicKey)
 		if err != nil {
 			controllers.JsonErrorResponse(w, errors.NewErrUnauthorized(err, "Invalid access token."))

@@ -34,11 +34,11 @@ func InitDB(dbName string, dbUser string, dbPassword string, dbHost string, dbPo
 }
 
 func InitializeDB() error {
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
+	dbUser := os.Getenv("DbUser")
+	dbPassword := os.Getenv("DbPassword")
+	dbHost := os.Getenv("DbHost")
+	dbPort := os.Getenv("DbPort")
+	dbName := os.Getenv("DbName")
 
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		dbUser,

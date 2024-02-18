@@ -12,7 +12,6 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -52,7 +51,7 @@ func init() {
 	}
 
 	// Initialize OpenAI Client
-	OpenAiClient = openai.NewClient(os.Getenv("OPEN_AI_API_KEY"))
+	OpenAiClient = openai.NewClient(os.Getenv("OpenAiApiKey"))
 }
 
 // Process each individual message from the current SQS batch
@@ -89,13 +88,16 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		categories = append(categories, category)
 	}
 
-	// Send Completion request to OpenAI
-	response, err := OpenAiClient.CreateCompletion(ctx, openai.CompletionRequest{
-		Prompt:      GenerateCategorizationPrompt(categories, receiptItems),
+	messages := []openai.ChatCompletionMessage{{
+		Role:    openai.ChatMessageRoleUser,
+		Content: GenerateCategorizationPrompt(categories, receiptItems),
+	}}
+
+	response, err := OpenAiClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+		Messages:    messages,
 		Model:       openai.GPT3Dot5Turbo,
-		MaxTokens:   2000,
-		Temperature: 0.2,
-		Stop:        []string{"\n"},
+		MaxTokens:   2400,
+		Temperature: 0.1,
 	})
 
 	if err != nil {
@@ -103,7 +105,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 	}
 
 	// Get output
-	output := response.Choices[0].Text
+	output := response.Choices[0].Message.Content
 	// Normalize output
 	exp := regexp.MustCompile(`(\r\n?|\n){2,}`)
 	normalizedOutput := exp.ReplaceAllString(output, "$1")
@@ -134,17 +136,14 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 			}
 		}
 
+		// Update receipt item category
 		if foundReceiptItem != nil && foundCategory != nil {
-			foundReceiptItem.Category = foundCategory
-		}
-	}
+			foundReceiptItem.CategoryID = &foundCategory.ID
 
-	// Bulk update ReceiptItems categories
-	if err := DB.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"category_id"}),
-	}).Create(&dbReceiptItems).Error; err != nil {
-		return err
+			if err := DB.Save(&foundReceiptItem); err != nil {
+				break
+			}
+		}
 	}
 
 	return nil

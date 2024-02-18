@@ -56,7 +56,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	user := middlewares.GetAuthUser(r)
 
 	// Initialize query builder
-	baseQuery := db.Instance.Preload("Store").Preload("ReceiptItems").Where("user_id = ?", user.Id)
+	baseQuery := db.Instance.Preload("Store").Preload("ReceiptItems").Preload("ReceiptItems.Category").Where("user_id = ?", user.Id)
 	queryBuilder := query.NewReceiptQueryBuilder(baseQuery)
 
 	// Extract query params

@@ -50,7 +50,7 @@ func (s CategorizeService) Categorize(rilin ReceiptItemInList, clin CategoryInLi
 	formattedPrompt := fmt.Sprintf(CATEGORIZE_PROMPT_SERBIAN, rilin.toString(), clin.toString())
 
 	ctx := context.Background()
-	client := openai.NewClient(os.Getenv("OPEN_AI_API_KEY"))
+	client := openai.NewClient(os.Getenv("OpenAiApiKey"))
 	response, err := client.CreateCompletion(ctx, openai.CompletionRequest{
 		Model:       openai.GPT3TextDavinci003,
 		MaxTokens:   2000,

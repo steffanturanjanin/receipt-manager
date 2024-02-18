@@ -7,20 +7,16 @@ import (
 
 var (
 	categories = []string{
-		"Hrana",
 		"Voće i povrće",
-		"Delikates",
-		"Meso",
-		"Riba",
+		"Mesne prerađevine",
+		"Meso i riba",
 		"Mlečni proizvodi i jaja",
 		"Hleb i pekarski proizvodi",
 		"Namirnice za pripremu jela",
 		"Slatkiši i grickalice",
 		"Gotova jela",
-		"Piće",
 		"Alkoholna pića",
-		"Sokovi",
-		"Voda",
+		"Sokovi i voda",
 		"Čaj i kafa",
 		"Kućna hemija",
 		"Lična higijena i nega",
@@ -28,6 +24,8 @@ var (
 		"Odeća i obuća",
 		"Zdravlje",
 		"Domaćinstvo",
+		"Kućni ljubimci",
+		"Automobil",
 	}
 
 	taxes = []models.Tax{

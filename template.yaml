@@ -12,91 +12,94 @@ Globals:
     Runtime: go1.x
     Environment:
       Variables:
-        ENVIRONMENT: !Ref ENVIRONMENT
+        Environment: !Ref Environment
 
 Parameters:
-  ENVIRONMENT:
+  Environment:
     Type: String
     Description: Environment 
     Default: dev
-  DB_HOST:
+  DbHost:
     Type: String
     Description: DB Host
-    Default:
-  DB_PORT:
+    Default: empty
+  DbPort:
     Type: String
     Description: DB Port
-    Default:
-  DB_NAME:
+    Default: empty
+  DbName:
     Type: String
     Description: DB Name
-    Default:
-  DB_USER:
+    Default: empty
+  DbUser:
     Type: String
     Description: DB User
-    Default:
-  DB_PASSWORD:
+    Default: empty
+  DbPassword:
     Type: String
     Description: DB Password
-    Default:
-  API_SECRET:
+    Default: empty
+    NoEcho: true
+  ApiSecret:
     Type: String
     Description: Api Secret
-    Default: 
-  ACCESS_TOKEN_PUBLIC_KEY:
+    Default: empty
+  AccessTokenPublicKey:
     Type: String
     Description: Access Token Public Key
-    Default:
-  ACCESS_TOKEN_PRIVATE_KEY:
+    Default: empty
+  AccessTokenPrivateKey:
     Type: String
     Description: Access Token Private Key
-    Default:
-  ACCESS_TOKEN_MAX_AGE:
+    Default: empty
+  AccessTokenMaxAge:
     Type: String
     Description: Access Token Max Age
     Default: 21600
-  ACCESS_TOKEN_EXPIRES_IN:
+  AccessTokenExpiresIn:
     Type: String
     Description: Access Token Expires In
     Default: 360h
-  REFRESH_TOKEN_PUBLIC_KEY:
+  RefreshTokenPublicKey:
     Type: String
     Description: Refresh Token Public Key
-    Default:
-  REFRESH_TOKEN_PRIVATE_KEY:
+    Default: empty
+  RefreshTokenPrivateKey:
     Type: String
     Description: Refresh Token Private Key
-    Default:
-  REFRESH_TOKEN_MAX_AGE:
+    Default: empty
+  RefreshTokenMaxAge:
     Type: String
     Description: Refresh Token Max Age
     Default: 21600
-  REFRESH_TOKEN_EXPIRES_IN:
+  RefreshTokenExpiresIn:
     Type: String
     Description: Refresh Token Expires In
     Default: 360h
-  OPEN_AI_API_KEY:
+  OpenAiApiKey:
     Type: String
     Description: Open AI API Key
-    Default:
+    Default: empty
 
 Resources:
   # ApiGateway
   ReceiptManagerApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: ReceiptManagerApi.Test
+      StageName: ReceiptManagerApiTest
 
   # SQS
   PendingReceiptsQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: pending_receipts
+      VisibilityTimeout: 60
 
   ReceiptItemsCategorizeQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: receipt_items_categorize
+      VisibilityTimeout: 60
 
   # Lambdas
   # Auth
@@ -115,11 +118,11 @@ Resources:
             Method: POST
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
 
   AuthLogin:
     Type: AWS::Serverless::Function
@@ -136,20 +139,20 @@ Resources:
             Method: POST
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
   AuthLogout:
     Type: AWS::Serverless::Function
@@ -181,20 +184,20 @@ Resources:
             Method: GET
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
   StoresReceipts:
     Type: AWS::Serverless::Function
@@ -211,20 +214,20 @@ Resources:
             Method: GET
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
   # ReceiptItems
   ReceiptItemsUpdateCategory:
@@ -242,20 +245,20 @@ Resources:
             Method: PATCH
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
           
   # Receipts
   ReceiptsParse:
@@ -287,20 +290,20 @@ Resources:
             Method: GET
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
   ReceiptsShow:
     Type: AWS::Serverless::Function
@@ -317,20 +320,20 @@ Resources:
             Method: GET
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
   ReceiptsCreateFromUrl:
     Type: AWS::Serverless::Function
@@ -347,20 +350,20 @@ Resources:
             Method: POST
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
   ReceiptsDelete:
     Type: AWS::Serverless::Function
@@ -377,20 +380,20 @@ Resources:
             Method: DELETE
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          API_SECRET: !Ref API_SECRET
-          ACCESS_TOKEN_PUBLIC_KEY: !Ref ACCESS_TOKEN_PUBLIC_KEY
-          ACCESS_TOKEN_PRIVATE_KEY: !Ref ACCESS_TOKEN_PRIVATE_KEY
-          ACCESS_TOKEN_MAX_AGE: !Ref ACCESS_TOKEN_MAX_AGE
-          ACCESS_TOKEN_EXPIRES_IN: !Ref ACCESS_TOKEN_EXPIRES_IN
-          REFRESH_TOKEN_PUBLIC_KEY: !Ref REFRESH_TOKEN_PUBLIC_KEY
-          REFRESH_TOKEN_PRIVATE_KEY: !Ref REFRESH_TOKEN_PRIVATE_KEY
-          REFRESH_TOKEN_MAX_AGE: !Ref REFRESH_TOKEN_MAX_AGE
-          REFRESH_TOKEN_EXPIRES_IN: !Ref REFRESH_TOKEN_EXPIRES_IN
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
   WorkerPendingReceipts:
     Type: AWS::Serverless::Function
@@ -399,18 +402,19 @@ Resources:
       CodeUri: ./cmd/aws/receipts/worker-pending-receipts
       Handler: main
       Events:
-        PendingReceiptsQueueWrite:
+        QueueWrite:
           Type: SQS
           Properties:
             Queue: !GetAtt PendingReceiptsQueue.Arn
-            BatchSize: 10
+            BatchSize: 5
+      Timeout: 60
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
 
   WorkerCategorizeReceiptItems:
     Type: AWS::Serverless::Function
@@ -419,19 +423,20 @@ Resources:
       CodeUri: ./cmd/aws/receipts/worker-categorize-receipt-items
       Handler: main
       Events:
-        ReceiptItemsCategorizeQueueWrite:
+        QueueWrite:
           Type: SQS
           Properties:
             Queue: !GetAtt ReceiptItemsCategorizeQueue.Arn
-            BatchSize: 10
+            BatchSize: 5
+      Timeout: 60
       Environment:
         Variables:
-          DB_HOST: !Ref DB_HOST
-          DB_PORT: !Ref DB_PORT
-          DB_NAME: !Ref DB_NAME
-          DB_USER: !Ref DB_USER
-          DB_PASSWORD: !Ref DB_PASSWORD
-          OPEN_AI_API_KEY: !Ref OPEN_AI_API_KEY
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          OpenAiApiKey: !Ref OpenAiApiKey
 
 # Output example:
 # HelloWorldFunction:
@@ -446,55 +451,55 @@ Outputs:
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   # Api Gateway
-  ReceiptManagerApi:
-    Description: "API Gateway endpoint URL for Prod environment for First Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/receipt-manager/"
+  # ReceiptManagerApi:
+  #   Description: "API Gateway endpoint URL for Prod environment for First Function"
+  #   Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/receipt-manager/"
   # SQS
   PendingReceiptsQueue:
-    Description:
+    Description: test
     Value: !GetAtt PendingReceiptsQueue.Arn
   ReceiptItemsCategorizeQueue:
-    Description:
+    Description: test
     Value: !GetAtt ReceiptItemsCategorizeQueue.Arn
   # Auth
   AuthRegister:
-    Description:
+    Description: test
     Value: !GetAtt AuthRegister.Arn
   AuthLogin:
-    Description:
+    Description: test
     Value: !GetAtt AuthLogin.Arn
   AuthLogout:
-    Description:
+    Description: test
     Value: !GetAtt AuthLogout.Arn
   # Stores
   StoresIndex:
-    Description:
+    Description: test
     Value: !GetAtt StoresIndex.Arn
   StoresReceipts:
-    Description:
+    Description: test
     Value: !GetAtt StoresReceipts.Arn
   # Receipt Items
   ReceiptItemsUpdateCategory:
-    Description:
+    Description: test
     Value: !GetAtt ReceiptItemsUpdateCategory.Arn
   ReceiptsParse:
-    Description:
+    Description: test
     Value: !GetAtt ReceiptsParse.Arn
   ReceiptsIndex:
-    Description:
+    Description: test
     Value: !GetAtt ReceiptsIndex.Arn
   ReceiptsShow:
-    Description:
+    Description: test
     Value: !GetAtt ReceiptsShow.Arn
   ReceiptsCreateFromUrl:
-    Description:
+    Description: test
     Value: !GetAtt ReceiptsCreateFromUrl.Arn
   ReceiptsDelete:
-    Description:
+    Description: test
     Value: !GetAtt ReceiptsDelete.Arn
   WorkerPendingReceipts:
-    Description:
+    Description: test
     Value: !GetAtt WorkerPendingReceipts.Arn
   WorkerCategorizeReceiptItems:
-    Description:
+    Description: test
     Value: !GetAtt WorkerCategorizeReceiptItems.Arn

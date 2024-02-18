@@ -56,9 +56,9 @@ func (service *AuthService) LoginUser(request dto.LoginUserRequest) (*dto.Access
 		return nil, nil, errors.NewErrUnauthorized(err, "Invalid credentials.")
 	}
 
-	accessTokenPrivateKey := os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
-	accessTokenMaxAge, _ := strconv.Atoi(os.Getenv("ACCESS_TOKEN_MAX_AGE"))
-	accessTokenTTL, err := time.ParseDuration(os.Getenv("ACCESS_TOKEN_EXPIRES_IN"))
+	accessTokenPrivateKey := os.Getenv("AccessTokenPrivateKey")
+	accessTokenMaxAge, _ := strconv.Atoi(os.Getenv("AccessTokenMaxAge"))
+	accessTokenTTL, err := time.ParseDuration(os.Getenv("AccessTokenExpiresIn"))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -68,9 +68,9 @@ func (service *AuthService) LoginUser(request dto.LoginUserRequest) (*dto.Access
 		return nil, nil, err
 	}
 
-	refreshTokenPrivateKey := os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
-	refreshTokenMaxAge, _ := strconv.Atoi(os.Getenv("REFRESH_TOKEN_MAX_AGE"))
-	refreshTokenTTL, err := time.ParseDuration(os.Getenv("REFRESH_TOKEN_EXPIRES_IN"))
+	refreshTokenPrivateKey := os.Getenv("RefreshTokenPrivateKey")
+	refreshTokenMaxAge, _ := strconv.Atoi(os.Getenv("RefreshTokenMaxAge"))
+	refreshTokenTTL, err := time.ParseDuration(os.Getenv("RefreshTokenExpiresIn"))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -115,7 +115,7 @@ func (service *AuthService) LoginUser(request dto.LoginUserRequest) (*dto.Access
 }
 
 func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*dto.AccessToken, *AuthCookies, error) {
-	refreshTokenPublicKey := os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
+	refreshTokenPublicKey := os.Getenv("RefreshTokenPublicKey")
 	sub, _ := utils.ValidateToken(refreshToken.Value, refreshTokenPublicKey)
 	userId, _ := strconv.Atoi(fmt.Sprint(sub))
 	userModel, err := service.UserRepository.GetById(userId)
@@ -123,9 +123,9 @@ func (service *AuthService) RefreshToken(refreshToken RefreshTokenCookie) (*dto.
 		return nil, nil, err
 	}
 
-	accessTokenPrivateKey := os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
-	accessTokenMaxAge, _ := strconv.Atoi(os.Getenv("ACCESS_TOKEN_MAX_AGE"))
-	accessTokenTTL, err := time.ParseDuration(os.Getenv("ACCESS_TOKEN_EXPIRES_IN"))
+	accessTokenPrivateKey := os.Getenv("AccessTokenPrivateKey")
+	accessTokenMaxAge, _ := strconv.Atoi(os.Getenv("AccessTokenMaxAge"))
+	accessTokenTTL, err := time.ParseDuration(os.Getenv("AccessTokenExpiresIn"))
 	if err != nil {
 		return nil, nil, err
 	}

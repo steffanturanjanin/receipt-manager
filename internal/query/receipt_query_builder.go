@@ -1,6 +1,7 @@
 package query
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -99,14 +100,15 @@ func (qb ReceiptQueryBuilder) GetFilters(r *http.Request) ReceiptFilters {
 	}
 
 	// Time layout constant
-	timeFormat := "2006-01-02 15:04:05"
+	timeFormat := "2006-01-02"
 
 	// Extract `fromDate` date range filter
 	var fromDate time.Time
-	if parsedTime, err := time.Parse(queryParams.Get(FROM_DATE), timeFormat); err == nil {
+	if parsedTime, err := time.Parse(timeFormat, queryParams.Get(FROM_DATE)); err == nil {
 		// Set parsed date
 		fromDate = parsedTime
 	} else {
+		fmt.Printf("ERROR_PARSING_FROM_DATE: %s\n", err)
 		// Get the current date
 		currentDate := time.Now()
 
@@ -119,10 +121,12 @@ func (qb ReceiptQueryBuilder) GetFilters(r *http.Request) ReceiptFilters {
 
 	// Extract `toDate` date range filter
 	var toDate time.Time
-	if parsedTime, err := time.Parse(queryParams.Get(TO_DATE), timeFormat); err == nil {
+	if parsedTime, err := time.Parse(timeFormat, queryParams.Get(TO_DATE)); err == nil {
 		// Set parsed date
 		toDate = parsedTime
 	} else {
+		fmt.Printf("ERROR_PARSING_TO_DATE: %s\n", err)
+
 		// Get the current date
 		currentDate := time.Now()
 

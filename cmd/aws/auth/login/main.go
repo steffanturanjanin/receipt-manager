@@ -21,11 +21,11 @@ import (
 )
 
 var (
-	dbUser     = os.Getenv("DB_USER")
-	dbPassword = os.Getenv("DB_PASSWORD")
-	dbHost     = os.Getenv("DB_HOST")
-	dbPort     = os.Getenv("DB_PORT")
-	dbName     = os.Getenv("DB_NAME")
+	dbUser     = os.Getenv("DbUser")
+	dbPassword = os.Getenv("DbPassword")
+	dbHost     = os.Getenv("DbHost")
+	dbPort     = os.Getenv("DbPort")
+	dbName     = os.Getenv("DbName")
 
 	db             *gorm.DB
 	err            error
