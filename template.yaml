@@ -12,7 +12,7 @@ Globals:
     Runtime: go1.x
     Environment:
       Variables:
-        ENVIRONMENT: dev
+        ENVIRONMENT: !Ref ENVIRONMENT
 
 Parameters:
   ENVIRONMENT:
@@ -433,16 +433,68 @@ Resources:
           DB_PASSWORD: !Ref DB_PASSWORD
           OPEN_AI_API_KEY: !Ref OPEN_AI_API_KEY
 
-# Outputs:
-#   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-#   # Find out more about other implicit resources you can reference within SAM
-#   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-#   HelloWorldAPI:
-#     Description: "API Gateway endpoint URL for Prod environment for First Function"
-#     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-#   HelloWorldFunction:
-#     Description: "First Lambda Function ARN"
-#     Value: !GetAtt HelloWorldFunction.Arn
-#   HelloWorldFunctionIamRole:
-#     Description: "Implicit IAM Role created for Hello World function"
-#     Value: !GetAtt HelloWorldFunctionRole.Arn
+# Output example:
+# HelloWorldFunction:
+#   Description: "First Lambda Function ARN"
+#   Value: !GetAtt HelloWorldFunction.Arn
+# HelloWorldFunctionIamRole:
+#   Description: "Implicit IAM Role created for Hello World function"
+#   Value: !GetAtt HelloWorldFunctionRole.Arn
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  # Api Gateway
+  ReceiptManagerApi:
+    Description: "API Gateway endpoint URL for Prod environment for First Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/receipt-manager/"
+  # SQS
+  PendingReceiptsQueue:
+    Description:
+    Value: !GetAtt PendingReceiptsQueue.Arn
+  ReceiptItemsCategorizeQueue:
+    Description:
+    Value: !GetAtt ReceiptItemsCategorizeQueue.Arn
+  # Auth
+  AuthRegister:
+    Description:
+    Value: !GetAtt AuthRegister.Arn
+  AuthLogin:
+    Description:
+    Value: !GetAtt AuthLogin.Arn
+  AuthLogout:
+    Description:
+    Value: !GetAtt AuthLogout.Arn
+  # Stores
+  StoresIndex:
+    Description:
+    Value: !GetAtt StoresIndex.Arn
+  StoresReceipts:
+    Description:
+    Value: !GetAtt StoresReceipts.Arn
+  # Receipt Items
+  ReceiptItemsUpdateCategory:
+    Description:
+    Value: !GetAtt ReceiptItemsUpdateCategory.Arn
+  ReceiptsParse:
+    Description:
+    Value: !GetAtt ReceiptsParse.Arn
+  ReceiptsIndex:
+    Description:
+    Value: !GetAtt ReceiptsIndex.Arn
+  ReceiptsShow:
+    Description:
+    Value: !GetAtt ReceiptsShow.Arn
+  ReceiptsCreateFromUrl:
+    Description:
+    Value: !GetAtt ReceiptsCreateFromUrl.Arn
+  ReceiptsDelete:
+    Description:
+    Value: !GetAtt ReceiptsDelete.Arn
+  WorkerPendingReceipts:
+    Description:
+    Value: !GetAtt WorkerPendingReceipts.Arn
+  WorkerCategorizeReceiptItems:
+    Description:
+    Value: !GetAtt WorkerCategorizeReceiptItems.Arn
