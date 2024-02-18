@@ -118,28 +118,37 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 
 	// Combination of Tin and LocationId should be unique
 	var dbStore models.Store
-	db.Instance.FirstOrCreate(&dbStore, models.Store{Tin: receipt.Store.Tin, LocationId: receipt.Store.LocationId}, func(tx *gorm.DB) error {
+	if dbErr := db.Instance.FirstOrCreate(&dbStore, models.Store{Tin: receipt.Store.Tin, LocationId: receipt.Store.LocationId}, func(tx *gorm.DB) error {
 		dbStore.Name = receipt.Store.Name
 		dbStore.LocationName = receipt.Store.LocationName
 		dbStore.Address = receipt.Store.Address
 		dbStore.City = receipt.Store.City
-
 		return nil
-	})
+	}).Error; dbErr != nil {
+		return dbErr
+	}
 
 	dbReceiptItems := make([]models.ReceiptItem, 0)
 	for _, receiptItemDto := range receipt.Items {
+
+		var dbTax models.Tax
+		dbResult := db.Instance.FirstOrCreate(&dbTax, models.Tax{
+			Identifier: receiptItemDto.Tax.Identifier,
+			Name:       receiptItemDto.Name,
+			Rate:       receiptItemDto.Tax.Rate,
+		})
+
+		if dbResult.Error != nil {
+			continue
+		}
+
 		dbReceiptItems = append(dbReceiptItems, models.ReceiptItem{
 			Name:         receiptItemDto.Name,
 			Unit:         receiptItemDto.Unit,
 			Quantity:     receiptItemDto.Quantity,
 			SingleAmount: receiptItemDto.SingleAmount.GetParas(),
 			TotalAmount:  receiptItemDto.TotalAmount.GetParas(),
-			Tax: &models.Tax{
-				Identifier: receiptItemDto.Tax.Identifier,
-				Name:       receiptItemDto.Tax.Name,
-				Rate:       receiptItemDto.Tax.Rate,
-			},
+			Tax:          &dbTax,
 		})
 	}
 
