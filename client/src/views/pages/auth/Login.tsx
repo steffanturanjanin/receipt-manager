@@ -5,11 +5,8 @@ import { SxProps } from '@mui/material/styles';
 const Copyright: FunctionComponent<{ sx: SxProps }> = ({ sx }) => (
 	<Typography variant="body2" color="text.secondary" align="center" sx={sx}>
 		{'Copyright © '}
-		<Link color="inherit" href="/">
-			Receipt manager
-		</Link>{' '}
-		{new Date().getFullYear()}
-		{'.'}
+		<Link color="inherit" href="/">Receipt manager</Link>
+		{' '} {new Date().getFullYear()} {'.'}
 	</Typography>
 );
 
