@@ -32,7 +32,7 @@ const Login: FunctionComponent = () => {
 					}}
 				>
 					<Typography component="h1" variant="h5">
-						Log in
+						Register
 					</Typography>
 					<Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
 						<TextField
@@ -61,7 +61,7 @@ const Login: FunctionComponent = () => {
 							variant="contained"
 							sx={{ mt: 3, mb: 2 }}
 						>
-							Log In
+							Register
 						</Button>
 					</Box>
 				</Box>

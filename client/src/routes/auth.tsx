@@ -1,7 +1,6 @@
-import { Fragment } from 'react';
 import { Navigate, RouteObject } from 'react-router-dom';
-
 import Login from "../views/pages/auth/Login";
+import Register from "../views/pages/auth/Register";
 
 const auth: RouteObject[] = [
 	{
@@ -18,7 +17,7 @@ const auth: RouteObject[] = [
 			},
 			{
 				path: 'register',
-				element: <Fragment>Register</Fragment>,
+				element: <Register />,
 			}
 		]
 	}
