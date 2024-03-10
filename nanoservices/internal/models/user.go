@@ -22,8 +22,6 @@ func NewUserResponseDTOFromUserModel(user User) dto.User {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
 	}
 }
 

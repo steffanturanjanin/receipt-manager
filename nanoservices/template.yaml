@@ -176,6 +176,27 @@ Resources:
             RestApiId: !Ref ReceiptManagerApi
             Path: /auth/logout
             Method: POST
+  
+  AuthMe:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AuthMe
+      CodeUri: ./cmd/aws/auth/me
+      Handler: main
+      Events:
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /auth/me
+            Method: GET
+      Environment:
+        Variables:
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
 
   # Stores
   StoresIndex:

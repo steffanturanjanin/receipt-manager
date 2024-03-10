@@ -1,9 +1,5 @@
 package dto
 
-import (
-	"time"
-)
-
 type RegisterUserRequest struct {
 	FirstName string `validate:"required,max=255" json:"first_name"`
 	LastName  string `validate:"required,max=255" json:"last_name"`
@@ -17,12 +13,10 @@ type LoginUserRequest struct {
 }
 
 type User struct {
-	Id        uint      `json:"id"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id        uint   `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
 }
 
 type AccessToken struct {
