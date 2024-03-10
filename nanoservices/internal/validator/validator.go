@@ -1,13 +1,16 @@
 package validator
 
 import (
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"strings"
 
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/validator/v10"
+	db "github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
 
 	ut "github.com/go-playground/universal-translator"
@@ -96,6 +99,7 @@ func (v *Validator) RegisterCustomTagValidations() {
 	v.Validator.RegisterValidation("receipt_url", receiptUrlValidation)
 	v.Validator.RegisterValidation("url_query_params", urlQueryParamsValidation)
 	v.Validator.RegisterValidation("url_host", urlHostValidation)
+	v.Validator.RegisterValidation("unique", isUniqueField)
 }
 
 func (v *Validator) RegisterTranslations() {
@@ -152,6 +156,13 @@ func (v *Validator) RegisterTranslations() {
 		t, _ := ut.T("url_host", fe.Param())
 		return t
 	})
+
+	_ = v.Validator.RegisterTranslation("unique", v.Translator, func(ut ut.Translator) error {
+		return ut.Add("unique", "{0} must be unique.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("unique", fe.Field())
+		return t
+	})
 }
 
 func (v *Validator) RegisterTagNameFunc(f validator.TagNameFunc) {
@@ -193,7 +204,11 @@ func lowerCaseTagNameFunction(field reflect.StructField) string {
 
 // Custom validation functions
 
-// Custom tag validation functions
+/************************************************************/
+/* Custom validation functions								*/
+/************************************************************/
+
+// Receipts
 func receiptUrlValidation(fl validator.FieldLevel) bool {
 	const FISCALIZATION_SYSTEM_HOST = "suf.purs.gov.rs"
 	url, err := url.Parse(fl.Field().String())
@@ -246,4 +261,29 @@ func urlHostValidation(fl validator.FieldLevel) bool {
 	actualHostname := strings.TrimPrefix(parsedUrl.Hostname(), "www")
 
 	return expectedHostname == actualHostname
+}
+
+// Example:
+//
+//	type RegisterUser struct {
+//		Email: unique:users.email,
+//		...
+//	}
+func isUniqueField(fl validator.FieldLevel) bool {
+	// struct field value
+	value := fl.Field().String()
+
+	// parts[0] - table name
+	// parts[1] - table field
+	parts := strings.Split(fl.Param(), ".")
+	table := parts[0]
+	field := parts[1]
+
+	var count int
+	if err := db.Instance.Raw("SELECT COUNT(*) FROM ? WHERE ? = ?", table, field, value).Scan(&count).Error; err != nil {
+		log.Printf("Error performing unique validation: %s\n", err)
+		os.Exit(1)
+	}
+
+	return count == 0
 }

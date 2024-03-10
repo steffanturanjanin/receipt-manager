@@ -4,76 +4,172 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 
-	"github.com/steffanturanjanin/receipt-manager/internal/auth"
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
-	"github.com/steffanturanjanin/receipt-manager/internal/database"
-	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	db "github.com/steffanturanjanin/receipt-manager/internal/database"
+	"github.com/steffanturanjanin/receipt-manager/internal/dto"
+	"github.com/steffanturanjanin/receipt-manager/internal/models"
+	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 	"github.com/steffanturanjanin/receipt-manager/internal/user"
+	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
-var (
-	dbUser     = os.Getenv("DbUser")
-	dbPassword = os.Getenv("DbPassword")
-	dbHost     = os.Getenv("DbHost")
-	dbPort     = os.Getenv("DbPort")
-	dbName     = os.Getenv("DbName")
+type RegisterUserRequest struct {
+	FirstName string `validate:"required, max=255" json:"first_name"`
+	LastName  string `validate:"required, max=255" json:"last_name"`
+	Email     string `validate:"required, email, unique=users.email" json:"email"`
+	Password  string `validate:"required, min=8, max=100" json:"password"`
+}
 
-	db             *gorm.DB
-	err            error
-	userRepository *user.UserRepository
-	authService    *auth.AuthService
-	validator      *validation.Validator
-	gorillaLambda  *gorillamux.GorillaMuxAdapter
+var (
+	// Env variables
+	AccessTokenPrivateKey  string
+	AccessTokenMaxAge      int
+	AccessTokenTTL         time.Duration
+	RefreshTokenPrivateKey string
+	RefreshTokenMaxAge     int
+	RefreshTokenTTL        time.Duration
+
+	// Tokens
+	AccessToken  string
+	RefreshToken string
+
+	// Auth cookies
+	AccessTokenCookie  http.Cookie
+	RefreshTokenCookie http.Cookie
+	LoggedInCookie     http.Cookie
+
+	// Validator
+	Validator *validation.Validator
+
+	// Router
+	GorillaLambda *gorillamux.GorillaMuxAdapter
+
+	// Errors
+	ErrServiceUnavailable = transport.NewServiceUnavailableError()
 )
 
 func init() {
-	db, err = database.InitDB(dbName, dbUser, dbPassword, dbHost, dbPort)
-	if err != nil {
+	// Initialize database
+	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
 	}
 
-	userRepository = user.NewUserRepository(db)
-	authService = auth.NewAuthService(userRepository)
-	validator = validation.NewDefaultValidator()
+	AccessTokenPrivateKey = os.Getenv("AccessTokenPrivateKey")
+	AccessTokenMaxAge, _ = strconv.Atoi(os.Getenv("AccessTokenMaxAge"))
+	AccessTokenTTL, _ = time.ParseDuration(os.Getenv("AccessTokenExpiresIn"))
+	RefreshTokenPrivateKey = os.Getenv("RefreshTokenPrivateKey")
+	RefreshTokenMaxAge, _ = strconv.Atoi(os.Getenv("RefreshTokenMaxAge"))
+	RefreshTokenTTL, _ = time.ParseDuration(os.Getenv("RefreshTokenExpiresIn"))
 
-	r := mux.NewRouter()
+	// Initialize Router
+	Router := mux.NewRouter()
+	Router.HandleFunc("/auth/register", handler)
+	GorillaLambda = gorillamux.New(Router)
 
-	r.HandleFunc("/auth/register", func(w http.ResponseWriter, r *http.Request) {
-		registerRequest := new(user.RegisterUserRequest)
+	// Initialize Validator
+	Validator = validation.NewDefaultValidator()
+}
 
-		if err := controllers.ParseBody(registerRequest, r); err != nil {
-			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
-			return
-		}
+var handler = func(w http.ResponseWriter, r *http.Request) {
+	registerRequest := &user.RegisterUserRequest{}
+	if err := controllers.ParseBody(registerRequest, r); err != nil {
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
 
-		if err := controllers.ValidateRequest(registerRequest, validator); err != nil {
-			controllers.JsonErrorResponse(w, err)
-			return
-		}
+	// Validate request
+	// If failed return 422 Unprocessed Entity with error map
+	if err := Validator.GetValidationErrors(registerRequest); err != nil {
+		controllers.JsonResponse(w, transport.NewValidationError(err), http.StatusUnprocessableEntity)
+		return
+	}
 
-		response, err := authService.RegisterUser(*registerRequest)
-		if err != nil {
-			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
-			return
-		}
+	// Hash password
+	hashedPassword, err := utils.HashPassword(registerRequest.Password)
+	if err != nil {
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
 
-		controllers.JsonResponse(w, response, http.StatusCreated)
-	})
+	user := models.User{
+		FirstName: registerRequest.FirstName,
+		LastName:  registerRequest.LastName,
+		Email:     registerRequest.Email,
+		Password:  hashedPassword,
+	}
 
-	gorillaLambda = gorillamux.New(r)
+	// Create user with hashed password
+	if err := db.Instance.Create(&user).Error; err != nil {
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
+
+	// Generate access token
+	AccessToken, err = utils.CreateToken(AccessTokenTTL, user.ID, AccessTokenPrivateKey)
+	if err != nil {
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
+
+	// Generate refresh token
+	RefreshToken, err = utils.CreateToken(RefreshTokenTTL, user.ID, RefreshTokenPrivateKey)
+	if err != nil {
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
+
+	// Generate access token cookie
+	AccessTokenCookie = http.Cookie{
+		Name:     "access_token",
+		Value:    AccessToken,
+		Path:     "/",
+		MaxAge:   AccessTokenMaxAge * 60,
+		Secure:   false,
+		HttpOnly: true,
+	}
+
+	// Generate refresh token cookie
+	RefreshTokenCookie = http.Cookie{
+		Name:     "refresh_token",
+		Value:    RefreshToken,
+		Path:     "/",
+		MaxAge:   RefreshTokenMaxAge * 60,
+		Secure:   false,
+		HttpOnly: true,
+	}
+
+	// Generate logged in cookie
+	LoggedInCookie = http.Cookie{
+		Name:     "logged_in",
+		Value:    "true",
+		Path:     "/",
+		MaxAge:   AccessTokenMaxAge * 60,
+		Secure:   false,
+		HttpOnly: false,
+	}
+
+	// Set auth cookies
+	http.SetCookie(w, &AccessTokenCookie)
+	http.SetCookie(w, &RefreshTokenCookie)
+	http.SetCookie(w, &LoggedInCookie)
+
+	response := dto.AccessToken{AccessToken: AccessToken}
+
+	controllers.JsonResponse(w, response, http.StatusCreated)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	r, err := gorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
+	r, err := GorillaLambda.ProxyWithContext(ctx, *core.NewSwitchableAPIGatewayRequestV1(&request))
 	return *r.Version1(), err
 }
 
