@@ -280,7 +280,7 @@ func isUniqueField(fl validator.FieldLevel) bool {
 	field := parts[1]
 
 	var count int
-	if err := db.Instance.Raw("SELECT COUNT(*) FROM ? WHERE ? = ?", table, field, value).Scan(&count).Error; err != nil {
+	if err := db.Instance.Raw("SELECT COUNT(*) FROM `"+table+"` WHERE `"+field+"` = ?", value).Scan(&count).Error; err != nil {
 		log.Printf("Error performing unique validation: %s\n", err)
 		os.Exit(1)
 	}

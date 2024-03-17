@@ -84,9 +84,15 @@ func init() {
 		os.Exit(1)
 	}
 
+	// Build middleware chain
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
+	authMiddleware := middlewares.SetAuthMiddleware
+	handler := authMiddleware(corsMiddleware(jsonMiddleware(handler)))
+
 	// Initialize Router
 	Router := mux.NewRouter()
-	Router.HandleFunc("/receipts", middlewares.SetAuthMiddleware(handler)).Methods("POST")
+	Router.HandleFunc("/receipts", handler).Methods("POST")
 	GorillaLambda = gorillamux.New(Router)
 
 	// Initialize AWS session and SQS client

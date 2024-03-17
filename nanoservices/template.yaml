@@ -13,6 +13,7 @@ Globals:
     Environment:
       Variables:
         Environment: !Ref Environment
+        Origin: !Ref Origin
 
 Parameters:
   Environment:
@@ -80,6 +81,10 @@ Parameters:
     Type: String
     Description: Open AI API Key
     Default: empty
+  Origin:
+    Type: String
+    Description: Allowed Origins
+    Default: empty
 
 Resources:
   # ApiGateway
@@ -87,6 +92,11 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: ReceiptManagerApiTest
+      Cors:
+        AllowMethods: "'GET, POST, PUT, DELETE, OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+        MaxAge: 600
 
   # SQS
   PendingReceiptsQueue:

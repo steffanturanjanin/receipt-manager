@@ -10,70 +10,72 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 
 	"github.com/steffanturanjanin/receipt-manager/internal/auth"
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
-	"github.com/steffanturanjanin/receipt-manager/internal/database"
+	db "github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/user"
 	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
 var (
-	dbUser     = os.Getenv("DbUser")
-	dbPassword = os.Getenv("DbPassword")
-	dbHost     = os.Getenv("DbHost")
-	dbPort     = os.Getenv("DbPort")
-	dbName     = os.Getenv("DbName")
-
-	db             *gorm.DB
-	err            error
+	// Infrastructure
 	userRepository *user.UserRepository
 	authService    *auth.AuthService
-	validator      *validation.Validator
-	gorillaLambda  *gorillamux.GorillaMuxAdapter
+
+	// Validator
+	validator *validation.Validator
+
+	// Router
+	gorillaLambda *gorillamux.GorillaMuxAdapter
 )
 
 func init() {
-	db, err = database.InitDB(dbName, dbUser, dbPassword, dbHost, dbPort)
-	if err != nil {
+	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
 	}
 
-	userRepository = user.NewUserRepository(db)
+	userRepository = user.NewUserRepository(db.Instance)
 	authService = auth.NewAuthService(userRepository)
 	validator = validation.NewDefaultValidator()
 
-	r := mux.NewRouter()
+	// Build middleware chain
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
+	handler := corsMiddleware(jsonMiddleware(handler))
 
-	r.HandleFunc("/auth/login", func(w http.ResponseWriter, r *http.Request) {
-		loginRequest := new(user.LoginUserRequest)
+	// Initialize router
+	router := mux.NewRouter()
+	router.HandleFunc("/auth/login", handler).Methods("POST")
+	gorillaLambda = gorillamux.New(router)
+}
 
-		if err := controllers.ParseBody(loginRequest, r); err != nil {
-			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
-			return
-		}
+func handler(w http.ResponseWriter, r *http.Request) {
+	loginRequest := new(user.LoginUserRequest)
 
-		if err := controllers.ValidateRequest(loginRequest, validator); err != nil {
-			controllers.JsonErrorResponse(w, err)
-			return
-		}
+	if err := controllers.ParseBody(loginRequest, r); err != nil {
+		controllers.JsonErrorResponse(w, errors.NewHttpError(err))
+		return
+	}
 
-		response, authCookies, err := authService.LoginUser(*loginRequest)
-		if err != nil {
-			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
-			return
-		}
+	if err := controllers.ValidateRequest(loginRequest, validator); err != nil {
+		controllers.JsonErrorResponse(w, err)
+		return
+	}
 
-		http.SetCookie(w, (*http.Cookie)(&authCookies.AccessTokenCookie))
-		http.SetCookie(w, (*http.Cookie)(&authCookies.RefreshTokenCookie))
-		http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
+	response, authCookies, err := authService.LoginUser(*loginRequest)
+	if err != nil {
+		controllers.JsonErrorResponse(w, errors.NewHttpError(err))
+		return
+	}
 
-		controllers.JsonResponse(w, response, http.StatusCreated)
-	})
+	http.SetCookie(w, (*http.Cookie)(&authCookies.AccessTokenCookie))
+	http.SetCookie(w, (*http.Cookie)(&authCookies.RefreshTokenCookie))
+	http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
 
-	gorillaLambda = gorillamux.New(r)
+	controllers.JsonResponse(w, response, http.StatusCreated)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

@@ -57,9 +57,15 @@ func init() {
 		os.Exit(1)
 	}
 
+	// Build middleware chain
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
+	authMiddleware := middlewares.SetAuthMiddleware
+	handler := authMiddleware(corsMiddleware(jsonMiddleware(handler)))
+
 	// Initialize router
 	Router := mux.NewRouter()
-	Router.HandleFunc("/receipt-items/{id}", middlewares.SetAuthMiddleware(handler)).Methods("PATCH")
+	Router.HandleFunc("/receipt-items/{id}", handler).Methods("PATCH")
 	GorillaLambda = gorillamux.New(Router)
 
 	// Initialize validator

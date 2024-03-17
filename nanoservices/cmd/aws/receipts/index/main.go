@@ -41,9 +41,11 @@ func init() {
 	}
 
 	// Build middleware chain
-	authMiddleware := middlewares.SetAuthMiddleware
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
 	queryParamsMiddleware := middlewares.SetQueryParamsMiddleware
-	handler := authMiddleware(queryParamsMiddleware(handler))
+	authMiddleware := middlewares.SetAuthMiddleware
+	handler := authMiddleware(queryParamsMiddleware(corsMiddleware(jsonMiddleware(handler))))
 
 	// Initialize router
 	Router := mux.NewRouter()

@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	"github.com/steffanturanjanin/receipt-manager/internal/errors"
+	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	receipt_fetcher "github.com/steffanturanjanin/receipt-manager/pkg/receipt-fetcher"
 )
 
@@ -23,26 +24,33 @@ var (
 )
 
 func init() {
+
+	// Build middleware chain
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
+	handler := corsMiddleware(jsonMiddleware(handler))
+
+	// Initialize router
 	router := mux.NewRouter()
-
-	router.HandleFunc("/receipts/parse", func(w http.ResponseWriter, r *http.Request) {
-		parseReceiptRequest := new(ParseReceiptRequest)
-
-		if err := controllers.ParseBody(parseReceiptRequest, r); err != nil {
-			controllers.JsonErrorResponse(w, errors.NewHttpError(err))
-			return
-		}
-
-		receipt, err := receipt_fetcher.Get(parseReceiptRequest.Url)
-		if err != nil {
-			controllers.JsonErrorResponse(w, err)
-			return
-		}
-
-		controllers.JsonResponse(w, receipt, http.StatusOK)
-	})
-
+	router.HandleFunc("/receipts/parse", handler)
 	gorillaLambda = gorillamux.New(router)
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	parseReceiptRequest := new(ParseReceiptRequest)
+
+	if err := controllers.ParseBody(parseReceiptRequest, r); err != nil {
+		controllers.JsonErrorResponse(w, errors.NewHttpError(err))
+		return
+	}
+
+	receipt, err := receipt_fetcher.Get(parseReceiptRequest.Url)
+	if err != nil {
+		controllers.JsonErrorResponse(w, err)
+		return
+	}
+
+	controllers.JsonResponse(w, receipt, http.StatusOK)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

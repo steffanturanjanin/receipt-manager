@@ -16,18 +16,18 @@ import (
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/dto"
+	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
-	"github.com/steffanturanjanin/receipt-manager/internal/user"
 	"github.com/steffanturanjanin/receipt-manager/internal/utils"
 	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
 )
 
 type RegisterUserRequest struct {
-	FirstName string `validate:"required, max=255" json:"first_name"`
-	LastName  string `validate:"required, max=255" json:"last_name"`
-	Email     string `validate:"required, email, unique=users.email" json:"email"`
-	Password  string `validate:"required, min=8, max=100" json:"password"`
+	FirstName string `validate:"required,max=255" json:"firstName"`
+	LastName  string `validate:"required,max=255" json:"lastName"`
+	Email     string `validate:"required,email,unique=users.email" json:"email"`
+	Password  string `validate:"required,min=8,max=100" json:"password"`
 }
 
 var (
@@ -71,9 +71,14 @@ func init() {
 	RefreshTokenMaxAge, _ = strconv.Atoi(os.Getenv("RefreshTokenMaxAge"))
 	RefreshTokenTTL, _ = time.ParseDuration(os.Getenv("RefreshTokenExpiresIn"))
 
+	// Build middleware chain
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
+	handler := corsMiddleware(jsonMiddleware(handler))
+
 	// Initialize Router
 	Router := mux.NewRouter()
-	Router.HandleFunc("/auth/register", handler)
+	Router.HandleFunc("/auth/register", handler).Methods("POST")
 	GorillaLambda = gorillamux.New(Router)
 
 	// Initialize Validator
@@ -81,7 +86,7 @@ func init() {
 }
 
 var handler = func(w http.ResponseWriter, r *http.Request) {
-	registerRequest := &user.RegisterUserRequest{}
+	registerRequest := &RegisterUserRequest{}
 	if err := controllers.ParseBody(registerRequest, r); err != nil {
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 		return

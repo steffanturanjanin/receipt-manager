@@ -12,6 +12,7 @@ import (
 
 	"github.com/steffanturanjanin/receipt-manager/internal/auth"
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
+	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 )
 
 var (
@@ -22,18 +23,26 @@ var (
 func init() {
 	authService = auth.NewAuthService(nil)
 
+	// Build middleware chain
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
+	authMiddleware := middlewares.SetAuthMiddleware
+	handler := authMiddleware(corsMiddleware(jsonMiddleware(handler)))
+
+	// Initialize router
 	router := mux.NewRouter()
-	router.HandleFunc("/auth/logout", func(w http.ResponseWriter, r *http.Request) {
-		authCookies := authService.Logout()
-
-		http.SetCookie(w, (*http.Cookie)(&authCookies.AccessTokenCookie))
-		http.SetCookie(w, (*http.Cookie)(&authCookies.RefreshTokenCookie))
-		http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
-
-		controllers.JsonResponse(w, nil, http.StatusOK)
-	})
-
+	router.HandleFunc("/auth/logout", handler)
 	gorillaLambda = gorillamux.New(router)
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	authCookies := authService.Logout()
+
+	http.SetCookie(w, (*http.Cookie)(&authCookies.AccessTokenCookie))
+	http.SetCookie(w, (*http.Cookie)(&authCookies.RefreshTokenCookie))
+	http.SetCookie(w, (*http.Cookie)(&authCookies.LoggedInCookie))
+
+	controllers.JsonResponse(w, nil, http.StatusOK)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

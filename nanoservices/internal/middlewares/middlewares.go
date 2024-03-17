@@ -27,7 +27,7 @@ const (
 	SORT_QUERY       ContextKey = "SORT_QUERY"
 )
 
-func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {
+func SetJsonMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		next(w, r)
@@ -96,6 +96,16 @@ func SetQueryParamsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		ctx = context.WithValue(ctx, SORT_QUERY, sortQuery)
 
 		next(w, r.WithContext(ctx))
+	}
+}
+
+func SetCorsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", os.Getenv("Origin"))
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		next(w, r)
 	}
 }
 
