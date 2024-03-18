@@ -1,23 +1,74 @@
-import { FunctionComponent, FormEvent } from 'react';
-import { Button, TextField, Link, Box, Typography, Container } from '@mui/material';
+import { AxiosError } from 'axios';
+import { FunctionComponent, FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from 'react-query';
+import { TextField, Box, Typography, Container } from '@mui/material';
 import { SxProps } from '@mui/material/styles';
+import { register } from '../../../api/auth';
+import { AuthResponse, RegisterRequest } from '../../../api/auth/types';
+import LoadingButton from '../../../components/LoadingButton';
+
+interface RegisterForm {
+	firstName: string,
+	lastName: string,
+	email: string,
+	password: string,
+}
+
+type RegisterFormErrors = {
+	[key in keyof RegisterForm]: string;
+}
+
+const RegisterFormFieldTranslation: Record<keyof RegisterForm, string> = {
+	firstName: "First name",
+	lastName: "Last name",
+	email: "Email",
+	password: "Password",
+}
+
+const DefaultRegisterForm: RegisterForm = {
+	firstName: '', lastName: '', email: '', password: '',
+}
 
 const Copyright: FunctionComponent<{ sx: SxProps }> = ({ sx }) => (
 	<Typography variant="body2" color="text.secondary" align="center" sx={sx}>
-		{'Copyright © '}
-		<Link color="inherit" href="/">Receipt manager</Link>
-		{' '} {new Date().getFullYear()} {'.'}
+		{'Copyright © '} Receipt manager {' '}
+		{new Date().getFullYear()} {'.'}
 	</Typography>
 );
 
-const Login: FunctionComponent = () => {
+const Register: FunctionComponent = () => {
+	const [registerForm, setRegisterForm] = useState<RegisterForm>(DefaultRegisterForm);
+	const [registerFormErrors, setRegisterFormErrors] = useState<RegisterFormErrors>(DefaultRegisterForm);
+
+	const navigate = useNavigate();
+
+	const { mutate, isLoading } = useMutation({
+		mutationFn: async (request: RegisterRequest) => await register(request),
+		onSuccess: (response: AuthResponse) => {
+			// Save auth token to local storage
+			// Redirect to Home
+			localStorage.setItem("auth", JSON.stringify(response));
+			navigate("/");
+		},
+		onError: (error: AxiosError<ValidationError<RegisterForm>>) => {
+			if (error.status = 422) {
+				setRegisterFormErrors({
+					...registerFormErrors,
+					...error.response?.data.errors,
+					...Object.fromEntries(
+						Object.entries(error.response?.data.errors || {}).map(
+							([field, value]) => ([field, `${RegisterFormFieldTranslation[field as keyof RegisterForm]} ${value}` ])
+					)),
+				});
+			}
+		}
+	})
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+		setRegisterFormErrors(DefaultRegisterForm);
+		mutate(registerForm)
   };
 
   return (
@@ -35,15 +86,44 @@ const Login: FunctionComponent = () => {
 						Register
 					</Typography>
 					<Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+					<TextField
+							margin="normal"
+							required
+							fullWidth
+							id="firstName"
+							label="First name"
+							name="firstName"
+							autoFocus
+							value={registerForm.firstName}
+							onChange={(event) => setRegisterForm({ ...registerForm, firstName: event.target.value })}
+							error={!!registerFormErrors.firstName}
+							helperText={registerFormErrors.firstName}
+						/>
 						<TextField
 							margin="normal"
 							required
 							fullWidth
+							id="last_name"
+							name="lastName"
+							label="Last name"
+							value={registerForm.lastName}
+							onChange={(event) => setRegisterForm({ ...registerForm, lastName: event.target.value })}
+							error={!!registerFormErrors.lastName}
+							helperText={registerFormErrors.lastName}
+						/>
+						<TextField
+							margin="normal"
+							required
+							fullWidth
+							type="email"
 							id="email"
 							label="Email Address"
 							name="email"
 							autoComplete="email"
-							autoFocus
+							value={registerForm.email}
+							onChange={(event) => setRegisterForm({ ...registerForm, email: event.target.value })}
+							error={!!registerFormErrors.email}
+							helperText={registerFormErrors.email}
 						/>
 						<TextField
 							margin="normal"
@@ -54,15 +134,19 @@ const Login: FunctionComponent = () => {
 							type="password"
 							id="password"
 							autoComplete="current-password"
+							value={registerForm.password}
+							onChange={(event) => setRegisterForm({ ...registerForm, password: event.target.value })}
+							error={!!registerFormErrors.password}
+							helperText={registerFormErrors.password}
 						/>
-						<Button
+						<LoadingButton
 							type="submit"
-							fullWidth
 							variant="contained"
-							sx={{ mt: 3, mb: 2 }}
+							fullWidth sx={{ mt: 3, mb: 2 }}
+							loading={isLoading}
 						>
 							Register
-						</Button>
+						</LoadingButton>
 					</Box>
 				</Box>
 				<Copyright sx={{ mt: 8, mb: 4 }} />
@@ -71,4 +155,4 @@ const Login: FunctionComponent = () => {
   );
 }
 
-export default Login;
+export default Register;
