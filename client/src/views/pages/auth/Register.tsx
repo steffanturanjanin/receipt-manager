@@ -15,11 +15,7 @@ interface RegisterForm {
 	password: string,
 }
 
-type RegisterFormErrors = {
-	[key in keyof RegisterForm]: string;
-}
-
-const RegisterFormFieldTranslation: Record<keyof RegisterForm, string> = {
+const RegisterFormFieldsTranslation: FormFieldsTranslation<RegisterForm> = {
 	firstName: "First name",
 	lastName: "Last name",
 	email: "Email",
@@ -27,7 +23,10 @@ const RegisterFormFieldTranslation: Record<keyof RegisterForm, string> = {
 }
 
 const DefaultRegisterForm: RegisterForm = {
-	firstName: '', lastName: '', email: '', password: '',
+	firstName: '',
+	lastName: '',
+	email: '',
+	password: '',
 }
 
 const Copyright: FunctionComponent<{ sx: SxProps }> = ({ sx }) => (
@@ -39,7 +38,7 @@ const Copyright: FunctionComponent<{ sx: SxProps }> = ({ sx }) => (
 
 const Register: FunctionComponent = () => {
 	const [registerForm, setRegisterForm] = useState<RegisterForm>(DefaultRegisterForm);
-	const [registerFormErrors, setRegisterFormErrors] = useState<RegisterFormErrors>(DefaultRegisterForm);
+	const [registerFormErrors, setRegisterFormErrors] = useState<FormErrors<RegisterForm>>(DefaultRegisterForm);
 
 	const navigate = useNavigate();
 
@@ -58,7 +57,7 @@ const Register: FunctionComponent = () => {
 					...error.response?.data.errors,
 					...Object.fromEntries(
 						Object.entries(error.response?.data.errors || {}).map(
-							([field, value]) => ([field, `${RegisterFormFieldTranslation[field as keyof RegisterForm]} ${value}` ])
+							([field, value]) => ([field, `${RegisterFormFieldsTranslation[field as keyof RegisterForm]} ${value}` ])
 					)),
 				});
 			}
