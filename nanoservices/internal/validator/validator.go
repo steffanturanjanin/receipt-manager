@@ -103,64 +103,59 @@ func (v *Validator) RegisterCustomTagValidations() {
 }
 
 func (v *Validator) RegisterTranslations() {
-	// v.RegisterTranslation("required", "{0} is required.")
-	// v.RegisterTranslation("email", "{0} must be a valid email.")
-	// v.RegisterTranslation("max", "{0} has maximum limit of {1}")
-	// v.RegisterTranslation("min", "{0} should have at least {1} character(s).")
-
 	_ = v.Validator.RegisterTranslation("required", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("required", "{0} is a required field.", true)
+		return ut.Add("required", "field is required.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("required", fe.Field())
+		t, _ := ut.T("required")
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("email", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("email", "{0} should be a valid email.", true)
+		return ut.Add("email", "field should be a valid email.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("email", fe.Field())
+		t, _ := ut.T("email")
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("max", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("max", "{0} has a limit of maximum {1} characters.", true)
+		return ut.Add("max", "field has a limit of maximum {0} characters.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("max", fe.Field(), fe.Param())
+		t, _ := ut.T("max", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("min", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("min", "{0} must have at least {1} characters.", true)
+		return ut.Add("min", "field must have at least {0} characters.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("min", fe.Field(), fe.Param())
+		t, _ := ut.T("min", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("receipt_url", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("receipt_url", "{0} is not valid.", true)
+		return ut.Add("receipt_url", "field is not valid receipt url.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("receipt_url", fe.Field())
+		t, _ := ut.T("receipt_url")
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("url_query_params", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("url_query_params", "Missing url query params: {0}.", true)
+		return ut.Add("url_query_params", "field is missing required url query params: {0}.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("url_query_params", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("url_host", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("url_host", "Invalid url host. Valid host is: {0}.", true)
+		return ut.Add("url_host", "field is invalid url host. Valid host is: {0}.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("url_host", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("unique", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("unique", "{0} must be unique.", true)
+		return ut.Add("unique", "field must be unique.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("unique", fe.Field())
+		t, _ := ut.T("unique")
 		return t
 	})
 }
