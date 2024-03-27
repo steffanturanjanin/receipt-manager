@@ -31,7 +31,7 @@ type LoginRequest struct {
 }
 
 const (
-	INVALID_CREDENTIALS = "Invalid credentials"
+	INVALID_CREDENTIALS = "invalid credentials"
 )
 
 var (

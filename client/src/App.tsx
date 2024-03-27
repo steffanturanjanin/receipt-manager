@@ -4,7 +4,7 @@ import { createTheme } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Router from './routes/Router';
-import './App.css'
+import './App.scss'
 
 const queryClient = new QueryClient({
 	defaultOptions: {
