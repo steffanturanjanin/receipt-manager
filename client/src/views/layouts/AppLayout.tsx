@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactElement } from "react";
+import { FunctionComponent, ReactElement, useState } from "react";
 import { NavLink, NavLinkProps } from "react-router-dom";
 import {
 	BottomNavigation,
@@ -14,6 +14,7 @@ import {
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import CameraIcon from "@mui/icons-material/Camera";
 import "./app-layout.scss";
+import QrScannerDialog from "../../features/qr-scanner/QrScannerDialog";
 
 interface AppLayoutProps {
 	children: ReactElement;
@@ -38,11 +39,18 @@ const BottomNavigationContainerStyle: SxProps = {
 	paddingY: '1rem',
 }
 
-const NavigationAction = styled(BottomNavigationAction)<BottomNavigationActionProps & NavLinkProps>({
+const NavigationAction = styled(BottomNavigationAction)<BottomNavigationActionProps>({
 	".MuiBottomNavigationAction-label": { fontSize: "1rem" },
 })
 
+const NavigationActionLink = styled(BottomNavigationAction)<BottomNavigationActionProps & NavLinkProps>({
+	".MuiBottomNavigationAction-label": { fontSize: "1rem" },
+})
+
+
 const AppLayout: FunctionComponent<AppLayoutProps> = ({ children }): ReactElement => {
+	const [receiptScannerOpened, setReceiptScannerOpened] = useState<boolean>(false);
+
 	return (
 		<AppLayoutContainer>
 			<AppLayoutContent component="main">
@@ -51,20 +59,21 @@ const AppLayout: FunctionComponent<AppLayoutProps> = ({ children }): ReactElemen
 
 			<Box component={Paper} sx={BottomNavigationContainerStyle} elevation={3}>
 				<BottomNavigation showLabels>
-					<NavigationAction
+					<NavigationActionLink
 						component={NavLink}
 						to="/"
 						label="Receipts"
 						icon={<ReceiptIcon fontSize="large" />}
 					/>
 					<NavigationAction
-						component={NavLink}
-						to="/scan"
 						label="Scan"
 						icon={<CameraIcon fontSize="large" />}
+						onClick={() => setReceiptScannerOpened(true)}
 					/>
 				</BottomNavigation>
 			</Box>
+
+			<QrScannerDialog open={receiptScannerOpened} onClose={() => setReceiptScannerOpened(false)} />
 		</AppLayoutContainer>
 	)
 }
