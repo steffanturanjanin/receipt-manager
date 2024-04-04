@@ -404,6 +404,9 @@ Resources:
           RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
           RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
           RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
+      Policies:
+        - AmazonSQSFullAccess
+
 
   ReceiptsDelete:
     Type: AWS::Serverless::Function
@@ -455,6 +458,8 @@ Resources:
           DbName: !Ref DbName
           DbUser: !Ref DbUser
           DbPassword: !Ref DbPassword
+      Policies:
+        - AmazonSQSFullAccess
 
   WorkerCategorizeReceiptItems:
     Type: AWS::Serverless::Function
@@ -477,6 +482,8 @@ Resources:
           DbUser: !Ref DbUser
           DbPassword: !Ref DbPassword
           OpenAiApiKey: !Ref OpenAiApiKey
+      Policies:
+        - AmazonSQSFullAccess
 
 # Output example:
 # HelloWorldFunction:

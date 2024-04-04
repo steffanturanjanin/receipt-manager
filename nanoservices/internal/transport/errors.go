@@ -15,9 +15,9 @@ type ErrorResponse struct {
 }
 
 // Bad Request - 400
-func NewBadRequestResponse(err error) ErrorResponse {
+func NewBadRequestResponse(message string) ErrorResponse {
 	return ErrorResponse{
-		Error: err.Error(),
+		Error: message,
 		Code:  http.StatusBadRequest,
 	}
 }

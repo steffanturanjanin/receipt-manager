@@ -1,16 +1,17 @@
-import { FunctionComponent, ReactElement } from "react";
+import { FunctionComponent, ReactElement, ReactNode } from "react";
 import { QrReader, QrReaderProps } from "react-qr-reader";
 import ViewFinder from "./ViewFinder";
 
 type QrScannerProps = Pick<QrReaderProps, "onResult">  & {
 	onScanStop: () => void;
+	notification?: ReactNode;
 }
 
 const containerStyle = {
 	margin: 'auto',
 	height: '100%',
 	width: '100%',
-	maxWidth: "600px",
+	maxWidth: "820px",
 }
 
 const videoContainerStyle = {
@@ -22,12 +23,13 @@ const videoContainerStyle = {
 
 const videoStyle = {
 	width: '100%',
-	objectFit: "cover",
+	//objectFit: "cover",
 }
 
 const QrScanner: FunctionComponent<QrScannerProps> = ({
 	onResult,
 	onScanStop,
+	notification
 }): ReactElement => {
 	return (
 		<QrReader
@@ -37,7 +39,7 @@ const QrScanner: FunctionComponent<QrScannerProps> = ({
 			containerStyle={containerStyle}
 			videoContainerStyle={videoContainerStyle}
 			videoStyle={videoStyle}
-			ViewFinder={() => <ViewFinder onClose={onScanStop} />}
+			ViewFinder={() => <ViewFinder onClose={onScanStop} notification={notification} />}
 		/>
 	)
 }

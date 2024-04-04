@@ -1,5 +1,5 @@
 import { FunctionComponent, ReactElement, useState } from "react";
-import { NavLink, NavLinkProps } from "react-router-dom";
+import { NavLink, NavLinkProps, Outlet } from "react-router-dom";
 import {
 	BottomNavigation,
 	BottomNavigationAction,
@@ -13,12 +13,9 @@ import {
 } from "@mui/material";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import CameraIcon from "@mui/icons-material/Camera";
+import QrScannerDialog from "../../../features/qr-scanner/QrScannerDialog";
 import "./app-layout.scss";
-import QrScannerDialog from "../../features/qr-scanner/QrScannerDialog";
 
-interface AppLayoutProps {
-	children: ReactElement;
-}
 
 const AppLayoutContainer = styled(Stack)<StackProps>({
 	width: "100vw",
@@ -26,9 +23,11 @@ const AppLayoutContainer = styled(Stack)<StackProps>({
 });
 
 const AppLayoutContent = styled(Stack)<StackProps>({
-	padding: '1.5rem',
+	//padding: '1.5rem',
 	marginBottom: '5.5rem',
 	overflow: 'auto',
+	backgroundColor: '#f6f6f6',
+	height: '100vh',
 });
 
 const BottomNavigationContainerStyle: SxProps = {
@@ -48,13 +47,13 @@ const NavigationActionLink = styled(BottomNavigationAction)<BottomNavigationActi
 })
 
 
-const AppLayout: FunctionComponent<AppLayoutProps> = ({ children }): ReactElement => {
+const AppLayout: FunctionComponent = (): ReactElement => {
 	const [receiptScannerOpened, setReceiptScannerOpened] = useState<boolean>(false);
 
 	return (
 		<AppLayoutContainer>
-			<AppLayoutContent component="main">
-				{children}
+			<AppLayoutContent>
+				<Outlet />
 			</AppLayoutContent>
 
 			<Box component={Paper} sx={BottomNavigationContainerStyle} elevation={3}>

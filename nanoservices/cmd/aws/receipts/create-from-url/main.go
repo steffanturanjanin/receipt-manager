@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -53,8 +52,16 @@ type ReceiptUrlRequest struct {
 const (
 	// SQS queues
 	PENDING_RECEIPTS_QUEUE = "pending_receipts"
+
 	// SQS mock
 	LOCAL_ELASTIC_MQ_SERVER_URL = "http://docker.for.mac.localhost:9324"
+
+	// Errors
+	ERR_RECEIPT_ALREADY_SCANNED = "Račun je već skeniran"
+	ERR_CANNOT_CREATE_RECEIPT   = "Nije moguće skenirati račun"
+
+	// Responses
+	RES_RECEIPT_CREATED = "Račun je kreiran i biće ubrzo obrađen"
 )
 
 var (
@@ -73,8 +80,8 @@ var (
 	Validator *validation.Validator
 
 	// Errors
-	ErrReceiptAlreadyScanned = transport.NewBadRequestResponse(errors.New("receipt already scanned"))
-	ErrCannotCreateReceipt   = transport.NewBadRequestResponse(errors.New("receipt cannot be created"))
+	ErrReceiptAlreadyScanned = transport.NewBadRequestResponse(ERR_RECEIPT_ALREADY_SCANNED)
+	ErrCannotCreateReceipt   = transport.NewBadRequestResponse(ERR_CANNOT_CREATE_RECEIPT)
 	ErrServiceUnavailable    = transport.NewServiceUnavailableError()
 )
 
@@ -112,6 +119,7 @@ func init() {
 	if urlResult, err := Client.GetQueueUrl(&sqs.GetQueueUrlInput{
 		QueueName: aws.String(PENDING_RECEIPTS_QUEUE),
 	}); err != nil {
+		log.Printf("Error getting queue %s url: %s\n", PENDING_RECEIPTS_QUEUE, err.Error())
 		panic(1)
 	} else {
 		PendingReceiptsSqsUrl = urlResult.QueueUrl
@@ -160,6 +168,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	dbResult := database.Instance.Create(dbReceipt)
 	if dbResult.Error != nil {
 		// Error while creating receipt
+		log.Printf("Error while saving receipt: %s\n", dbResult.Error.Error())
 		controllers.JsonResponse(w, ErrCannotCreateReceipt, http.StatusBadRequest)
 		return
 	}
@@ -185,7 +194,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Receipt created successfully
-	controllers.JsonInfoResponse(w, "Receipt created and set to be processed", http.StatusCreated)
+	controllers.JsonInfoResponse(w, RES_RECEIPT_CREATED, http.StatusCreated)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

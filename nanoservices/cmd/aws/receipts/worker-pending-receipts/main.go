@@ -77,7 +77,6 @@ func init() {
 	} else {
 		ReceiptItemsCategorizeSqsUrl = urlResult.QueueUrl
 	}
-
 }
 
 func processMessage(ctx context.Context, message events.SQSMessage) error {
