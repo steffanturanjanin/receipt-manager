@@ -14,7 +14,6 @@ import (
 	aws_session "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
@@ -115,25 +114,31 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		return dbErr
 	}
 
+	// Find or Create Store
 	// Combination of Tin and LocationId should be unique
 	var dbStore models.Store
-	if dbErr := db.Instance.FirstOrCreate(&dbStore, models.Store{Tin: receipt.Store.Tin, LocationId: receipt.Store.LocationId}, func(tx *gorm.DB) error {
-		dbStore.Name = receipt.Store.Name
-		dbStore.LocationName = receipt.Store.LocationName
-		dbStore.Address = receipt.Store.Address
-		dbStore.City = receipt.Store.City
-		return nil
-	}).Error; dbErr != nil {
-		return dbErr
+	where := models.Store{Tin: receipt.Store.Tin, LocationId: receipt.Store.LocationId}
+	if dbErr := db.Instance.First(&dbStore, where).Error; dbErr != nil {
+		dbStore = models.Store{
+			Tin:          receipt.Store.Tin,
+			LocationId:   receipt.Store.LocationId,
+			Name:         receipt.Store.Name,
+			LocationName: receipt.Store.LocationName,
+			Address:      receipt.Store.Address,
+			City:         receipt.Store.City,
+		}
+
+		db.Instance.Create(&dbStore)
 	}
 
+	// Create Receipt Items
 	dbReceiptItems := make([]models.ReceiptItem, 0)
 	for _, receiptItemDto := range receipt.Items {
 
 		var dbTax models.Tax
 		dbResult := db.Instance.FirstOrCreate(&dbTax, models.Tax{
 			Identifier: receiptItemDto.Tax.Identifier,
-			Name:       receiptItemDto.Name,
+			Name:       receiptItemDto.Tax.Name,
 			Rate:       receiptItemDto.Tax.Rate,
 		})
 
