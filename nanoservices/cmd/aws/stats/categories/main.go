@@ -38,7 +38,10 @@ type CategoryStatsResponseItem struct {
 	Total    string   `json:"total"`
 }
 
-type CategoryStatsResponse = []CategoryStatsResponseItem
+type CategoryStatsResponse struct {
+	Total      string                      `json:"total"`
+	Categories []CategoryStatsResponseItem `json:"categories"`
+}
 
 var (
 	// Router
@@ -121,7 +124,24 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categoryStatsResponse := make(CategoryStatsResponse, 0)
+	var total int
+	dbErr = db.Instance.Model(&models.Receipt{}).
+		Select("SUM(receipts.total_purchase_amount) AS total").
+		Where("receipts.date BETWEEN ? AND ?", fromDate, toDate).
+		Where("receipts.user_id = ?", user.Id).
+		Scan(&total).
+		Error
+
+	if dbErr != nil {
+		log.Printf("Error trying to fetch total spent amount for date range: %+v\n", dbErr)
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
+
+	categoryStatsResponse := CategoryStatsResponse{
+		Categories: make([]CategoryStatsResponseItem, 0),
+		Total:      fmt.Sprintf("%.2f", float64(total)/100),
+	}
 	for _, categoryStat := range categoriesStats {
 		total := fmt.Sprintf("%.2f", float64(categoryStat.Total)/100)
 		category := Category{ID: categoryStat.ID, Name: categoryStat.Name, Color: categoryStat.Color}
@@ -131,7 +151,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 			Total:    total,
 		}
 
-		categoryStatsResponse = append(categoryStatsResponse, categoryStatsResponseItem)
+		categoryStatsResponse.Categories = append(categoryStatsResponse.Categories, categoryStatsResponseItem)
 	}
 
 	controllers.JsonResponse(w, &categoryStatsResponse, http.StatusOK)
