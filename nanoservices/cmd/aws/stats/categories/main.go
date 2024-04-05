@@ -23,12 +23,14 @@ import (
 type CategoryStat struct {
 	ID    int    `json:"id"`
 	Name  string `json:"name"`
+	Color string `json:"color"`
 	Total int    `json:"total"`
 }
 
 type Category struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID    int    `json:"id"`
+	Color string `json:"color"`
+	Name  string `json:"name"`
 }
 
 type CategoryStatsResponseItem struct {
@@ -104,7 +106,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 
 	var categoriesStats []CategoryStat
 	dbErr := db.Instance.Model(&models.Category{}).
-		Select("categories.id AS id, categories.name AS name, SUM(receipt_items.total_amount) AS total").
+		Select("categories.id AS id, categories.name AS name, categories.color AS color, SUM(receipt_items.total_amount) AS total").
 		Joins("INNER JOIN receipt_items ON categories.id = receipt_items.category_id").
 		Joins("INNER JOIN receipts ON receipt_items.receipt_id = receipts.id").
 		Where("receipts.date BETWEEN ? AND ?", fromDate, toDate).
@@ -122,7 +124,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	categoryStatsResponse := make(CategoryStatsResponse, 0)
 	for _, categoryStat := range categoriesStats {
 		total := fmt.Sprintf("%.2f", float64(categoryStat.Total)/100)
-		category := Category{ID: categoryStat.ID, Name: categoryStat.Name}
+		category := Category{ID: categoryStat.ID, Name: categoryStat.Name, Color: categoryStat.Color}
 
 		categoryStatsResponseItem := CategoryStatsResponseItem{
 			Category: category,
