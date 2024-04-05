@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
+import dayjs from "dayjs";
+import "dayjs/locale/sr";
+
+dayjs.locale("sr");
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.Fragment>

@@ -1,20 +1,4 @@
-interface Receipt {
-	id: number;
-	amount: string;
-	date: string;
-	store: {
-		name: string;
-	},
-	categories: string[],
-}
-
-export interface ReceiptByDate {
-	date: string;
-	total: string;
-	receipts: Receipt[];
-}
-
-export const receipts: ReceiptByDate[] = [
+export const receipts: ReceiptsAggregatedByDate[] = [
 	{
 		date: "2024-03-16",
 		total: "804,70",

@@ -3,11 +3,18 @@ interface CategoriesStatsParams {
 	toDate: string;
 }
 
-interface CategoryStats {
-	category: {
-		id: number;
-		name: string;
-		color: string;
-	};
+interface CategoryStat {
+	id: number;
+	color: string;
+	name: string;
+}
+
+interface CategoryStatItem {
+	category: CategoryStat;
 	total: string;
+}
+
+interface CategoryStats {
+	total: string;
+	categories: CategoryStatItem[];
 }
