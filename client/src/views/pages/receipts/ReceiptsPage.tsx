@@ -7,7 +7,7 @@ import { getReceiptsAggregatedByDate } from "../../../api/receipts";
 import { getCategoriesStats } from "../../../api/stats";
 import PageLayout from "../../layouts/PageLayout/PageLayout";
 import CategoryStats from "../../../features/categories/CategoryStats";
-import ReceiptList from "../../../features/recepits/ReceiptList";
+import ReceiptList from "../../../features/receipts/ReceiptList";
 import { useMonthRange } from "../../../shared/hooks.ts/useMonthRange";
 
 const EMPTY_STATE_STRING = "Nema unetih troškova za ovaj mesec.";
