@@ -1,4 +1,5 @@
 import { httpClient } from "../http"
+import { singleReceipt } from "./mock";
 
 export const createReceipt = async (request: CreateReceiptRequest): Promise<{ message: string }> => {
 	const { data } = await httpClient.post("/receipts", request);
@@ -11,4 +12,13 @@ export const getReceiptsAggregatedByDate = async (params: GetReceiptsParams): Pr
 	const { data } = await httpClient.get<ReceiptsAggregatedByDate[]>("/stats/receipts", { params });
 
 	return data;
+}
+
+
+export const getReceipt = async (id: string): Promise<SingleReceipt> => {
+	// const { data } = await httpClient.get<SingleReceipt>(`/receipts/${id}`);
+
+	// return data;
+
+	return singleReceipt;
 }

@@ -8,7 +8,7 @@ interface ReceiptListProps {
 	receiptsAggregatedByDate: ReceiptsAggregatedByDate[];
 }
 
-const ReceiptListItem: FunctionComponent<Receipt> = ({ id, amount, date, store, categories }) => {
+const ReceiptListItem: FunctionComponent<ReceiptAggregatedByDateItem> = ({ id, amount, date, store, categories }) => {
 	const timeFormatted = dayjs(date).format("HH:mm");
 	const categoriesList = categories.join(", ");
 

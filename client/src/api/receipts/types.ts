@@ -7,61 +7,7 @@ enum ReceiptStatus {
 	PROCESSED = "processed",
 }
 
-// interface Store {
-// 	id: number;
-// 	tin: string;
-// 	name: string;
-// 	locationId: string;
-// 	locationName: string;
-// 	address: string;
-// 	city: string;
-// }
-
-// interface Category {
-// 	id: number;
-// 	name: string;
-// }
-
-// interface Tax {
-// 	id: number;
-// 	identifier: string;
-// 	name: string;
-// 	rate: number;
-// }
-
-// interface ReceiptItem {
-// 	id: number;
-// 	receiptId: number;
-// 	name: string;
-// 	unit: string;
-// 	quantity: number;
-// 	singleAmount: number;
-// 	totalAmount: number;
-// 	category: Category;
-// 	tax: Tax;
-// }
-
-// interface Receipt {
-// 	id: number;
-// 	userId: number;
-// 	//status: ReceiptStatus;
-// 	status: string;
-// 	pfrNumber?: string;
-// 	counter?: string;
-// 	totalPurchaseAmount: number;
-// 	totalTaxAmount: number;
-// 	//date: Date;
-// 	date: string;
-// 	qrCode: string;
-// 	meta?: object;
-// 	receiptItems: ReceiptItem[];
-// 	store: Store;
-// }
-
-
-// type PaginatedReceipts = Paginated<Receipt> & { meta: Paginated<Receipt>["meta"] & { total: number } }
-
-interface Receipt {
+interface ReceiptAggregatedByDateItem {
 	id: number;
 	amount: string;
 	date: string;
@@ -74,7 +20,7 @@ interface Receipt {
 interface ReceiptsAggregatedByDate {
 	date: string;
 	total: string;
-	receipts: Receipt[];
+	receipts: ReceiptAggregatedByDateItem[];
 }
 
 interface GetReceiptsParams {
@@ -82,4 +28,61 @@ interface GetReceiptsParams {
 	toDate: string;
 }
 
+// Single Receipt interfaces
 
+interface SingleReceiptCategory {
+	id: number;
+	name: string;
+	color: string;
+}
+
+interface SingleReceiptReceiptItemTax {
+	id: number;
+	identifier: string;
+	name: string;
+	rate: number;
+}
+
+interface SingleReceiptUser {
+	id: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+}
+
+interface SingleReceiptStore {
+	id: number;
+	tin: string;
+	name: string;
+	locationId: string;
+	locationName: string;
+	address: string;
+	city: string;
+}
+
+interface SingleReceiptReceiptItem {
+	id: number;
+	name: string;
+	unit: string;
+	quantity: number;
+	singleAmount: string;
+	totalAmount: string;
+	category: SingleReceiptCategory;
+	tax: SingleReceiptReceiptItemTax;
+}
+
+interface SingleReceipt {
+	id: number;
+	user: SingleReceiptUser;
+	status: ReceiptStatus;
+	pfrNumber: string;
+	counter: string;
+	totalPurchaseAmount: string;
+	totalTaxAmount: string;
+	date: string;
+	meta: object;
+	qrCode: string;
+	receiptItems: SingleReceiptReceiptItem[];
+	store: SingleReceiptStore;
+	createdAt: string;
+}

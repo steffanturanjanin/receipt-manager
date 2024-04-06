@@ -55,16 +55,16 @@ const ReceiptsPage: FunctionComponent = (): ReactElement => {
 				</MonthButton>
 			}
 		>
-			<CategoryStats categoryStats={categoriesStats}/>
-
+			<CategoryStats
+				categoryStats={categoriesStats}
+			/>
 			<Stack direction="column" gap="2rem" marginTop="3rem">
 				<Typography variant="h4" component="h2" fontWeight="bold">Troškovi</Typography>
 				{(!receipts|| !receipts.length) ?
 					<Typography component="p" variant="body1">{EMPTY_STATE_STRING}</Typography> :
 					<ReceiptList receiptsAggregatedByDate={receipts}/>
 				}
-		</Stack>
-
+			</Stack>
 		</PageLayout>
 	);
 }

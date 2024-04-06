@@ -5,6 +5,7 @@ import AuthGuard from "./guards/AuthGuard";
 import Home from "../views/pages/home/Home";
 import AppLayout from "../views/layouts/AppLayout/AppLayout";
 import ReceiptsPage from "../views/pages/receipts/ReceiptsPage";
+import ShowReceiptPage from "../views/pages/receipts/ShowReceiptPage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -20,6 +21,10 @@ const routes: RouteObject[] = [
 			{
 				path: "/receipts",
 				element: <ReceiptsPage />
+			},
+			{
+				path: "/receipts/:id",
+				element: <ShowReceiptPage />
 			}
 		]
 	}
