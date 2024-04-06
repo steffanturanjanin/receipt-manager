@@ -2,23 +2,32 @@ package transport
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 )
 
+type UserReceipt struct {
+	ID        int    `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Email     string `json:"email"`
+}
+
 type BaseReceiptResponse struct {
 	ID                  int                   `json:"id"`
-	UserId              *int                  `json:"userId"`
 	Status              string                `json:"status"`
 	PfrNumber           *string               `json:"pfrNumber"`
 	Counter             *string               `json:"counter"`
-	TotalPurchaseAmount *int                  `json:"totalPurchaseAmount"`
-	TotalTaxAmount      *int                  `json:"totalTaxAmount"`
+	TotalPurchaseAmount string                `json:"totalPurchaseAmount"`
+	TotalTaxAmount      string                `json:"totalTaxAmount"`
 	Date                *time.Time            `json:"date"`
 	QrCode              *string               `json:"qrCode"`
 	Meta                *map[string]string    `json:"meta"`
+	CreatedAt           time.Time             `json:"createdAt"`
 	ReceiptItems        []ReceiptItemResponse `json:"receiptItems"`
+	User                *UserReceipt          `json:"user"`
 }
 
 type BaseReceiptTransformer struct{}
@@ -37,10 +46,13 @@ func (t BaseReceiptTransformer) Transform(models []models.Receipt) []BaseReceipt
 func (t BaseReceiptTransformer) TransformSingle(model models.Receipt) BaseReceiptResponse {
 	receipt := BaseReceiptResponse{}
 
-	var userId *int
-	if model.UserID != nil {
-		userId = new(int)
-		*userId = int(*model.UserID)
+	var user *UserReceipt
+	if model.User != nil {
+		user = &UserReceipt{}
+		user.ID = int(model.User.ID)
+		user.FirstName = model.User.FirstName
+		user.LastName = model.User.LastName
+		user.Email = model.User.Email
 	}
 
 	var meta *map[string]string
@@ -61,16 +73,17 @@ func (t BaseReceiptTransformer) TransformSingle(model models.Receipt) BaseReceip
 	}
 
 	receipt.ID = int(model.ID)
-	receipt.UserId = userId
 	receipt.Status = model.Status
 	receipt.PfrNumber = model.PfrNumber
 	receipt.Counter = model.Counter
-	receipt.TotalPurchaseAmount = model.TotalPurchaseAmount
-	receipt.TotalTaxAmount = model.TotalTaxAmount
+	receipt.TotalPurchaseAmount = fmt.Sprintf("%.2f", float64(*model.TotalPurchaseAmount)/100)
+	receipt.TotalTaxAmount = fmt.Sprintf("%.2f", float64(*model.TotalTaxAmount)/100)
 	receipt.Date = model.Date
 	receipt.QrCode = model.QrCode
 	receipt.Meta = meta
+	receipt.CreatedAt = model.CreatedAt
 	receipt.ReceiptItems = receiptItems
+	receipt.User = user
 
 	return receipt
 }

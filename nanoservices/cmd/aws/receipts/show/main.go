@@ -58,7 +58,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	receiptId, _ := strconv.ParseInt(pathParams["id"], 10, 64)
 
 	// Initialize query
-	query := db.Instance.Model(models.Receipt{}).Preload("Store").Preload("ReceiptItems").Where("user_id = ?", user.Id)
+	query := db.Instance.Model(models.Receipt{}).
+		Preload("Store").
+		Preload("User").
+		Preload("ReceiptItems").
+		Preload("ReceiptItems.Category").
+		Preload("ReceiptItems.Tax").
+		Where("user_id = ?", user.Id)
 
 	// Find Receipt
 	var dbReceipt models.Receipt
