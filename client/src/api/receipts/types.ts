@@ -67,7 +67,7 @@ interface SingleReceiptReceiptItem {
 	quantity: number;
 	singleAmount: string;
 	totalAmount: string;
-	category: SingleReceiptCategory;
+	category: SingleReceiptCategory | null;
 	tax: SingleReceiptReceiptItemTax;
 }
 

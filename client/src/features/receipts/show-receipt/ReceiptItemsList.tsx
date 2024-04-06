@@ -1,5 +1,5 @@
 import { Fragment, FunctionComponent, ReactElement } from "react";
-import { Box, BoxProps, Divider, Stack, Typography, styled } from "@mui/material";
+import { Box, BoxProps, Divider, Stack, Typography, styled, useTheme } from "@mui/material";
 import { ReceiptCard, ReceiptCardContent } from "./components";
 
 const ColorCircle = styled(Box)<BoxProps>({
@@ -25,6 +25,10 @@ const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem
 	const { name, totalAmount, category, quantity, unit, singleAmount } = receiptItem;
 	const breakdownPerUnit = `${quantity} ${unit} x ${singleAmount}`;
 
+	const theme = useTheme();
+	const UNCATEGORIZED_COLOR = theme.palette.grey['500'];
+	const UNCATEGORIZED_NAME = "Nekategorisano";
+
 	return (
 		<Fragment>
 			<Stack direction="column" gap="0.5rem">
@@ -34,8 +38,8 @@ const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem
 				</Stack>
 				<Stack direction="row" gap="0.5rem" justifyContent="space-between">
 					<Stack component={Typography} variant="body2" direction="row" alignItems="center" gap="0.5rem">
-						<CategoryCircle color={category.color} />
-						{category.name}
+						<CategoryCircle color={category?.color || UNCATEGORIZED_COLOR} />
+						{category?.name || UNCATEGORIZED_NAME}
 					</Stack>
 					<Typography variant="body2">{breakdownPerUnit}</Typography>
 				</Stack>
