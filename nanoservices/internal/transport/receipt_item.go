@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"fmt"
+
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 )
 
@@ -10,8 +12,8 @@ type ReceiptItemResponse struct {
 	Name         string            `json:"name"`
 	Unit         string            `json:"unit"`
 	Quantity     float64           `json:"quantity"`
-	SingleAmount int               `json:"singleAmount"`
-	TotalAmount  int               `json:"totalAmount"`
+	SingleAmount string            `json:"singleAmount"`
+	TotalAmount  string            `json:"totalAmount"`
 	Category     *CategoryResponse `json:"category"`
 	Tax          *TaxResponse      `json:"tax"`
 }
@@ -39,8 +41,8 @@ func (t ReceiptItemTransformer) TransformSingle(model models.ReceiptItem) Receip
 	receiptItem.Name = model.Name
 	receiptItem.Unit = model.Unit
 	receiptItem.Quantity = model.Quantity
-	receiptItem.SingleAmount = model.SingleAmount
-	receiptItem.TotalAmount = model.TotalAmount
+	receiptItem.SingleAmount = fmt.Sprintf("%.2f", float64(model.SingleAmount)/100)
+	receiptItem.TotalAmount = fmt.Sprintf("%.2f", float64(model.TotalAmount)/100)
 	receiptItem.Category = category
 	receiptItem.Tax = tax
 
