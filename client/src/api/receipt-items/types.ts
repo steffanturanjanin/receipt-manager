@@ -1,0 +1,3 @@
+interface UpdateReceiptItemRequest {
+	categoryId: number;
+}

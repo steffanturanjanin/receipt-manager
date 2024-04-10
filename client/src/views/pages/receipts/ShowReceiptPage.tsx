@@ -1,5 +1,5 @@
-import { FunctionComponent } from "react";
-import { useQuery } from "react-query";
+import { FunctionComponent, useState } from "react";
+import { useQuery, useQueryClient } from "react-query";
 import { getReceipt } from "../../../api/receipts";
 import { Link, LinkProps, useParams } from "react-router-dom";
 import PageLayout from "../../layouts/PageLayout/PageLayout";
@@ -8,11 +8,33 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ReceiptPaymentOverview from "../../../features/receipts/show-receipt/ReceiptPaymentOverview";
 import ReceiptItemsList from "../../../features/receipts/show-receipt/ReceiptItemsList";
 import ReceiptDetails from "../../../features/receipts/show-receipt/ReceiptDetails";
+import ReceiptItemUpdateDialog from "../../../features/receipt-items/ReceiptItemUpdateDialog";
 
+const ReceiptContainer = styled(Stack)<StackProps>({
+	gap: "2rem"
+});
+
+const BackButton = styled(Stack)<StackProps & LinkProps>(({ theme }) => ({
+	textDecoration: "none",
+	fontSize: "22px",
+	color: theme.palette.primary.dark,
+}));
+
+interface UpdateReceiptItemForm {
+	open: boolean;
+	receiptItem?: SingleReceiptReceiptItem;
+}
 
 const ShowReceiptPage: FunctionComponent = () => {
+	// Extract `receiptId` from path
 	const { id: receiptId } = useParams();
 
+	// Update Receipt Item Form state
+	const [updateReceiptItemForm, setUpdateReceiptItemForm] = useState<UpdateReceiptItemForm>({
+		open: false,
+	});
+
+	// Fetch receipt
 	const { data: receipt } = useQuery({
 		queryKey: ["single_receipt", receiptId],
 		queryFn: () => getReceipt(receiptId!),
@@ -20,15 +42,11 @@ const ShowReceiptPage: FunctionComponent = () => {
 		enabled: !!receiptId,
 	});
 
-	const ReceiptContainer = styled(Stack)<StackProps>({
-		gap: "2rem"
-	});
+	const queryClient = useQueryClient();
 
-	const BackButton = styled(Stack)<StackProps & LinkProps>(({ theme }) => ({
-		textDecoration: "none",
-		fontSize: "22px",
-		color: theme.palette.primary.dark,
-	}))
+	const refetch = () => {
+		queryClient.invalidateQueries(["single_receipt", receiptId]);
+	}
 
 	return (
 		<PageLayout
@@ -47,6 +65,9 @@ const ShowReceiptPage: FunctionComponent = () => {
 				/>
 				<ReceiptItemsList
 					receiptItems={receipt?.receiptItems || [] }
+					onClick={(receiptItem: SingleReceiptReceiptItem) =>
+						setUpdateReceiptItemForm({ open: true, receiptItem})
+					}
 				/>
 				{receipt &&
 					<ReceiptDetails {...{
@@ -58,8 +79,16 @@ const ShowReceiptPage: FunctionComponent = () => {
 						createdAt: receipt.createdAt,
 					}} />
 				}
-
 			</ReceiptContainer>
+			<ReceiptItemUpdateDialog
+				open={updateReceiptItemForm.open}
+				onClose={() => setUpdateReceiptItemForm({ ...updateReceiptItemForm, open: false })}
+				receiptItem={updateReceiptItemForm.receiptItem}
+				updateReceiptItem={(value: SingleReceiptReceiptItem) =>
+					setUpdateReceiptItemForm({...updateReceiptItemForm, receiptItem: value})
+				}
+				onSubmitted={refetch}
+			/>
 		</PageLayout>
 	)
 }

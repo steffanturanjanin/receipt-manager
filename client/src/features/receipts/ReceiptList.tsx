@@ -13,7 +13,7 @@ const ReceiptListItem: FunctionComponent<ReceiptAggregatedByDateItem> = ({ id, a
 	const categoriesList = categories.join(", ");
 
 	return (
-		<Card component={Link} to="/" sx={{ textDecoration: "none"}} key={id}>
+		<Card component={Link} to={`/receipts/${id}`} sx={{ textDecoration: "none"}} key={id}>
 			<CardContent component={Stack} direction="column" gap="1rem">
 				<Stack direction="row" justifyContent="space-between">
 					<Typography component="span" fontWeight="bold">{store.name}</Typography>
@@ -30,6 +30,8 @@ const ReceiptListItem: FunctionComponent<ReceiptAggregatedByDateItem> = ({ id, a
 
 const ReceiptListGroup: FunctionComponent<ReceiptsAggregatedByDate> = ({ date, total, receipts }) => {
 	const formattedDate = dayjs(date).format("DD.MM.YYYY");
+
+	// const ReceiptGroup = styled(Stack)<StackProps &
 
 	const ReceiptGroupHeader = styled(Stack)<StackProps>({
 		gap: "2rem",

@@ -28,7 +28,7 @@ const CategoryStats: FunctionComponent<CategoryStatsProps> = ({ categoryStats })
 					<Typography variant="body1" component="p">Potrošeno ovog meseca:</Typography>
 					<Typography variant="h4" component="p">{total || "0.00"}</Typography>
 				</Stack>
-				{categories?.length &&
+				{categories && categories.length > 0 &&
 					<Stack justifyContent="center" alignItems="center">
 						<Pie
 							data={{

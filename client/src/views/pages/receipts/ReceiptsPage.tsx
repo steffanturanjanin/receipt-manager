@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactElement } from "react";
+import { FunctionComponent, ReactElement, useMemo } from "react";
 import { useQuery } from "react-query";
 import { Button, ButtonProps, Stack, Typography, styled } from "@mui/material";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -27,23 +27,28 @@ const ReceiptsPage: FunctionComponent = (): ReactElement => {
 		calculateNextMonth
 	} = useMonthRange();
 
-	const { data: categoriesStats } = useQuery({
+	const { isLoading: isCategoriesStatsLoading, data: categoriesStats } = useQuery({
 		queryKey: ["categories_stats", monthRange?.from, monthRange?.to],
 		queryFn: () => getCategoriesStats({ fromDate: monthRange!.from, toDate: monthRange!.to }),
 		keepPreviousData: true,
 		enabled: !!monthRange,
 	});
 
-	const { data: receipts } = useQuery({
+	const { isLoading: isReceiptsLoading, data: receipts } = useQuery({
 		queryKey: ["receipts", monthRange?.from, monthRange?.to],
 		queryFn: () => getReceiptsAggregatedByDate({ fromDate: monthRange!.from, toDate: monthRange!.to }),
 		keepPreviousData: true,
 		enabled: !!monthRange,
 	});
 
+	const isLoading = useMemo(() => {
+		return isCategoriesStatsLoading || isReceiptsLoading;
+	}, [isCategoriesStatsLoading, isReceiptsLoading]);
+
 	return (
 		<PageLayout
 			title={currentMonth || ""}
+			showBackdrop={isLoading}
 			headerPrefix={prevMonth &&
 				<MonthButton onClick={calculatePrevMonth}><ChevronLeftIcon />
 					{prevMonth}

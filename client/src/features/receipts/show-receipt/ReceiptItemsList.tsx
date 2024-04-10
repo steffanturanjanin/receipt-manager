@@ -1,5 +1,5 @@
-import { Fragment, FunctionComponent, ReactElement } from "react";
-import { Box, BoxProps, Divider, Stack, Typography, styled, useTheme } from "@mui/material";
+import { FunctionComponent, ReactElement } from "react";
+import { Box, BoxProps, ButtonProps, Divider, Stack, Typography, styled, useTheme } from "@mui/material";
 import { ReceiptCard, ReceiptCardContent } from "./components";
 
 const ColorCircle = styled(Box)<BoxProps>({
@@ -19,9 +19,14 @@ const CategoryCircle: FunctionComponent<CategoryCircleProps> = ({ color }) =>
 interface ReceiptItemProps {
 	receiptItem: SingleReceiptReceiptItem;
 	divider: boolean;
+	onClick: (receiptItem: SingleReceiptReceiptItem) => void;
 }
 
-const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem }): ReactElement => {
+const ReceiptItemContainer = styled(Box)<BoxProps & ButtonProps>({
+	cursor: "pointer",
+});
+
+const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem, onClick }): ReactElement => {
 	const { name, totalAmount, category, quantity, unit, singleAmount } = receiptItem;
 	const breakdownPerUnit = `${quantity} ${unit} x ${singleAmount}`;
 
@@ -30,7 +35,7 @@ const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem
 	const UNCATEGORIZED_NAME = "Nekategorisano";
 
 	return (
-		<Fragment>
+		<ReceiptItemContainer onClick={() => onClick(receiptItem)}>
 			<Stack direction="column" gap="0.5rem">
 				<Stack direction="row" gap="0.5rem" justifyContent="space-between">
 					<Typography variant="h6">{name}</Typography>
@@ -45,15 +50,16 @@ const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem
 				</Stack>
 			</Stack>
 			{divider && <Divider orientation="horizontal" sx={{ marginY: "1rem" }}/> }
-		</Fragment>
+		</ReceiptItemContainer>
 	)
 }
 
 interface ReceiptItemsListProps {
 	receiptItems: SingleReceiptReceiptItem[];
+	onClick: (receiptItem: SingleReceiptReceiptItem) => void;
 }
 
-const ReceiptItemsList: FunctionComponent<ReceiptItemsListProps> = ({ receiptItems }): ReactElement => {
+const ReceiptItemsList: FunctionComponent<ReceiptItemsListProps> = ({ receiptItems, onClick }): ReactElement => {
 	return (
 		<Box component="section">
 			<Typography variant="h4" component="h2" marginY="2rem">Stavke sa računa</Typography>
@@ -64,6 +70,7 @@ const ReceiptItemsList: FunctionComponent<ReceiptItemsListProps> = ({ receiptIte
 							key={receiptItem.id}
 							receiptItem={receiptItem}
 							divider={index !== receiptItems.length - 1}
+							onClick={onClick}
 						/>
 					))}
 				</ReceiptCardContent>
