@@ -114,13 +114,23 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("Error fetching receipt item %+d: %s\n", receiptItemId, err.Error())
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	// Update Receipt Item Category
+	dbReceiptItem.CategoryID = new(uint)
 	*dbReceiptItem.CategoryID = updateReceiptItemCategoryRequest.CategoryId
-	if db.Instance.Save(&dbReceiptItem).Error != nil {
-		log.Printf("Error updating receipt item %+d: %s\n", receiptItemId, err.Error())
+
+	if dbErr := db.Instance.Save(&dbReceiptItem).Error; dbErr != nil {
+		log.Printf("Error updating receipt item %+d: %s\n", receiptItemId, dbErr.Error())
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
+
+	if dbErr := db.Instance.Preload("Category").Preload("Tax").Find(&dbReceiptItem).Error; dbErr != nil {
+		log.Printf("Error loading receipt item relations: %s\n", dbErr.Error())
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
 	}
 
 	// Transform response

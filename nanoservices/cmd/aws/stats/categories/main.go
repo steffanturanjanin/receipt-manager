@@ -126,7 +126,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 
 	var total int
 	dbErr = db.Instance.Model(&models.Receipt{}).
-		Select("SUM(receipts.total_purchase_amount) AS total").
+		Select("IFNULL(SUM(receipts.total_purchase_amount), 0) AS total").
 		Where("receipts.date BETWEEN ? AND ?", fromDate, toDate).
 		Where("receipts.user_id = ?", user.Id).
 		Scan(&total).

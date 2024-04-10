@@ -18,3 +18,13 @@ func (t CategoryTransformer) TransformSingle(model models.Category) CategoryResp
 
 	return category
 }
+
+func (t CategoryTransformer) Transform(models []models.Category) []CategoryResponse {
+	categories := make([]CategoryResponse, 0)
+	for _, model := range models {
+		category := t.TransformSingle(model)
+		categories = append(categories, category)
+	}
+
+	return categories
+}
