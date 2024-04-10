@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import dayjs from "dayjs";
+import { useSearchParams } from "react-router-dom";
 
 export interface CurrentMonthRange {
 	from: dayjs.Dayjs;
@@ -23,13 +24,30 @@ export interface UseMonthRange {
 
 export const useMonthRange = (): UseMonthRange => {
 	const [currentMonthRange, setCurrentMonthRange] = useState<CurrentMonthRange>();
+	// Query params hook
+	const [queryParams, setSearchParams] = useSearchParams();
 
 	// Initialize `currentMonthRange`
 	useEffect(() => {
-		const firstDateOfMonth = dayjs().startOf("month");
-		const lastDateOfMonth = dayjs().endOf("month");
+		const monthQueryParamString = queryParams.get("month");
+		const isMonthQueryParamValid =
+			dayjs(monthQueryParamString).isValid() &&
+			dayjs(monthQueryParamString).isBefore(dayjs());
+
+		const monthQueryParam = isMonthQueryParamValid ? dayjs(monthQueryParamString) : dayjs();
+		const month = monthQueryParam.format("YYYY-MM");
+		setSearchParams({ month });
+
+		const firstDateOfMonth = monthQueryParam.startOf("month");
+		const lastDateOfMonth = monthQueryParam.endOf("month");
 		setCurrentMonthRange({ from: firstDateOfMonth, to: lastDateOfMonth});
 	}, []);
+
+	// Manage query param
+	useEffect(() => {
+		if (!currentMonthRange) return;
+		setSearchParams({ month: currentMonthRange.from.format("YYYY-MM") });
+	}, [currentMonthRange])
 
 	// Previous month string
 	const prevMonth = useMemo(() => {

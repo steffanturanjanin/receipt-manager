@@ -29,7 +29,7 @@ const CategoryStats: FunctionComponent<CategoryStatsProps> = ({ categoryStats })
 					<Typography variant="h4" component="p">{total || "0.00"}</Typography>
 				</Stack>
 				{categories && categories.length > 0 &&
-					<Stack justifyContent="center" alignItems="center">
+					<Stack justifyContent="center" alignItems="center" sx={{ maxHeight: "350px"}}>
 						<Pie
 							data={{
 								labels: categories.map(statistic => statistic.category.name),
