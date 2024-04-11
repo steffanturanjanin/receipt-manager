@@ -83,7 +83,7 @@ func (v *Validator) Validate(s interface{}) error {
 func NewEnglishTranslator() ut.Translator {
 	en := en.New()
 	uni := ut.New(en, en)
-	translator, _ := uni.GetTranslator("en")
+	translator, _ := uni.GetTranslator("sr")
 
 	return translator
 }
@@ -104,56 +104,63 @@ func (v *Validator) RegisterCustomTagValidations() {
 
 func (v *Validator) RegisterTranslations() {
 	_ = v.Validator.RegisterTranslation("required", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("required", "field is required.", true)
+		return ut.Add("required", "polje je obavezno.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("required")
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("email", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("email", "field should be a valid email.", true)
+		return ut.Add("email", "polje mora biti email.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("email")
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("max", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("max", "field has a limit of maximum {0} characters.", true)
+		return ut.Add("max", "polje ima limit od maksimalno {0} karaktera.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("max", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("min", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("min", "field must have at least {0} characters.", true)
+		return ut.Add("min", "polje mora imati najmanje {0} karaktera.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("min", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("receipt_url", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("receipt_url", "field is not valid receipt url.", true)
+		return ut.Add("receipt_url", "polje ne predstavlja validan url računa.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("receipt_url")
 		return t
 	})
 
+	_ = v.Validator.RegisterTranslation("url", v.Translator, func(ut ut.Translator) error {
+		return ut.Add("url", "polje nije validan url.", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("url")
+		return t
+	})
+
 	_ = v.Validator.RegisterTranslation("url_query_params", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("url_query_params", "field is missing required url query params: {0}.", true)
+		return ut.Add("url_query_params", "polju nedostaju obavezni query parametri: {0}.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("url_query_params", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("url_host", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("url_host", "field is invalid url host. Valid host is: {0}.", true)
+		return ut.Add("url_host", "polje nema validan url host. Validan host je: {0}.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("url_host", fe.Param())
 		return t
 	})
 
 	_ = v.Validator.RegisterTranslation("unique", v.Translator, func(ut ut.Translator) error {
-		return ut.Add("unique", "field must be unique.", true)
+		return ut.Add("unique", "polje mora biti jedinstveno.", true)
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T("unique")
 		return t

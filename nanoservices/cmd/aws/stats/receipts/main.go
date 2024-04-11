@@ -29,7 +29,7 @@ type ReceiptDbDto struct {
 }
 
 type Store struct {
-	Name string
+	Name string `json:"name"`
 }
 
 type Receipt struct {
@@ -123,15 +123,13 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 			"receipts.date AS receipt_date",
 			"DATE(receipts.date) AS date",
 		).
-		Joins("INNER JOIN receipt_items ON receipts.id = receipt_items.receipt_id").
-		Joins("INNER JOIN categories ON receipt_items.category_id = categories.id").
-		Joins("INNER JOIN stores ON receipts.store_id = stores.id").
+		Joins("LEFT JOIN receipt_items ON receipts.id = receipt_items.receipt_id").
+		Joins("LEFT JOIN categories ON receipt_items.category_id = categories.id").
+		Joins("LEFT JOIN stores ON receipts.store_id = stores.id").
 		Where("receipts.date BETWEEN ? AND ?", fromDate, toDate).
 		Where("receipts.user_id = ?", user.Id).
 		Order("receipts.date DESC").
 		Scan(&dbReceipts)
-
-	fmt.Printf("DB_RESULT: %+v\n", dbReceipts)
 
 	receiptsMap := make(map[int]Receipt, 0)
 	for _, dbReceipt := range dbReceipts {
