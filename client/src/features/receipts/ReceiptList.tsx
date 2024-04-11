@@ -31,8 +31,6 @@ const ReceiptListItem: FunctionComponent<ReceiptAggregatedByDateItem> = ({ id, a
 const ReceiptListGroup: FunctionComponent<ReceiptsAggregatedByDate> = ({ date, total, receipts }) => {
 	const formattedDate = dayjs(date).format("DD.MM.YYYY");
 
-	// const ReceiptGroup = styled(Stack)<StackProps &
-
 	const ReceiptGroupHeader = styled(Stack)<StackProps>({
 		gap: "2rem",
 		paddingLeft: "1rem",

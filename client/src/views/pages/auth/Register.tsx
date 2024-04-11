@@ -7,6 +7,7 @@ import { SxProps } from '@mui/material/styles';
 import { register } from '../../../api/auth';
 import { AuthResponse, RegisterRequest } from '../../../api/auth/types';
 import LoadingButton from '../../../components/LoadingButton';
+import { FormFieldsTranslator, FormErrors } from '../../../shared/types/errors';
 
 interface RegisterForm {
 	firstName: string,
@@ -15,7 +16,7 @@ interface RegisterForm {
 	password: string,
 }
 
-const RegisterFormFieldsTranslation: FormFieldsTranslation<RegisterForm> = {
+const RegisterFormFieldsTranslation: FormFieldsTranslator<RegisterForm> = {
 	firstName: "First name",
 	lastName: "Last name",
 	email: "Email",

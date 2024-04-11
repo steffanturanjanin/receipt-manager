@@ -1,5 +1,3 @@
-type FormErrors<FormType extends object> = {
-	[key in keyof FormType]: string;
-}
+export type FormErrors<Form extends object> = Record<keyof Form, string>;
 
-type FormFieldsTranslation<FormType extends object> = Record<keyof FormType, string>;
+export type FormFieldsTranslator<Form extends object> = Record<keyof Form, string>;

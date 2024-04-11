@@ -13,7 +13,7 @@ interface LoginForm {
 	password: string,
 }
 
-const LoginFormFieldsTranslation: FormFieldsTranslation<LoginForm> = {
+const LoginFormFieldsTranslation: FormFieldsTranslator<LoginForm> = {
 	email: "Email",
 	password: "Password",
 }
