@@ -1,7 +1,7 @@
 import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import { FunctionComponent, ReactElement } from 'react';
 
-interface LoadingButtonProps extends ButtonProps {
+export interface LoadingButtonProps extends ButtonProps {
 	loaderPosition?: 'left' | 'right';
 	loaderSize?: string | number;
 	loading?: boolean;

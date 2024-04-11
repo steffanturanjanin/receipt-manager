@@ -1,4 +1,3 @@
-
 interface Auth {
 	access_token: string;
 }
@@ -12,4 +11,8 @@ export const getAuth = (): Auth | null  => {
 	}
 
 	return JSON.parse(authData) as Auth;
+}
+
+export const removeAuth = (): void => {
+	localStorage.removeItem(AUTH_KEY);
 }

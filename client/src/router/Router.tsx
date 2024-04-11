@@ -3,10 +3,11 @@ import { RouteObject, RouterProvider, createBrowserRouter } from "react-router-d
 import auth from "./auth";
 import AuthGuard from "./guards/AuthGuard";
 import Home from "../views/pages/home/Home";
-import AppLayout from "../views/layouts/AppLayout/AppLayout";
+import AppLayout from "../views/layouts/AppLayout";
 import ReceiptsPage from "../views/pages/receipts/ReceiptsPage";
 import ShowReceiptPage from "../views/pages/receipts/ShowReceiptPage";
 import CreateReceiptPage from "../views/pages/receipts/CreateReceiptPage";
+import ProfilePage from "../views/pages/profile/ProfilePage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -30,6 +31,10 @@ const routes: RouteObject[] = [
 			{
 				path: "/receipts/:id",
 				element: <ShowReceiptPage />
+			},
+			{
+				path: "/profile",
+				element: <ProfilePage />
 			}
 		]
 	}

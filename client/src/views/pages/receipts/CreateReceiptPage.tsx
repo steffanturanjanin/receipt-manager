@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
 import { AxiosError } from "axios";
 import { Stack, Typography, TextField, Button } from "@mui/material";
-import PageLayout from "../../layouts/PageLayout/PageLayout";
+import PageLayout from "../../layouts/PageLayout";
 import LoadingButton from "../../../components/LoadingButton";
 import { createReceipt } from "../../../api/receipts";
 import { FormErrors, FormFieldsTranslator } from "../../../shared/types/errors";

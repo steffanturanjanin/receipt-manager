@@ -2,7 +2,7 @@ import { FunctionComponent, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { getReceipt } from "../../../api/receipts";
 import { Link, LinkProps, useParams } from "react-router-dom";
-import PageLayout from "../../layouts/PageLayout/PageLayout";
+import PageLayout from "../../layouts/PageLayout";
 import { Button, ButtonProps, Stack, StackProps, styled } from "@mui/material";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ReceiptPaymentOverview from "../../../features/receipts/show-receipt/ReceiptPaymentOverview";
@@ -22,7 +22,7 @@ const BackButton = styled(Stack)<StackProps & LinkProps>(({ theme }) => ({
 	color: theme.palette.primary.dark,
 }));
 
-const RemoveReceiptButton = styled(Button)<ButtonProps>(({theme}) => ({
+const RemoveReceiptButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	minWidth: "auto",
 	color: theme.palette.error.light,
 	border: `1px solid ${theme.palette.grey[400]}`,

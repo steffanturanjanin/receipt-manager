@@ -14,8 +14,11 @@ interface AuthResponse {
 	access_token: string;
 }
 
-export type {
-	AuthResponse,
-	LoginRequest,
-	RegisterRequest,
+interface Profile {
+	id: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	receiptsCount: number;
+	registeredAt: string;
 }

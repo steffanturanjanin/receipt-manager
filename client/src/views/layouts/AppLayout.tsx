@@ -13,22 +13,20 @@ import {
 } from "@mui/material";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import CameraIcon from "@mui/icons-material/Camera";
-import QrScannerDialog from "../../../features/qr-scanner/QrScannerDialog";
-import "./app-layout.scss";
-
+import ProfileIcon from '@mui/icons-material/Person';
+import QrScannerDialog from "../../features/qr-scanner/QrScannerDialog";
 
 const AppLayoutContainer = styled(Stack)<StackProps>({
 	width: "100vw",
 	height: "100vh",
 });
 
-const AppLayoutContent = styled(Stack)<StackProps>({
-	//padding: '1.5rem',
+const AppLayoutContent = styled(Stack)<StackProps>(({ theme }) => ({
 	marginBottom: '5.5rem',
 	overflow: 'auto',
-	backgroundColor: '#f6f6f6',
+	backgroundColor: theme.palette.grey["100"],
 	height: '100vh',
-});
+}));
 
 const BottomNavigationContainerStyle: SxProps = {
 	position: 'fixed',
@@ -40,12 +38,18 @@ const BottomNavigationContainerStyle: SxProps = {
 
 const NavigationAction = styled(BottomNavigationAction)<BottomNavigationActionProps>({
 	".MuiBottomNavigationAction-label": { fontSize: "1rem" },
-})
+});
 
-const NavigationActionLink = styled(BottomNavigationAction)<BottomNavigationActionProps & NavLinkProps>({
-	".MuiBottomNavigationAction-label": { fontSize: "1rem" },
-})
-
+const NavigationActionLink = styled(NavigationAction)<
+	BottomNavigationActionProps & NavLinkProps
+>(({ theme }) => ({
+	".MuiBottomNavigationAction-label": {
+		fontSize: "1rem"
+	},
+	"&.MuiButtonBase-root.MuiBottomNavigationAction-root.active": {
+		color: theme.palette.primary.main,
+	}
+}));
 
 const AppLayout: FunctionComponent = (): ReactElement => {
 	const [receiptScannerOpened, setReceiptScannerOpened] = useState<boolean>(false);
@@ -60,7 +64,7 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 				<BottomNavigation showLabels>
 					<NavigationActionLink
 						component={NavLink}
-						to="/"
+						to="/receipts"
 						label="Receipts"
 						icon={<ReceiptIcon fontSize="large" />}
 					/>
@@ -69,10 +73,19 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 						icon={<CameraIcon fontSize="large" />}
 						onClick={() => setReceiptScannerOpened(true)}
 					/>
+					<NavigationActionLink
+						component={NavLink}
+						to="/profile"
+						label="Profile"
+						icon={<ProfileIcon fontSize="large" />}
+					/>
 				</BottomNavigation>
 			</Box>
 
-			<QrScannerDialog open={receiptScannerOpened} onClose={() => setReceiptScannerOpened(false)} />
+			<QrScannerDialog
+				open={receiptScannerOpened}
+				onClose={() => setReceiptScannerOpened(false)}
+			/>
 		</AppLayoutContainer>
 	)
 }
