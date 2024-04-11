@@ -29,7 +29,7 @@ const LogoutButton = styled(LoadingButton)<LoadingButtonProps>(({ theme }) => ({
 const ProfilePage: FunctionComponent = (): ReactElement => {
 	const navigate = useNavigate();
 
-	const { data: profile } = useQuery({
+	const { data: profile, isFetching: isProfileFetching } = useQuery({
 		queryKey: ["profile"],
 		queryFn: () => getProfile(),
 	});
@@ -42,11 +42,11 @@ const ProfilePage: FunctionComponent = (): ReactElement => {
 		}
 	});
 
-	const { firstName, lastName, email, registeredAt, receiptsCount } = profile || {};
+	const { firstName, lastName, email, registeredAt, receiptCount } = profile || {};
 	const formattedRegisteredAt = registeredAt ? dayjs(registeredAt).format("DD.MM.YYYY.") : "";
 
 	return (
-		<PageLayout title="Profil">
+		<PageLayout title="Profil" showBackdrop={isProfileFetching}>
 			<Typography variant="h5" component="h2" mb="1rem">
 				{`${firstName} ${lastName}`}
 			</Typography>
@@ -64,7 +64,7 @@ const ProfilePage: FunctionComponent = (): ReactElement => {
 					<Divider />
 					<ProfileItem>
 						<Typography>Skeniranih računa:</Typography>
-						<Typography>{receiptsCount}</Typography>
+						<Typography>{receiptCount}</Typography>
 					</ProfileItem>
 				</Paper>
 				<Paper>

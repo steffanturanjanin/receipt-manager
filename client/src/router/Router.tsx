@@ -40,6 +40,7 @@ const routes: RouteObject[] = [
 	}
 ];
 
-const Router: FunctionComponent = () => <RouterProvider router={createBrowserRouter(routes)} />
+const Router: FunctionComponent = () =>
+	<RouterProvider router={createBrowserRouter(routes)} />
 
 export default Router;

@@ -19,6 +19,6 @@ interface Profile {
 	firstName: string;
 	lastName: string;
 	email: string;
-	receiptsCount: number;
+	receiptCount: number;
 	registeredAt: string;
 }

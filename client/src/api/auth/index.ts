@@ -1,5 +1,4 @@
 import { httpClient } from "../http"
-import { profile } from "./mock";
 
 export const register = async (request: RegisterRequest): Promise<AuthResponse> => {
 	const { data } = await httpClient.post<AuthResponse>("/auth/register", request);
@@ -20,9 +19,7 @@ export const logout = async (): Promise<void> => {
 }
 
 export const getProfile = async (): Promise<Profile> => {
-	// const { data } = await httpClient.get<Profile>("/auth/me");
+	const { data } = await httpClient.get<Profile>("/auth/me");
 
-	// return data;
-
-	return profile;
+	return data;
 }

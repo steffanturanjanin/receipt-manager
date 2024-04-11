@@ -3,6 +3,6 @@ export const profile: Profile = {
 	firstName: "Stefan",
 	lastName: "Turanjanin",
 	email: "stefan@turanjanin.net",
-	receiptsCount: 256,
+	receiptCount: 256,
 	registeredAt: "2024-04-04",
 }
