@@ -12,9 +12,14 @@ export const getReceiptsAggregatedByDate = async (params: GetReceiptsParams): Pr
 	return data;
 }
 
-
 export const getReceipt = async (id: string): Promise<SingleReceipt> => {
 	const { data } = await httpClient.get<SingleReceipt>(`/receipts/${id}`);
+
+	return data;
+}
+
+export const deleteReceipt = async (id: number): Promise<void> => {
+	const { data }= await httpClient.delete<void>(`/receipts/${id}`);
 
 	return data;
 }
