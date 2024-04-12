@@ -2,8 +2,16 @@ import { FunctionComponent, ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "react-query";
 import dayjs from "dayjs";
-import { alpha, styled } from "@mui/system";
-import { Divider, Paper, Stack, StackProps, Typography } from "@mui/material";
+import {
+	Divider,
+	Paper,
+	Stack,
+	StackProps,
+	Typography,
+	alpha,
+	styled
+} from "@mui/material";
+import LogoutIcon from '@mui/icons-material/Logout';
 import { getProfile, logout } from "../../../api/auth";
 import PageLayout from "../../layouts/PageLayout";
 import LoadingButton, { LoadingButtonProps } from "../../../components/LoadingButton";
@@ -21,6 +29,7 @@ const ProfileLogoutItem = styled(ProfileItem)<StackProps>({
 
 const LogoutButton = styled(LoadingButton)<LoadingButtonProps>(({ theme }) => ({
 	color: theme.palette.error.main,
+	gap: "0.5rem",
 	"&:hover": {
 		backgroundColor: alpha(theme.palette.error.light, 0.1),
 	}
@@ -69,7 +78,9 @@ const ProfilePage: FunctionComponent = (): ReactElement => {
 				</Paper>
 				<Paper>
 					<ProfileLogoutItem component="form" onSubmit={() => onSubmit()}>
-						<LogoutButton type="submit" variant="text">Odjavi se</LogoutButton>
+						<LogoutButton type="submit" variant="text">
+							Odjavi se <LogoutIcon />
+						</LogoutButton>
 					</ProfileLogoutItem>
 				</Paper>
 			</Stack>

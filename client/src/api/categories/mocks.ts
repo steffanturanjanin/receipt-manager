@@ -14,4 +14,4 @@ export const categories: Category[] = [
 		name: "Tehnologija",
 		color: "#7FB5B5",
 	}
-]
+];

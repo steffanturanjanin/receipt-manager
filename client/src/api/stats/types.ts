@@ -18,3 +18,23 @@ interface CategoryStats {
 	total: string;
 	categories: CategoryStatItem[];
 }
+
+interface ExpensesDateBreakdown {
+	date: string;
+	total: string;
+}
+
+interface ExpensesByCategoryBreakdown {
+	id: number;
+	name: string;
+	total: string;
+	percentage: number;
+	receiptCount: number;
+}
+
+interface ExpensesByStoreBreakdown {
+	id: number;
+	name: string;
+	total: string;
+	receiptCount: number;
+}

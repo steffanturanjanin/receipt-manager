@@ -8,6 +8,7 @@ import ReceiptsPage from "../views/pages/receipts/ReceiptsPage";
 import ShowReceiptPage from "../views/pages/receipts/ShowReceiptPage";
 import CreateReceiptPage from "../views/pages/receipts/CreateReceiptPage";
 import ProfilePage from "../views/pages/profile/ProfilePage";
+import StatsPage from "../views/pages/stats/StatsPage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -35,6 +36,10 @@ const routes: RouteObject[] = [
 			{
 				path: "/profile",
 				element: <ProfilePage />
+			},
+			{
+				path: "/stats",
+				element: <StatsPage />
 			}
 		]
 	}

@@ -12,8 +12,9 @@ import {
 	styled
 } from "@mui/material";
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import CameraIcon from "@mui/icons-material/Camera";
+import ScanIcon from "@mui/icons-material/Camera";
 import ProfileIcon from '@mui/icons-material/Person';
+import StatsIcon from '@mui/icons-material/BarChart';
 import QrScannerDialog from "../../features/qr-scanner/QrScannerDialog";
 
 const AppLayoutContainer = styled(Stack)<StackProps>({
@@ -70,7 +71,7 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 					/>
 					<NavigationAction
 						label="Scan"
-						icon={<CameraIcon fontSize="large" />}
+						icon={<ScanIcon fontSize="large" />}
 						onClick={() => setReceiptScannerOpened(true)}
 					/>
 					<NavigationActionLink
@@ -78,6 +79,12 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 						to="/profile"
 						label="Profile"
 						icon={<ProfileIcon fontSize="large" />}
+					/>
+					<NavigationActionLink
+						component={NavLink}
+						to="/stats"
+						label="Stats"
+						icon={<StatsIcon fontSize="large" />}
 					/>
 				</BottomNavigation>
 			</Box>

@@ -44,3 +44,100 @@ export const categoryStats: CategoryStats = {
 			},
 		]
 }
+
+export const expensesYearlyBreakdown: ExpensesDateBreakdown[] = [
+	{
+		date: "2023-05",
+		total: "2324.23",
+	},
+	{
+		date: "2023-06",
+		total: "2323.53",
+	},
+	{
+		date: "2023-07",
+		total: "54534.53",
+	},
+	{
+		date: "2023-08",
+		total: "4244.23",
+	},
+	{
+		date: "2023-09",
+		total: "23543.12",
+	},
+	{
+		date: "2023-10",
+		total: "23122.26",
+	},
+	{
+		date: "2023-11",
+		total: "2324.23",
+	},
+	{
+		date: "2023-12",
+		total: "2323.53",
+	},
+	{
+		date: "2024-01",
+		total: "54534.53",
+	},
+	{
+		date: "2024-02",
+		total: "4244.23",
+	},
+	{
+		date: "2024-03",
+		total: "23543.12",
+	},
+	{
+		date: "2024-4",
+		total: "23122.26",
+	},
+];
+
+export const expensesByCategoryYearlyBreakdown: ExpensesByCategoryBreakdown[] = [
+	{
+		id: 1,
+		name: "Automobil",
+		total: "1999.20",
+		percentage: 71,
+		receiptCount: 1,
+	},
+	{
+		id: 2,
+		name: "Piće",
+		total: "3328.24",
+		percentage: 12,
+		receiptCount: 4,
+	},
+	{
+		id: 3,
+		name: "Tehnika",
+		total: "12612.24",
+		percentage: 23,
+		receiptCount: 1,
+	},
+	{
+		id: 4,
+		name: "Hrana",
+		total: "31612.33",
+		percentage: 44,
+		receiptCount: 15,
+	},
+];
+
+export const expensesByStoreYearlyBreakdown: ExpensesByStoreBreakdown[] = [
+	{
+		id: 1,
+		name: "NAFTNA INDUSTRIJA SRBIJE",
+		total: "2990.00",
+		receiptCount: 5,
+	},
+	{
+		id: 2,
+		name: "METLA DISKONT",
+		total: "804.70",
+		receiptCount: 3,
+	},
+]
