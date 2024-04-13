@@ -9,6 +9,7 @@ import ShowReceiptPage from "../views/pages/receipts/ShowReceiptPage";
 import CreateReceiptPage from "../views/pages/receipts/CreateReceiptPage";
 import ProfilePage from "../views/pages/profile/ProfilePage";
 import StatsPage from "../views/pages/stats/StatsPage";
+import SearchPage from "../views/pages/search/SearchPage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -40,6 +41,10 @@ const routes: RouteObject[] = [
 			{
 				path: "/stats",
 				element: <StatsPage />
+			},
+			{
+				path: "/search",
+				element: <SearchPage />
 			}
 		]
 	}

@@ -27,3 +27,7 @@ interface Paginated<T> {
 		pagination: PaginationMeta;
 	}
 }
+
+interface SearchQuery {
+	searchText: string;
+}

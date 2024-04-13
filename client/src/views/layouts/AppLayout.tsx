@@ -15,6 +15,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import ScanIcon from "@mui/icons-material/Camera";
 import ProfileIcon from '@mui/icons-material/Person';
 import StatsIcon from '@mui/icons-material/BarChart';
+import SearchIcon from '@mui/icons-material/ManageSearch';
 import QrScannerDialog from "../../features/qr-scanner/QrScannerDialog";
 
 const AppLayoutContainer = styled(Stack)<StackProps>({
@@ -38,14 +39,14 @@ const BottomNavigationContainerStyle: SxProps = {
 }
 
 const NavigationAction = styled(BottomNavigationAction)<BottomNavigationActionProps>({
-	".MuiBottomNavigationAction-label": { fontSize: "1rem" },
+	".MuiSvgIcon-root": {
+		fontSize: "3.5rem"
+	},
 });
 
-const NavigationActionLink = styled(NavigationAction)<
-	BottomNavigationActionProps & NavLinkProps
->(({ theme }) => ({
-	".MuiBottomNavigationAction-label": {
-		fontSize: "1rem"
+const NavigationActionLink = styled(NavigationAction)<BottomNavigationActionProps & NavLinkProps>(({ theme }) => ({
+	".MuiSvgIcon-root": {
+		fontSize: "2rem"
 	},
 	"&.MuiButtonBase-root.MuiBottomNavigationAction-root.active": {
 		color: theme.palette.primary.main,
@@ -62,28 +63,34 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 			</AppLayoutContent>
 
 			<Box component={Paper} sx={BottomNavigationContainerStyle} elevation={3}>
-				<BottomNavigation showLabels>
+				<BottomNavigation>
 					<NavigationActionLink
 						component={NavLink}
 						to="/receipts"
-						label="Receipts"
+						label="Računi"
 						icon={<ReceiptIcon fontSize="large" />}
 					/>
+					<NavigationActionLink
+						component={NavLink}
+						to="/search"
+						label="Pretraga"
+						icon={<SearchIcon fontSize="large" />}
+					/>
 					<NavigationAction
-						label="Scan"
+						label="Skeniraj"
 						icon={<ScanIcon fontSize="large" />}
 						onClick={() => setReceiptScannerOpened(true)}
 					/>
 					<NavigationActionLink
 						component={NavLink}
 						to="/profile"
-						label="Profile"
+						label="Profil"
 						icon={<ProfileIcon fontSize="large" />}
 					/>
 					<NavigationActionLink
 						component={NavLink}
 						to="/stats"
-						label="Stats"
+						label="Statistika"
 						icon={<StatsIcon fontSize="large" />}
 					/>
 				</BottomNavigation>
