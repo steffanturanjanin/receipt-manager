@@ -1,7 +1,5 @@
 import { Fragment, FunctionComponent, ReactElement } from "react";
-import { useQuery } from "react-query";
 import { Box, Divider, Stack, Typography } from "@mui/material";
-import { getExpensesByStoreBreakdownStats } from "../../api/stats";
 
 interface ExpenseByStoreItemProps {
 	expenseByStore: ExpensesByStoreBreakdown;
@@ -27,19 +25,18 @@ const ExpenseBySoreItem: FunctionComponent<ExpenseByStoreItemProps> = ({ expense
 	)
 }
 
-const ExpensesByStore: FunctionComponent = (): ReactElement => {
-	const { data: expensesByStore } = useQuery({
-		queryKey: ["expenses_by_store_yearly_breakdown"],
-		queryFn: () => getExpensesByStoreBreakdownStats(),
-	});
+interface ExpensesByStoreProps {
+	stores: ExpensesByStoreBreakdown[],
+}
 
+const ExpensesByStore: FunctionComponent<ExpensesByStoreProps> = ({ stores }): ReactElement => {
 	return (
 		<Box>
-			{expensesByStore?.map((expenseByStore, index) => (
+			{stores.map((store, index) => (
 				<ExpenseBySoreItem
-					key={expenseByStore.id}
-					expenseByStore={expenseByStore}
-					divider={index !== expensesByStore.length -1}
+					key={store.id}
+					expenseByStore={store}
+					divider={index !== stores.length -1}
 				/>
 			))}
 		</Box>

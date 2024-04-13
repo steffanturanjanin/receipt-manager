@@ -9,10 +9,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import {Stack} from "@mui/material"
+import { Stack, StackProps, styled } from "@mui/material"
 import dayjs from "dayjs";
-import { useQuery } from "react-query";
-import { getExpensesDateBreakdownStats } from "../../api/stats";
 
 ChartJS.register(
   CategoryScale,
@@ -23,18 +21,33 @@ ChartJS.register(
   Legend
 );
 
-const ExpensesChart: FunctionComponent = (): ReactElement => {
-	const { data: expenses } = useQuery({
-		queryKey: ["expenses_yearly_breakdown"],
-		queryFn: () => getExpensesDateBreakdownStats(),
-	});
+const ExpensesChartContainer = styled(Stack)<StackProps>(({ theme }) => ({
+	width: "100%",
+	height: "250px",
+	[theme.breakpoints.up("sm")]: {
+		height: "320px",
+	}
+}));
 
-	const labels = useMemo(() => expenses?.map(expense => dayjs(expense.date).format("MMM")) || [], [expenses]);
-	const data = useMemo(() => expenses?.map(expense => expense.total) || [], [expenses])
+interface ExpensesChartProps {
+	expenses: ExpensesDateBreakdown[]
+}
+
+const ExpensesChart: FunctionComponent<ExpensesChartProps> = ({ expenses }): ReactElement => {
+	const labels = useMemo(
+		() => expenses.map(expense => dayjs(expense.date).format("MMM")) || [],
+		[expenses]
+	);
+
+	const data = useMemo(
+		() => expenses.map(expense => expense.total) || [],
+		[expenses]
+	);
 
 	return (
-		<Stack>
+		<ExpensesChartContainer direction="column" justifyContent="center" alignItems="center">
 			<Bar
+				style={{ height: "100%" }}
 				data={{
 					labels: labels,
 					datasets: [
@@ -47,6 +60,7 @@ const ExpensesChart: FunctionComponent = (): ReactElement => {
 				}}
 				options={{
 					responsive: true,
+					maintainAspectRatio: false,
 					plugins: {
 						legend: {
 							display: false,
@@ -54,7 +68,7 @@ const ExpensesChart: FunctionComponent = (): ReactElement => {
 					}
 				}}
 			/>
-		</Stack>
+		</ExpensesChartContainer>
 	)
 }
 

@@ -1,5 +1,4 @@
 import { httpClient } from "../http"
-import { expensesByCategoryYearlyBreakdown, expensesByStoreYearlyBreakdown, expensesYearlyBreakdown } from "./mock";
 
 export const getCategoriesStats = async ({ fromDate, toDate }: CategoriesStatsParams): Promise<CategoryStats> => {
 	const { data } = await httpClient.get<CategoryStats>("/stats/categories", {
@@ -10,25 +9,19 @@ export const getCategoriesStats = async ({ fromDate, toDate }: CategoriesStatsPa
 }
 
 export const getExpensesDateBreakdownStats = async (): Promise<ExpensesDateBreakdown[]> => {
-	// const { data } = await httpClient.get<ExpensesYearlyBreakdown[]>("/stats/expenses/yearly-breakdown");
+	const { data } = await httpClient.get<ExpensesDateBreakdown[]>("/stats/expenses/breakdown");
 
-	// return data;
-
-	return expensesYearlyBreakdown;
+	return data;
 }
 
 export const getExpensesByCategoryBreakdownStats = async (): Promise<ExpensesByCategoryBreakdown[]> => {
-	// const { data } = await httpClient.get<CategoryYearlyBreakdown[]>("/stats/categories/yearly-breakdown");
+	const { data } = await httpClient.get<ExpensesByCategoryBreakdown[]>("/stats/categories/breakdown");
 
-	// return data;
-
-	return expensesByCategoryYearlyBreakdown;
+	return data;
 }
 
 export const getExpensesByStoreBreakdownStats = async (): Promise<ExpensesByStoreBreakdown[]> => {
-	// const { data } = await httpClient.get<ExpensesByCategoryYearlyBreakdown[]>("/stats/stores/yearly-breakdown");
+	const { data } = await httpClient.get<ExpensesByStoreBreakdown[]>("/stats/stores/breakdown");
 
-	// return data;
-
-	return expensesByStoreYearlyBreakdown;
+	return data;
 }

@@ -1,8 +1,5 @@
 import { Fragment, FunctionComponent, ReactElement } from "react";
-import { useQuery } from "react-query";
 import { Box, Divider, Stack, Typography } from "@mui/material";
-import { getExpensesByCategoryBreakdownStats } from "../../api/stats";
-
 
 interface ExpensesByCategoryItemProps {
 	category: ExpensesByCategoryBreakdown;
@@ -29,19 +26,18 @@ const ExpensesByCategoryItem: FunctionComponent<ExpensesByCategoryItemProps> = (
 	)
 }
 
-const ExpensesByCategory: FunctionComponent = (): ReactElement => {
-	const { data: categoriesStats } = useQuery({
-		queryKey: ["expenses_by_category_stats_yearly_breakdown"],
-		queryFn: () => getExpensesByCategoryBreakdownStats(),
-	});
+interface ExpensesByCategoryProps {
+	categories: ExpensesByCategoryBreakdown[]
+}
 
+const ExpensesByCategory: FunctionComponent<ExpensesByCategoryProps> = ({ categories }): ReactElement => {
 	return (
 		<Box>
-			{categoriesStats?.map((category, index) => (
+			{categories.map((category, index) => (
 				<ExpensesByCategoryItem
 					key={category.id}
 					category={category}
-					divider={index !== categoriesStats.length -1}
+					divider={index !== categories.length -1}
 				/>
 			))}
 		</Box>
