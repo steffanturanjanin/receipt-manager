@@ -1,4 +1,4 @@
-import { FormEvent, FunctionComponent, ReactElement, useState, MouseEvent, ChangeEvent } from "react";
+import { FormEvent, FunctionComponent, ReactElement, useState, MouseEvent, ChangeEvent, useEffect } from "react";
 import PageLayout from "../../layouts/PageLayout";
 import { Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { useQuery } from "react-query";
@@ -43,6 +43,12 @@ const SearchPage: FunctionComponent = (): ReactElement => {
 			!!searchTerm?.length
 	});
 
+	useEffect(() => {
+		if (searchTerm === "") {
+			setSearchCriteria(undefined);
+		}
+	}, [searchTerm])
+
 	return (
 		<PageLayout title="Pretraga">
 			<Stack direction="column" gap="2rem">
@@ -51,15 +57,15 @@ const SearchPage: FunctionComponent = (): ReactElement => {
 						fullWidth
 						size="small"
 						variant="outlined"
-						placeholder="Pretraži artikle i predovnice"
+						placeholder="Pretraži artikle i prodavnice"
 						value={searchInput}
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setSearchInput(event.target.value)}
 						sx={{ backgroundColor: "white"}} />
 				</Stack>
 
 				<Stack direction="column" gap="1rem">
-					{searchTerm === undefined && (
-						<Typography variant="h5">Unesite termin u polje da započnete pretragu...</Typography>
+					{(searchTerm === undefined || searchTerm === "") && (
+						<Typography variant="h5">Unesite termin u polje da započnete pretragu.</Typography>
 					)}
 
 					{(searchCriteria && searchTerm) &&
