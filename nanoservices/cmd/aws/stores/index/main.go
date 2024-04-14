@@ -17,15 +17,26 @@ import (
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
-	"github.com/steffanturanjanin/receipt-manager/internal/query"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
 )
 
+type Store struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Location string `json:"location"`
+	City     string `json:"city"`
+	Address  string `json:"address"`
+}
+
 var (
+	// Database
+	DB *gorm.DB
+
 	// Router
 	GorillaLambda *gorillamux.GorillaMuxAdapter
 
 	// Errors
+	ErrMissingSearchText  = transport.NewBadRequestResponse("Missing required 'searchText' query parameter")
 	ErrServiceUnavailable = transport.NewServiceUnavailableError()
 )
 
@@ -33,6 +44,8 @@ func init() {
 	// Initialize database
 	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
+	} else {
+		DB = db.Instance
 	}
 
 	// Build middleware chain
@@ -52,39 +65,40 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Auth user
 	user := middlewares.GetAuthUser(r)
 
-	// Query params
-	paginationQuery := middlewares.GetPaginationQueryParams(r)
+	queryParams := r.URL.Query()
+	searchText := queryParams.Get("searchText")
 
-	// Query builder
-	baseQuery := db.Instance.Preload("Receipts", func(query *gorm.DB) *gorm.DB {
-		return query.Select("user_id")
-	}).Where("receipts.user_id = ?", user.Id).Order("name desc")
+	if searchText == "" {
+		controllers.JsonResponse(w, ErrMissingSearchText, http.StatusBadRequest)
+		return
+	}
 
-	queryBuilder := query.NewStoreQueryBuilder(baseQuery)
+	var dbStores []models.Store
+	dbErr := DB.Select("stores.id AS id", "name", "location_name", "city", "address").
+		Joins("INNER JOIN receipts ON stores.id = receipts.store_id").
+		Where("receipts.user_id = ?", user.Id).
+		Where("name LIKE ? OR location_name LIKE ? OR city LIKE ? OR address LIKE ?", "%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%").
+		Find(&dbStores).
+		Error
 
-	// Execute paginated query
-	var stores []models.Store
-	result, err := queryBuilder.ExecutePaginatedQuery(&stores, paginationQuery)
-	if err != nil {
-		log.Printf("Error trying to execute paginated query: %s\n", err.Error())
-
+	if dbErr != nil {
+		log.Printf("Error while fetching stores: %+v\n", dbErr)
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 		return
 	}
 
-	// Build response
-	transformer := transport.StoreTransformer{}
-	storesResponse := transformer.Transform(stores)
-
-	response, err := transport.CreatePaginationResponse(&storesResponse, result.Meta)
-	if err != nil {
-		log.Printf("Error while building response: %s\n", err.Error())
-
-		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
-		return
+	stores := make([]Store, 0)
+	for _, dbStore := range dbStores {
+		store := Store{}
+		store.ID = int(dbStore.ID)
+		store.Name = dbStore.Name
+		store.Location = dbStore.LocationName
+		store.Address = dbStore.Address
+		store.City = dbStore.City
+		stores = append(stores, store)
 	}
 
-	controllers.JsonResponse(w, &response, http.StatusOK)
+	controllers.JsonResponse(w, stores, http.StatusOK)
 }
 
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

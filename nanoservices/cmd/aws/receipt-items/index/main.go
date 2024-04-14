@@ -22,23 +22,25 @@ import (
 )
 
 type ReceiptItemDb struct {
-	ID       int       `json:"id"`
-	Name     string    `json:"name"`
-	Date     time.Time `json:"date"`
-	Store    string    `json:"store"`
-	Amount   int       `json:"amount"`
-	Unit     string    `json:"unit"`
-	Quantity int       `json:"quantity"`
+	ID        int       `json:"id"`
+	ReceiptId int       `json:"receipt_id"`
+	Name      string    `json:"name"`
+	Date      time.Time `json:"date"`
+	Store     string    `json:"store"`
+	Amount    int       `json:"amount"`
+	Unit      string    `json:"unit"`
+	Quantity  float64   `json:"quantity"`
 }
 
 type ReceiptItem struct {
-	ID       int       `json:"id"`
-	Name     string    `json:"name"`
-	Date     time.Time `json:"date"`
-	Store    string    `json:"store"`
-	Amount   string    `json:"amount"`
-	Unit     string    `json:"unit"`
-	Quantity int       `json:"quantity"`
+	ID        int       `json:"id"`
+	ReceiptID int       `json:"receiptID"`
+	Name      string    `json:"name"`
+	Date      time.Time `json:"date"`
+	Store     string    `json:"store"`
+	Amount    string    `json:"amount"`
+	Unit      string    `json:"unit"`
+	Quantity  float64   `json:"quantity"`
 }
 
 var (
@@ -93,6 +95,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 			"receipt_items.single_amount AS amount",
 			"receipt_items.unit AS unit",
 			"receipt_items.quantity AS quantity",
+			"receipts.id AS receipt_id",
 			"receipts.date AS date",
 			"stores.name AS store",
 		).
@@ -114,6 +117,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	for _, dbReceiptItem := range dbReceiptItems {
 		receiptItem := ReceiptItem{}
 		receiptItem.ID = dbReceiptItem.ID
+		receiptItem.ReceiptID = dbReceiptItem.ReceiptId
 		receiptItem.Name = dbReceiptItem.Name
 		receiptItem.Date = dbReceiptItem.Date
 		receiptItem.Store = dbReceiptItem.Store
