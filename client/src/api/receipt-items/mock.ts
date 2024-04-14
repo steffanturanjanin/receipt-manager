@@ -1,6 +1,7 @@
 export const receiptItems: ReceiptItem[] = [
 	{
 		id: 1,
+		receiptId: 1,
 		name: "KAFA GRAND GOLD 200G",
 		date: "2024-03-16",
 		store: "Diskont br. 32",
@@ -10,6 +11,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 2,
+		receiptId: 1,
 		name: "KAFA GRAND GOLD 200G",
 		date: "2024-03-16",
 		store: "Diskont br. 32",
@@ -19,6 +21,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 3,
+		receiptId: 1,
 		name: "KISELA PAVLAKA 20%MM CASA 400G MH",
 		date: "2024-03-16",
 		store: "Diskont br. 32",
@@ -28,6 +31,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 4,
+		receiptId: 1,
 		name: "VRAT SUVI SLAJS 100G KOSMAJSKA D",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -37,6 +41,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 5,
+		receiptId: 1,
 		name: "KOLAC MALA GRCKA TULUMBA 500G DO",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -46,6 +51,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 6,
+		receiptId: 1,
 		name: "SOK SCHWEPPES B L 1,5L COCA COLA",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -55,6 +61,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 7,
+		receiptId: 1,
 		name: "CIDER SOMERSBY JAB 0.33L NPB",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -64,6 +71,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 8,
+		receiptId: 1,
 		name: "PIVO BUDWEISER 0,5L CAN CARLSBER",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -73,6 +81,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 9,
+		receiptId: 1,
 		name: "SOK POMORANDZA LIFE 100% 1L NECT",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -82,6 +91,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 10,
+		receiptId: 1,
 		name: "VL MARAMICE BABY PLAVE 72/1 NEVE",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -91,6 +101,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 11,
+		receiptId: 1,
 		name: "BAR BOUNTY 57G MARS",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -100,6 +111,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 12,
+		receiptId: 1,
 		name: "BAR BOUNTY 57G MARS",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -109,6 +121,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 13,
+		receiptId: 1,
 		name: "BAR KINDER BUENO WHITE 39G FERRE",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",
@@ -118,6 +131,7 @@ export const receiptItems: ReceiptItem[] = [
 	},
 	{
 		id: 14,
+		receiptId: 1,
 		name: "ZV GUMA ORBIT EUKALIPTU 14G WRIG",
 		date: "2024-03-16",
 		store: "Roda Megamarket 345",

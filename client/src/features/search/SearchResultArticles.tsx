@@ -1,4 +1,4 @@
-import { Divider, Paper, Stack, StackProps, Typography, styled } from "@mui/material";
+import { CircularProgress, Divider, Paper, Stack, StackProps, Typography, styled } from "@mui/material";
 import dayjs from "dayjs";
 import { Fragment, FunctionComponent, ReactElement } from "react";
 
@@ -39,6 +39,7 @@ const SearchResultArticle: FunctionComponent<SearchResultArticleProps> = ({ rece
 
 interface SearchResultArticlesProps {
 	receiptItems: ReceiptItem[];
+	isLoading?: boolean;
 }
 
 const SearchResultContainer = styled(Stack)<StackProps>({
@@ -46,8 +47,19 @@ const SearchResultContainer = styled(Stack)<StackProps>({
 	boxShadow: "#959da533 0 0.5rem 1.5rem",
 })
 
-const SearchResultArticles: FunctionComponent<SearchResultArticlesProps> = ({ receiptItems }): ReactElement => {
-	if (!receiptItems.length) {
+const SearchResultArticles: FunctionComponent<SearchResultArticlesProps> = ({
+	receiptItems,
+	isLoading,
+}): ReactElement => {
+	if (isLoading) {
+		return (
+			<Stack alignItems="center">
+				<CircularProgress color="primary" />
+			</Stack>
+		)
+	}
+
+	if (!receiptItems.length && !isLoading) {
 		return <Typography>Nema artikala koji odgovaraju pretraženom terminu.</Typography>
 	}
 

@@ -1,4 +1,4 @@
-import { Divider, Paper, Stack, StackProps, Typography, styled } from "@mui/material";
+import { CircularProgress, Divider, Paper, Stack, StackProps, Typography, styled } from "@mui/material";
 import { Fragment, FunctionComponent, ReactElement } from "react";
 
 interface SearchResultStoreProps {
@@ -22,6 +22,7 @@ const SearchResultStore: FunctionComponent<SearchResultStoreProps> = ({ store, d
 
 interface SearchResultStoresProps {
 	stores: Store[];
+	isLoading?: boolean;
 }
 
 const SearchResultContainer = styled(Stack)<StackProps>({
@@ -29,8 +30,16 @@ const SearchResultContainer = styled(Stack)<StackProps>({
 	boxShadow: "#959da533 0 0.5rem 1.5rem",
 })
 
-const SearchResultStores: FunctionComponent<SearchResultStoresProps> = ({ stores }): ReactElement => {
-	if (!stores.length) {
+const SearchResultStores: FunctionComponent<SearchResultStoresProps> = ({ stores, isLoading }): ReactElement => {
+	if (isLoading) {
+		return (
+			<Stack alignItems="center">
+				<CircularProgress color="primary"/>
+			</Stack>
+		)
+	}
+
+	if (!stores.length && !isLoading) {
 		return <Typography>Nema prodavnica koje odgovaraju pretraženom terminu.</Typography>
 	}
 

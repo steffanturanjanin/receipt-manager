@@ -4,6 +4,7 @@ interface UpdateReceiptItemRequest {
 
 interface ReceiptItem {
 	id: number;
+	receiptId: number;
 	name: string;
 	date: string;
 	store: string;

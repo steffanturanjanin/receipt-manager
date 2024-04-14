@@ -27,7 +27,7 @@ const SearchPage: FunctionComponent = (): ReactElement => {
 		}
 	}
 
-	const { data: stores } = useQuery({
+	const { isLoading: isStoresLoading, data: stores, } = useQuery({
 		queryKey: ["stores", searchCriteria, searchTerm],
 		queryFn: () => getStores({ searchText: searchTerm! }),
 		enabled:
@@ -35,7 +35,7 @@ const SearchPage: FunctionComponent = (): ReactElement => {
 			!!searchTerm?.length
 	});
 
-	const { data: receiptItems } = useQuery({
+	const { isLoading: isReceiptItemsLoading, data: receiptItems } = useQuery({
 		queryKey: ["receipt_items", searchCriteria, searchTerm],
 		queryFn: () => getReceiptItems({ searchText: searchTerm! }),
 		enabled:
@@ -82,8 +82,18 @@ const SearchPage: FunctionComponent = (): ReactElement => {
 						</ToggleButtonGroup>
 					}
 
-					{searchCriteria === "articles" && <SearchResultArticles receiptItems={receiptItems || []} /> }
-					{searchCriteria === "stores" && <SearchResultStores stores={stores || []} />}
+					{searchCriteria === "articles" &&
+						<SearchResultArticles
+							isLoading={isReceiptItemsLoading}
+							receiptItems={receiptItems || []}
+							/>
+					}
+					{searchCriteria === "stores" &&
+						<SearchResultStores
+							isLoading={isStoresLoading}
+							stores={stores || []}
+						/>
+					}
 				</Stack>
 			</Stack>
 		</PageLayout>
