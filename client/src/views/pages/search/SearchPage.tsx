@@ -2,7 +2,7 @@ import { FormEvent, FunctionComponent, ReactElement, useState, MouseEvent, Chang
 import PageLayout from "../../layouts/PageLayout";
 import { Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { useQuery } from "react-query";
-import { getStores } from "../../../api/stores";
+import { getStoresSearch } from "../../../api/stores";
 import SearchResultStores from "../../../features/search/SerachResultStores";
 import { getReceiptItems } from "../../../api/receipt-items";
 import SearchResultArticles from "../../../features/search/SearchResultArticles";
@@ -29,7 +29,7 @@ const SearchPage: FunctionComponent = (): ReactElement => {
 
 	const { isLoading: isStoresLoading, data: stores, } = useQuery({
 		queryKey: ["stores", searchCriteria, searchTerm],
-		queryFn: () => getStores({ searchText: searchTerm! }),
+		queryFn: () => getStoresSearch({ searchText: searchTerm! }),
 		enabled:
 			(searchCriteria === "stores" || searchCriteria === undefined) &&
 			!!searchTerm?.length

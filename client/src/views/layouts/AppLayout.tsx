@@ -39,12 +39,14 @@ const BottomNavigationContainerStyle: SxProps = {
 }
 
 const NavigationAction = styled(BottomNavigationAction)<BottomNavigationActionProps>({
+	minWidth: 0,
 	".MuiSvgIcon-root": {
 		fontSize: "3.5rem"
 	},
 });
 
 const NavigationActionLink = styled(NavigationAction)<BottomNavigationActionProps & NavLinkProps>(({ theme }) => ({
+	minWidth: 0,
 	".MuiSvgIcon-root": {
 		fontSize: "2rem"
 	},
@@ -67,13 +69,13 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 					<NavigationActionLink
 						component={NavLink}
 						to="/receipts"
-						label="Računi"
+						//label="Računi"
 						icon={<ReceiptIcon fontSize="large" />}
 					/>
 					<NavigationActionLink
 						component={NavLink}
 						to="/search"
-						label="Pretraga"
+						//label="Pretraga"
 						icon={<SearchIcon fontSize="large" />}
 					/>
 					<NavigationAction
@@ -84,13 +86,13 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 					<NavigationActionLink
 						component={NavLink}
 						to="/profile"
-						label="Profil"
+						//label="Profil"
 						icon={<ProfileIcon fontSize="large" />}
 					/>
 					<NavigationActionLink
 						component={NavLink}
 						to="/stats"
-						label="Statistika"
+						//label="Statistika"
 						icon={<StatsIcon fontSize="large" />}
 					/>
 				</BottomNavigation>

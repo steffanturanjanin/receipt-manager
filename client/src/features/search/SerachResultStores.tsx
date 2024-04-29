@@ -2,7 +2,7 @@ import { CircularProgress, Divider, Paper, Stack, StackProps, Typography, styled
 import { Fragment, FunctionComponent, ReactElement } from "react";
 
 interface SearchResultStoreProps {
-	store: Store;
+	store: StoreSearch;
 	divider?: boolean;
 }
 
@@ -21,7 +21,7 @@ const SearchResultStore: FunctionComponent<SearchResultStoreProps> = ({ store, d
 }
 
 interface SearchResultStoresProps {
-	stores: Store[];
+	stores: StoreSearch[];
 	isLoading?: boolean;
 }
 
