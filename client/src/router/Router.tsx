@@ -11,6 +11,7 @@ import ProfilePage from "../views/pages/profile/ProfilePage";
 import StatsPage from "../views/pages/stats/StatsPage";
 import SearchPage from "../views/pages/search/SearchPage";
 import StoresPage from "../views/pages/stores/StoresPage";
+import StorePage from "../views/pages/stores/StorePage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -50,6 +51,10 @@ const routes: RouteObject[] = [
 			{
 				path: "/stores",
 				element: <StoresPage />,
+			},
+			{
+				path: "/stores/:tin",
+				element: <StorePage />,
 			}
 		]
 	}
