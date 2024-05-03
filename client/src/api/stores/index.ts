@@ -7,7 +7,7 @@ export const getStoresSearch = async ({ searchText }: SearchQuery): Promise<Stor
 	return data;
 }
 
-export const getStoresList = async ({ searchText }: Partial<SearchQuery>): Promise<ExpensesByStoreBreakdown[]> => {
+export const getStoresList = async ({ searchText }: Partial<SearchQuery>): Promise<StoreListItem[]> => {
 	if (searchText === undefined) {
 		return storesList;
 	}
