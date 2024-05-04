@@ -1,24 +1,19 @@
 import { httpClient } from "../http"
-import { store, storesList } from "./mocks";
 
-export const getStoresSearch = async ({ searchText }: SearchQuery): Promise<StoreSearch[]> => {
-	const { data } = await httpClient.get<StoreSearch[]>("/stores", { params: { searchText }});
+export const getStores = async ({ searchText }: SearchQuery): Promise<Store[]> => {
+	const { data } = await httpClient.get<Store[]>("/stores", { params: { searchText }});
 
 	return data;
 }
 
-export const getStoresList = async ({ searchText }: Partial<SearchQuery>): Promise<StoreListItem[]> => {
-	if (searchText === undefined) {
-		return storesList;
-	}
+export const getCompanies = async ({ searchText }: Partial<SearchQuery>): Promise<CompanyListItem[]> => {
+	const { data } = await httpClient.get<CompanyListItem[]>("/stores/companies", { params: { searchText } });
 
-	return storesList.filter((store) => store.name.toLowerCase().includes(searchText.toLocaleLowerCase()));
+	return data;
 }
 
-export const getStore = async (tin: string): Promise<Store> => {
-	// const { data } = await httpClient.get<Store>(`/stores/${tin}`);
+export const getCompany = async (tin: string): Promise<Company> => {
+	const { data } = await httpClient.get<Company>(`/stores/companies/${tin}`);
 
-	// return data;
-
-	return store;
+	return data;
 }

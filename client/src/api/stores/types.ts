@@ -1,19 +1,19 @@
-interface StoreSearch {
-	id: number;
+interface Store {
+	tin: string;
 	name: string;
 	location: string;
 	city: string;
 	address: string;
 }
 
-interface StoreListItem {
-	id: number;
+interface CompanyListItem {
+	tin: string;
 	name: string;
 	total: string;
 	receiptCount: number;
 }
 
-interface StoreLocation {
+interface CompanyLocation {
 	locationId: string;
 	locationName: string;
 	address: string;
@@ -22,23 +22,22 @@ interface StoreLocation {
 	receiptCount: number;
 }
 
-interface StoreLocations {
-	data: StoreLocation[];
+interface CompanyLocations {
+	data: CompanyLocation[];
 	total: string;
 	receiptsCount: number;
 }
 
-interface StoreExpenses {
+interface CompanyExpense {
 	id: number;
 	locationName: string;
 	date: string;
 	amount: string;
 }
 
-interface Store {
-	id: number;
-	name: string;
+interface Company {
 	tin: string;
-	locations: StoreLocations;
-	expenses: StoreExpenses[];
+	name: string;
+	locations: CompanyLocations;
+	expenses: CompanyExpense[];
 }

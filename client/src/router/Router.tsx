@@ -10,8 +10,8 @@ import CreateReceiptPage from "../views/pages/receipts/CreateReceiptPage";
 import ProfilePage from "../views/pages/profile/ProfilePage";
 import StatsPage from "../views/pages/stats/StatsPage";
 import SearchPage from "../views/pages/search/SearchPage";
-import StoresPage from "../views/pages/stores/StoresPage";
-import StorePage from "../views/pages/stores/StorePage";
+import CompaniesPage from "../views/pages/stores/CompaniesPage";
+import CompanyPage from "../views/pages/stores/CompanyPage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -50,11 +50,11 @@ const routes: RouteObject[] = [
 			},
 			{
 				path: "/stores",
-				element: <StoresPage />,
+				element: <CompaniesPage />,
 			},
 			{
-				path: "/stores/:tin",
-				element: <StorePage />,
+				path: "/stores/companies/:tin",
+				element: <CompanyPage />,
 			}
 		]
 	}

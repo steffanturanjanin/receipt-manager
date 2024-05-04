@@ -1,27 +1,27 @@
-export const stores: StoreSearch[] = [
+export const stores: Store[] = [
 	{
-		id: 1,
+		tin: "1",
 		name: "METLA DISKONT",
 		location: "Diskont br.32",
 		city: "Ниш - Пантелеј",
 		address: "КЊАЖЕВАЧКА 205",
 	},
 	{
-		id: 2,
+		tin: "2",
 		name: "NAFTNA INDUSTRIJA SRBIJE",
 		location: "БС Ниш Исток",
 		city: "Ниш - Пантелеј",
 		address: "МАТЕЈЕВАЧКИ ПУТ ББ",
 	},
 	{
-		id: 3,
+		tin: "3",
 		name: "MERCATOR-S",
 		location: "Roda Megamarket 345",
 		city: "Ниш - Пантелеј",
 		address: "ВИЗАНТИЈСКИ БУЛЕВАР 1",
 	},
 	{
-		id: 4,
+		tin: "4",
 		name: "PRIVREDNO DRUŠTVO ZAPLANJKA KOMERC DOO NIŠ",
 		location: "Продавница бр.9",
 		city: "Ниш - Пантелеј",
@@ -29,35 +29,34 @@ export const stores: StoreSearch[] = [
 	}
 ];
 
-export const storesList: StoreListItem[] = [
+export const companiesList: CompanyListItem[] = [
 	{
-		id: 1,
+		tin: "1",
 		name: "NAFTNA INDUSTRIJA SRBIJE",
 		total: "2990.00",
 		receiptCount: 5,
 	},
 	{
-		id: 2,
+		tin: "2",
 		name: "METLA DISKONT",
 		total: "804.70",
 		receiptCount: 3,
 	},
 	{
-		id: 3,
+		tin: "3",
 		name: "MERCATOR-S",
 		total: "3213.50",
 		receiptCount: 4,
 	},
 	{
-		id: 4,
+		tin: "4",
 		name: "PRIVREDNO DRUŠTVO ZAPLANJKA KOMERC DOO NIŠ",
 		total: "6501.20",
 		receiptCount: 5,
 	}
 ];
 
-export const store: Store = {
-	id: 1,
+export const company: Company = {
 	tin: "12345",
 	name: "MERCATOR - S D.O.O",
 	locations: {
@@ -86,19 +85,19 @@ export const store: Store = {
 		{
 			id: 1,
 			locationName: "Roda Megamarker 345",
-			date: "31-12-2023 15:55:00",
+			date: "30-12-2023 15:55:00",
 			amount: "322.90",
 		},
 		{
 			id: 2,
 			locationName: "Roda Megamarker 345",
-			date: "31-12-2023 11:55:00",
+			date: "30-12-2023 11:55:00",
 			amount: "322.90",
 		},
 		{
 			id: 3,
 			locationName: "Roda Megamarker 345",
-			date: "31-12-2023 12:27:00",
+			date: "30-12-2023 12:27:00",
 			amount: "322.90",
 		},
 		{

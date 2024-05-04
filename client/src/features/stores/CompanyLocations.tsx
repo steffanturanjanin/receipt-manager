@@ -2,12 +2,12 @@ import { Divider, Stack, Typography } from "@mui/material";
 import { Fragment, FunctionComponent, ReactElement } from "react";
 import CardItem from "./CardItem";
 
-interface StoreLocationsProps {
-	storeLocations: StoreLocations;
+interface CompanyLocationsProps {
+	companyLocations: CompanyLocations;
 }
 
-const StoreLocations: FunctionComponent<StoreLocationsProps> = ({ storeLocations }): ReactElement => {
-	const { data, total, receiptsCount } = storeLocations;
+const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLocations }): ReactElement => {
+	const { data, total, receiptsCount } = companyLocations;
 
 	return (
 		<Stack direction="column" gap="1rem">
@@ -40,4 +40,4 @@ const StoreLocations: FunctionComponent<StoreLocationsProps> = ({ storeLocations
 	);
 }
 
-export default StoreLocations;
+export default CompanyLocations;
