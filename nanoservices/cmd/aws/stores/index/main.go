@@ -21,7 +21,7 @@ import (
 )
 
 type Store struct {
-	ID       int    `json:"id"`
+	Tin      string `json:"tin"`
 	Name     string `json:"name"`
 	Location string `json:"location"`
 	City     string `json:"city"`
@@ -74,7 +74,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var dbStores []models.Store
-	dbErr := DB.Select("stores.id AS id", "name", "location_name", "city", "address").
+	dbErr := DB.
+		Select(
+			"stores.tin AS tin",
+			"stores.name AS name",
+			"stores.location_name AS location_name",
+			"stores.city AS city",
+			"stores.address AS address",
+		).
 		Joins("INNER JOIN receipts ON stores.id = receipts.store_id").
 		Where("receipts.user_id = ?", user.Id).
 		Where("name LIKE ? OR location_name LIKE ? OR city LIKE ? OR address LIKE ?", "%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%").
@@ -90,7 +97,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	stores := make([]Store, 0)
 	for _, dbStore := range dbStores {
 		store := Store{}
-		store.ID = int(dbStore.ID)
+		store.Tin = dbStore.Tin
 		store.Name = dbStore.Name
 		store.Location = dbStore.LocationName
 		store.Address = dbStore.Address

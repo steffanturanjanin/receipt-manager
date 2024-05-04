@@ -21,38 +21,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	// Database
-	DB *gorm.DB
-
-	// Router
-	GorillaLambda *gorillamux.GorillaMuxAdapter
-
-	// Errors
-	ErrServiceUnavailable = transport.NewServiceUnavailableError()
-	ErrNotFound           = transport.NewNotFoundError()
-)
-
-func init() {
-	// Initialize database
-	if err := db.InitializeDB(); err != nil {
-		os.Exit(1)
-	} else {
-		DB = db.Instance
-	}
-
-	// Build middleware chain
-	jsonMiddleware := middlewares.SetJsonMiddleware
-	corsMiddleware := middlewares.SetCorsMiddleware
-	authMiddleware := middlewares.SetAuthMiddleware
-	handler := authMiddleware(corsMiddleware(jsonMiddleware(handler)))
-
-	// Initialize Router
-	Router := mux.NewRouter()
-	Router.HandleFunc("/stores/companies/{tin}", handler).Methods("GET")
-	GorillaLambda = gorillamux.New(Router)
-}
-
 type LocationDb struct {
 	LocationID   string `json:"location_id"`
 	LocationName string `json:"location_name"`
@@ -101,6 +69,38 @@ type Company struct {
 	Name      string            `json:"name"`
 	Locations Locations         `json:"locations"`
 	Expenses  []LocationExpense `json:"expenses"`
+}
+
+var (
+	// Database
+	DB *gorm.DB
+
+	// Router
+	GorillaLambda *gorillamux.GorillaMuxAdapter
+
+	// Errors
+	ErrServiceUnavailable = transport.NewServiceUnavailableError()
+	ErrNotFound           = transport.NewNotFoundError()
+)
+
+func init() {
+	// Initialize database
+	if err := db.InitializeDB(); err != nil {
+		os.Exit(1)
+	} else {
+		DB = db.Instance
+	}
+
+	// Build middleware chain
+	jsonMiddleware := middlewares.SetJsonMiddleware
+	corsMiddleware := middlewares.SetCorsMiddleware
+	authMiddleware := middlewares.SetAuthMiddleware
+	handler := authMiddleware(corsMiddleware(jsonMiddleware(handler)))
+
+	// Initialize Router
+	Router := mux.NewRouter()
+	Router.HandleFunc("/stores/companies/{tin}", handler).Methods("GET")
+	GorillaLambda = gorillamux.New(Router)
 }
 
 var handler = func(w http.ResponseWriter, r *http.Request) {
