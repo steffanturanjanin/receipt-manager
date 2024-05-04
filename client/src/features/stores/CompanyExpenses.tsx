@@ -1,8 +1,8 @@
-import { Divider, Stack, StackProps, Typography, styled } from "@mui/material";
 import { Fragment, FunctionComponent, ReactElement } from "react";
 import { Link, LinkProps } from "react-router-dom";
-import CardItem from "./CardItem";
 import dayjs from "dayjs";
+import { Divider, Stack, StackProps, Typography, styled } from "@mui/material";
+import CardItem from "./CardItem";
 
 interface CompanyExpensesProps {
 	companyExpenses: CompanyExpense[];
@@ -28,7 +28,6 @@ interface CompanyExpenseItemProps {
 
 const CompanyExpenseItem: FunctionComponent<CompanyExpenseItemProps> = ({ expense, divider}): ReactElement => {
 	const { id, date, locationName, amount } = expense;
-	console.log("DATE", dayjs(date).format("MM.DD.YYYY. HH:MM"));
 	const formattedDate = dayjs(date).format("MM.DD.YYYY. HH:MM");
 
 	return (

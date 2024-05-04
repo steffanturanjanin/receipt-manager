@@ -1,26 +1,20 @@
 import { FunctionComponent, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { getReceipt } from "../../../api/receipts";
-import { Link, LinkProps, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import PageLayout from "../../layouts/PageLayout";
 import { Button, ButtonProps, Stack, StackProps, styled } from "@mui/material";
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ReceiptPaymentOverview from "../../../features/receipts/show-receipt/ReceiptPaymentOverview";
 import ReceiptItemsList from "../../../features/receipts/show-receipt/ReceiptItemsList";
 import ReceiptDetails from "../../../features/receipts/show-receipt/ReceiptDetails";
 import ReceiptItemUpdateDialog from "../../../features/receipt-items/ReceiptItemUpdateDialog";
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteReceipt from "../../../features/receipts/DeleteReceipt";
+import BackButton from "../../../components/BackButton";
 
 const ReceiptContainer = styled(Stack)<StackProps>({
 	gap: "2rem"
 });
-
-const BackButton = styled(Stack)<StackProps & LinkProps>(({ theme }) => ({
-	textDecoration: "none",
-	fontSize: "22px",
-	color: theme.palette.primary.dark,
-}));
 
 const RemoveReceiptButton = styled(Button)<ButtonProps>(({ theme }) => ({
 	minWidth: "auto",
@@ -62,12 +56,6 @@ const ShowReceiptPage: FunctionComponent = () => {
 		queryClient.invalidateQueries(["single_receipt", receiptId]);
 	}
 
-	const back = (
-		<BackButton component={Link} to="/" direction="row" alignItems="center">
-			<ChevronLeftIcon /> Nazad
-		</BackButton>
-	);
-
 	const controls = (
 		<RemoveReceiptButton onClick={() => setDeleteReceiptForm({ ...deleteReceiptForm, open: true })}>
 			<DeleteIcon />
@@ -77,7 +65,7 @@ const ShowReceiptPage: FunctionComponent = () => {
 	return (
 		<PageLayout
 			title="Pregled računa"
-			headerPrefix={back}
+			headerPrefix={<BackButton />}
 			headerSuffix={controls}
 		>
 			<ReceiptContainer>

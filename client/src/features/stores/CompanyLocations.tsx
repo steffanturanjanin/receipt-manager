@@ -7,7 +7,7 @@ interface CompanyLocationsProps {
 }
 
 const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLocations }): ReactElement => {
-	const { data, total, receiptsCount } = companyLocations;
+	const { data, total, receiptCount } = companyLocations;
 
 	return (
 		<Stack direction="column" gap="1rem">
@@ -22,7 +22,7 @@ const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLoc
 							</Stack>
 							<Stack direction="row" justifyContent="space-between">
 								<Typography color="grey.700">{location.address}</Typography>
-								<Typography color="grey.700" variant="body2">{location.receiptCount} račun</Typography>
+								<Typography color="grey.700" variant="body2">{location.receiptCount} račun/a</Typography>
 							</Stack>
 						</Stack>
 						<Divider />
@@ -32,7 +32,7 @@ const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLoc
 					<Typography>Ukupno:</Typography>
 					<Stack direction="column">
 						<Typography>{total}</Typography>
-						<Typography color="grey.700" variant="body2">{receiptsCount} račun</Typography>
+						<Typography color="grey.700" variant="body2">{receiptCount} račun/a</Typography>
 					</Stack>
 				</Stack>
 			</CardItem>

@@ -25,7 +25,7 @@ interface CompanyLocation {
 interface CompanyLocations {
 	data: CompanyLocation[];
 	total: string;
-	receiptsCount: number;
+	receiptCount: number;
 }
 
 interface CompanyExpense {

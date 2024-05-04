@@ -1,8 +1,8 @@
-import { ChangeEvent, FormEvent, FunctionComponent, ReactElement, useState } from "react";
+import { ChangeEvent, FormEvent, FunctionComponent, ReactElement, useMemo, useState } from "react";
 import { useQuery } from "react-query";
-import { Stack, TextField } from "@mui/material";
-import PageLayout from "../../layouts/PageLayout";
+import { Stack, TextField, Typography } from "@mui/material";
 import { getCompanies } from "../../../api/stores";
+import PageLayout from "../../layouts/PageLayout";
 import CompanyList from "../../../features/stores/CompanyList";
 
 const CompaniesPage: FunctionComponent = (): ReactElement => {
@@ -14,13 +14,18 @@ const CompaniesPage: FunctionComponent = (): ReactElement => {
 		setSearchTerm(searchInput);
 	}
 
-	const { data: companies } = useQuery({
+	const { isLoading, data: companies } = useQuery({
 		queryKey: ["company_list", searchTerm],
 		queryFn: () => getCompanies({ searchText: searchTerm }),
-	})
+	});
+
+	const empty = useMemo(
+		() => !isLoading && companies?.length === 0,
+		[companies, isLoading]
+	);
 
 	return (
-		<PageLayout title="Prodavnice">
+		<PageLayout title="Prodavnice" showBackdrop={isLoading}>
 			<Stack direction="column" gap="2rem">
 				<Stack component="form" onSubmit={onSubmit}>
 					<TextField
@@ -32,7 +37,10 @@ const CompaniesPage: FunctionComponent = (): ReactElement => {
 						onChange={(event: ChangeEvent<HTMLInputElement>) => setSearchInput(event.target.value)}
 						sx={{ backgroundColor: "white" }} />
 				</Stack>
-				<CompanyList companies={companies || []} />
+				{empty ?
+					<Typography variant="h4">Nema rezultata</Typography> :
+					<CompanyList companies={companies || []} />
+				}
 			</Stack>
 		</PageLayout>
 	)

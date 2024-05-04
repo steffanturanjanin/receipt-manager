@@ -79,7 +79,7 @@ export const company: Company = {
 			}
 		],
 		total: "7540.36",
-		receiptsCount: 11,
+		receiptCount: 11,
 	},
 	expenses: [
 		{
