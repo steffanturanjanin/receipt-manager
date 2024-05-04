@@ -64,7 +64,7 @@ func init() {
 
 	// Initialize router
 	Router := mux.NewRouter()
-	Router.HandleFunc("/companies", handler).Methods("GET")
+	Router.HandleFunc("/stores/companies", handler).Methods("GET")
 	GorillaLambda = gorillamux.New(Router)
 }
 
