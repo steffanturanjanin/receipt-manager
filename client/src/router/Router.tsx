@@ -12,6 +12,7 @@ import StatsPage from "../views/pages/stats/StatsPage";
 import SearchPage from "../views/pages/search/SearchPage";
 import CompaniesPage from "../views/pages/stores/CompaniesPage";
 import CompanyPage from "../views/pages/stores/CompanyPage";
+import CategoryStatsPage from "../views/pages/categories/CategoryStatsPage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -55,6 +56,10 @@ const routes: RouteObject[] = [
 			{
 				path: "/stores/companies/:tin",
 				element: <CompanyPage />,
+			},
+			{
+				path: "/categories/:id",
+				element: <CategoryStatsPage />
 			}
 		]
 	}

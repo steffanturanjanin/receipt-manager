@@ -11,7 +11,7 @@ const BackButtonContainer = styled("button")(({ theme }) => ({
 	cursor: "pointer",
 	padding: 0,
 	textDecoration: "none",
-	fontSize: "22px",
+	fontSize: "18px",
 	color: theme.palette.primary.dark,
 }));
 

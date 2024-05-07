@@ -9,6 +9,7 @@ const CardLinkContentContainer = styled(Link)<LinkProps>(({ theme }) => ({
 	textDecoration: "none",
 	"&:hover": {
 		backgroundColor: theme.palette.grey[50],
+		boxShadow: "#959da533 0 8px 24px",
 	}
 }));
 
