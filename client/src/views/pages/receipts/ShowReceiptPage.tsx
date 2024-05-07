@@ -43,7 +43,7 @@ const ShowReceiptPage: FunctionComponent = () => {
 	});
 
 	// Fetch receipt
-	const { data: receipt } = useQuery({
+	const { isLoading, data: receipt } = useQuery({
 		queryKey: ["single_receipt", receiptId],
 		queryFn: () => getReceipt(receiptId!),
 		keepPreviousData: true,
@@ -67,12 +67,13 @@ const ShowReceiptPage: FunctionComponent = () => {
 			title="Pregled računa"
 			headerPrefix={<BackButton />}
 			headerSuffix={controls}
+			showBackdrop={isLoading}
 		>
 			<ReceiptContainer>
 				<ReceiptPaymentOverview {...{
 						storeName: receipt?.store.name || "",
 						totalPurchaseAmount: receipt?.totalPurchaseAmount || "0.00",
-						date: receipt?.date || "",
+						date: receipt?.date,
 					}}
 				/>
 				<ReceiptItemsList
@@ -87,7 +88,7 @@ const ShowReceiptPage: FunctionComponent = () => {
 						user: receipt.user,
 						totalTaxAmount: receipt.totalTaxAmount,
 						pfrNumber: receipt.pfrNumber,
-						counter: receipt.pfrNumber,
+						counter: receipt.counter,
 						createdAt: receipt.createdAt,
 					}} />
 				}

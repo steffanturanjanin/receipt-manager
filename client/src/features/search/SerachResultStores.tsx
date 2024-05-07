@@ -1,5 +1,7 @@
-import { CircularProgress, Divider, Paper, Stack, StackProps, Typography, styled } from "@mui/material";
+import { CircularProgress, Divider, Stack, Typography } from "@mui/material";
 import { Fragment, FunctionComponent, ReactElement } from "react";
+import Card from "../../components/card/Card";
+import CardLinkContent from "../../components/card/CardLinkContent";
 
 interface SearchResultStoreProps {
 	store: Store;
@@ -7,14 +9,14 @@ interface SearchResultStoreProps {
 }
 
 const SearchResultStore: FunctionComponent<SearchResultStoreProps> = ({ store, divider }): ReactElement => {
-	const { name, location, city, address } = store;
+	const { tin, name, location, city, address } = store;
 	return (
 		<Fragment>
-			<Stack direction="column" sx={{ padding: "1rem" }}>
+			<CardLinkContent to={`/stores/companies/${tin}`}>
 				<Typography fontWeight="bold">{name}</Typography>
 				<Typography>{location}</Typography>
 				<Typography variant="body2" color="grey.700">{`${address}, ${city}`}</Typography>
-			</Stack>
+			</CardLinkContent>
 			{divider && <Divider />}
 		</Fragment>
 	)
@@ -24,11 +26,6 @@ interface SearchResultStoresProps {
 	stores: Store[];
 	isLoading?: boolean;
 }
-
-const SearchResultContainer = styled(Stack)<StackProps>({
-	borderRadius: "0.75rem",
-	boxShadow: "#959da533 0 0.5rem 1.5rem",
-})
 
 const SearchResultStores: FunctionComponent<SearchResultStoresProps> = ({ stores, isLoading }): ReactElement => {
 	if (isLoading) {
@@ -44,15 +41,15 @@ const SearchResultStores: FunctionComponent<SearchResultStoresProps> = ({ stores
 	}
 
 	return (
-		<SearchResultContainer direction="column" component={Paper}>
+		<Card>
 			{stores.map((store, index) => (
 				<SearchResultStore
-					key={store.id}
+					key={index}
 					store={store}
 					divider={index !== stores.length - 1}
 				/>
 			))}
-		</SearchResultContainer>
+		</Card>
 	)
 }
 

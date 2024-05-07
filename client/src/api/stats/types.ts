@@ -33,7 +33,7 @@ interface ExpensesByCategoryBreakdown {
 }
 
 interface ExpensesByStoreBreakdown {
-	id: number;
+	tin: string;
 	name: string;
 	total: string;
 	receiptCount: number;

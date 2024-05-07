@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import { Card, CardContent, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { Pie } from 'react-chartjs-2';
 import {
 	Chart as ChartJS,
@@ -7,6 +7,8 @@ import {
 	Tooltip,
 	ArcElement
 } from 'chart.js';
+import Card from "../../components/card/Card";
+import CardContent from "../../components/card/CardContent";
 
 ChartJS.register(
 	ArcElement,
@@ -23,7 +25,7 @@ const CategoryStats: FunctionComponent<CategoryStatsProps> = ({ categoryStats })
 
 	return (
 		<Card>
-			<CardContent component={Stack} direction="column" gap="1rem">
+			<CardContent>
 				<Stack direction="column">
 					<Typography variant="body1" component="p">Potrošeno ovog meseca:</Typography>
 					<Typography variant="h4" component="p">{total || "0.00"}</Typography>
@@ -32,10 +34,10 @@ const CategoryStats: FunctionComponent<CategoryStatsProps> = ({ categoryStats })
 					<Stack justifyContent="center" alignItems="center" sx={{ maxHeight: "350px"}}>
 						<Pie
 							data={{
-								labels: categories.map(statistic => statistic.category.name),
+								labels: categories.map((statistic) => statistic.category.name),
 								datasets: [{
-									data: categories.map(statistic => statistic.total),
-									backgroundColor: categories.map(statistic => statistic.category.color),
+									data: categories.map((statistic) => statistic.total),
+									backgroundColor: categories.map((statistic) => statistic.category.color),
 								}]
 							}}
 							options={{

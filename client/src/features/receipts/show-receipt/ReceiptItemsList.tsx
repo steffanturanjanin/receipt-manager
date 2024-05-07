@@ -1,6 +1,6 @@
-import { FunctionComponent, ReactElement } from "react";
+import { Fragment, FunctionComponent, ReactElement } from "react";
 import { Box, BoxProps, ButtonProps, Divider, Stack, Typography, styled, useTheme } from "@mui/material";
-import { ReceiptCard, ReceiptCardContent } from "./components";
+import Card from "../../../components/card/Card";
 
 const ColorCircle = styled(Box)<BoxProps>({
 	width: "0.6em",
@@ -22,9 +22,13 @@ interface ReceiptItemProps {
 	onClick: (receiptItem: SingleReceiptReceiptItem) => void;
 }
 
-const ReceiptItemContainer = styled(Box)<BoxProps & ButtonProps>({
+const ReceiptItemContainer = styled(Box)<BoxProps & ButtonProps>(({ theme }) => ({
 	cursor: "pointer",
-});
+	padding: "1rem",
+	"&:hover": {
+		backgroundColor: theme.palette.grey[50],
+	}
+}));
 
 const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem, onClick }): ReactElement => {
 	const { name, totalAmount, category, quantity, unit, singleAmount } = receiptItem;
@@ -35,22 +39,24 @@ const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem
 	const UNCATEGORIZED_NAME = "Nekategorisano";
 
 	return (
-		<ReceiptItemContainer onClick={() => onClick(receiptItem)}>
-			<Stack direction="column" gap="0.5rem">
-				<Stack direction="row" gap="0.5rem" justifyContent="space-between">
-					<Typography variant="h6">{name}</Typography>
-					<Typography variant="h6">{totalAmount}</Typography>
-				</Stack>
-				<Stack direction="row" gap="0.5rem" justifyContent="space-between">
-					<Stack component={Typography} variant="body2" direction="row" alignItems="center" gap="0.5rem">
-						<CategoryCircle color={category?.color || UNCATEGORIZED_COLOR} />
-						{category?.name || UNCATEGORIZED_NAME}
+		<Fragment>
+			<ReceiptItemContainer onClick={() => onClick(receiptItem)}>
+				<Stack direction="column" gap="0.5rem">
+					<Stack direction="row" gap="0.5rem" justifyContent="space-between">
+						<Typography variant="h6">{name}</Typography>
+						<Typography variant="h6">{totalAmount}</Typography>
 					</Stack>
-					<Typography variant="body2">{breakdownPerUnit}</Typography>
+					<Stack direction="row" gap="0.5rem" justifyContent="space-between">
+						<Stack component={Typography} variant="body2" direction="row" alignItems="center" gap="0.5rem">
+							<CategoryCircle color={category?.color || UNCATEGORIZED_COLOR} />
+							{category?.name || UNCATEGORIZED_NAME}
+						</Stack>
+						<Typography variant="body2">{breakdownPerUnit}</Typography>
+					</Stack>
 				</Stack>
-			</Stack>
-			{divider && <Divider orientation="horizontal" sx={{ marginY: "1rem" }}/> }
-		</ReceiptItemContainer>
+			</ReceiptItemContainer>
+			{divider && <Divider orientation="horizontal" /> }
+		</Fragment>
 	)
 }
 
@@ -63,18 +69,16 @@ const ReceiptItemsList: FunctionComponent<ReceiptItemsListProps> = ({ receiptIte
 	return (
 		<Box component="section">
 			<Typography variant="h4" component="h2" marginY="2rem">Stavke sa računa</Typography>
-			<ReceiptCard>
-				<ReceiptCardContent>
-					{receiptItems.map((receiptItem, index) => (
-						<ReceiptItem
-							key={receiptItem.id}
-							receiptItem={receiptItem}
-							divider={index !== receiptItems.length - 1}
-							onClick={onClick}
-						/>
-					))}
-				</ReceiptCardContent>
-			</ReceiptCard>
+			<Card>
+				{receiptItems.map((receiptItem, index) => (
+					<ReceiptItem
+						key={receiptItem.id}
+						receiptItem={receiptItem}
+						divider={index !== receiptItems.length - 1}
+						onClick={onClick}
+					/>
+				))}
+			</Card>
 		</Box>
 	)
 }

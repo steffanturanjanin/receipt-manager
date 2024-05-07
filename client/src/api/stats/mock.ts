@@ -128,13 +128,13 @@ export const expensesByCategoryYearlyBreakdown: ExpensesByCategoryBreakdown[] = 
 
 export const expensesByStoreYearlyBreakdown: ExpensesByStoreBreakdown[] = [
 	{
-		id: 1,
+		tin: "1",
 		name: "NAFTNA INDUSTRIJA SRBIJE",
 		total: "2990.00",
 		receiptCount: 5,
 	},
 	{
-		id: 2,
+		tin: "2",
 		name: "METLA DISKONT",
 		total: "804.70",
 		receiptCount: 3,

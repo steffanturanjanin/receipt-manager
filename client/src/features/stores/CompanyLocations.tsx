@@ -1,6 +1,6 @@
 import { Divider, Stack, Typography } from "@mui/material";
 import { Fragment, FunctionComponent, ReactElement } from "react";
-import CardItem from "./CardItem";
+import Card from "../../components/card/Card";
 
 interface CompanyLocationsProps {
 	companyLocations: CompanyLocations;
@@ -12,7 +12,7 @@ const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLoc
 	return (
 		<Stack direction="column" gap="1rem">
 			<Typography variant="h6" component="h2">Lokacije</Typography>
-			<CardItem>
+			<Card>
 				{data.map((location, index) => (
 					<Fragment key={index}>
 						<Stack direction="column" gap="0.25rem" padding="1rem">
@@ -35,7 +35,7 @@ const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLoc
 						<Typography color="grey.700" variant="body2">{receiptCount} račun/a</Typography>
 					</Stack>
 				</Stack>
-			</CardItem>
+			</Card>
 		</Stack>
 	);
 }

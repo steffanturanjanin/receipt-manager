@@ -4,7 +4,7 @@ import {  useParams } from "react-router-dom";
 import { Divider, Stack, Typography } from "@mui/material";
 import { getCompany } from "../../../api/stores";
 import PageLayout from "../../layouts/PageLayout";
-import CardItem from "../../../features/stores/CardItem";
+import Card from "../../../components/card/Card";
 import CompanyLocations from "../../../features/stores/CompanyLocations";
 import CompanyExpenses from "../../../features/stores/CompanyExpenses";
 import BackButton from "../../../components/BackButton";
@@ -22,7 +22,7 @@ const CompanyPage: FunctionComponent = (): ReactElement => {
 		<PageLayout title={company?.name || ""} showBackdrop={isCompanyLoading} headerPrefix={<BackButton />}>
 			{company && (
 				<Stack direction="column" gap="2rem">
-					<CardItem>
+					<Card>
 						<Stack direction="row" justifyContent="space-between" padding="1rem">
 							<Typography>Ime:</Typography>
 							<Typography fontWeight="bold">{company?.name}</Typography>
@@ -32,7 +32,7 @@ const CompanyPage: FunctionComponent = (): ReactElement => {
 							<Typography>PIB:</Typography>
 							<Typography fontWeight="bold">{company?.tin}</Typography>
 						</Stack>
-					</CardItem>
+					</Card>
 					<CompanyLocations
 						companyLocations={company.locations}
 					/>

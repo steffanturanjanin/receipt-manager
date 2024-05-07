@@ -1,5 +1,6 @@
 import { Fragment, FunctionComponent, ReactElement } from "react";
-import { Box, Divider, Stack, Typography } from "@mui/material";
+import { Divider, Stack, Typography } from "@mui/material";
+import CardLinkContent from "../../components/card/CardLinkContent";
 
 interface ExpensesByCategoryItemProps {
 	category: ExpensesByCategoryBreakdown;
@@ -11,16 +12,18 @@ const ExpensesByCategoryItem: FunctionComponent<ExpensesByCategoryItemProps> = (
 
 	return (
 		<Fragment>
-			<Stack direction="column" sx={{ padding: "1rem" }} gap="0.5rem">
-				<Stack direction="row" justifyContent="space-between">
-					<Typography>{name}</Typography>
-					<Typography>{total}</Typography>
+			<CardLinkContent to="/">
+				<Stack direction="column" gap="0.5rem">
+					<Stack direction="row" justifyContent="space-between">
+						<Typography>{name}</Typography>
+						<Typography>{total}</Typography>
+					</Stack>
+					<Stack direction="row" justifyContent="space-between">
+						<Typography variant="caption">{receiptCount} račun</Typography>
+						<Typography variant="caption">{percentage}%</Typography>
+					</Stack>
 				</Stack>
-				<Stack direction="row" justifyContent="space-between">
-					<Typography variant="caption">{receiptCount} račun</Typography>
-					<Typography variant="caption">{percentage}%</Typography>
-				</Stack>
-			</Stack>
+			</CardLinkContent>
 			{divider && <Divider />}
 		</Fragment>
 	)
@@ -32,7 +35,7 @@ interface ExpensesByCategoryProps {
 
 const ExpensesByCategory: FunctionComponent<ExpensesByCategoryProps> = ({ categories }): ReactElement => {
 	return (
-		<Box>
+		<Fragment>
 			{categories.map((category, index) => (
 				<ExpensesByCategoryItem
 					key={category.id}
@@ -40,7 +43,7 @@ const ExpensesByCategory: FunctionComponent<ExpensesByCategoryProps> = ({ catego
 					divider={index !== categories.length -1}
 				/>
 			))}
-		</Box>
+		</Fragment>
 	);
 }
 

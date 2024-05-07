@@ -2,7 +2,7 @@ import { Fragment, FunctionComponent, ReactElement } from "react";
 import { Link, LinkProps } from "react-router-dom";
 import dayjs from "dayjs";
 import { Divider, Stack, StackProps, Typography, styled } from "@mui/material";
-import CardItem from "./CardItem";
+import Card from "../../components/card/Card";
 
 interface CompanyExpensesProps {
 	companyExpenses: CompanyExpense[];
@@ -48,7 +48,7 @@ const CompanyExpenses: FunctionComponent<CompanyExpensesProps> = ({ companyExpen
 	return (
 		<Stack direction="column" gap="1rem">
 			<Typography variant="h6" component="h2">Troškovi</Typography>
-			<CardItem>
+			<Card>
 				{companyExpenses.map((expense, index) => (
 					<CompanyExpenseItem
 						key={index}
@@ -56,7 +56,7 @@ const CompanyExpenses: FunctionComponent<CompanyExpensesProps> = ({ companyExpen
 						divider={index !== companyExpenses.length - 1}
 					/>
 				))}
-			</CardItem>
+			</Card>
 		</Stack>
 	)
 }

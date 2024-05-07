@@ -1,8 +1,9 @@
-import { Fragment, FunctionComponent } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, Stack, Typography, } from "@mui/material";
+import { FunctionComponent } from "react";
+import { Stack, Typography, } from "@mui/material";
 import { StackProps, styled } from "@mui/system";
 import dayjs from "dayjs";
+import Card from "../../components/card/Card";
+import CardLinkContent from "../../components/card/CardLinkContent";
 
 interface ReceiptListProps {
 	receiptsAggregatedByDate: ReceiptsAggregatedByDate[];
@@ -13,17 +14,19 @@ const ReceiptListItem: FunctionComponent<ReceiptAggregatedByDateItem> = ({ id, a
 	const categoriesList = categories.join(", ");
 
 	return (
-		<Card component={Link} to={`/receipts/${id}`} sx={{ textDecoration: "none"}} key={id}>
-			<CardContent component={Stack} direction="column" gap="1rem">
-				<Stack direction="row" justifyContent="space-between">
-					<Typography component="span" fontWeight="bold">{store.name}</Typography>
-					<Typography component="span">{amount}</Typography>
+		<Card key={id}>
+			<CardLinkContent to={`/receipts/${id}`}>
+				<Stack direction="column" gap="1rem">
+					<Stack direction="row" justifyContent="space-between">
+						<Typography component="span" fontWeight="bold">{store.name}</Typography>
+						<Typography component="span">{amount}</Typography>
+					</Stack>
+					<Stack direction="row" justifyContent="space-between" alignItems="center">
+						<Typography component="span" variant="body2">{categoriesList}</Typography>
+						<Typography component="span">{timeFormatted}</Typography>
+					</Stack>
 				</Stack>
-				<Stack direction="row" justifyContent="space-between" alignItems="center">
-					<Typography component="span" variant="body2">{categoriesList}</Typography>
-					<Typography component="span">{timeFormatted}</Typography>
-				</Stack>
-			</CardContent>
+			</CardLinkContent>
 		</Card>
 	)
 }
@@ -38,21 +41,19 @@ const ReceiptListGroup: FunctionComponent<ReceiptsAggregatedByDate> = ({ date, t
 	})
 
 	return (
-		<Fragment>
-			{receipts.map(receipt => (
-				<Stack direction="column" gap="0.5rem" key={receipt.date}>
-					<ReceiptGroupHeader direction="row" justifyContent="space-between">
-						<Typography component="span" color="text.secondary">{formattedDate}</Typography>
-						<Typography component="span">{total}</Typography>
-					</ReceiptGroupHeader>
-					{receipts.map(receipt => <ReceiptListItem key={receipt.id} {...receipt} />)}
-				</Stack>
-			))}
-		</Fragment>
+			<Stack direction="column" gap="0.5rem" >
+				<ReceiptGroupHeader direction="row" justifyContent="space-between">
+					<Typography component="span" color="text.secondary">{formattedDate}</Typography>
+					<Typography component="span">{total}</Typography>
+				</ReceiptGroupHeader>
+				{receipts.map((receipt, index) => <ReceiptListItem key={index} {...receipt} />)}
+			</Stack>
 	)
 }
 
 const ReceiptList: FunctionComponent<ReceiptListProps> = ({ receiptsAggregatedByDate }) => {
+	console.log("RECEIPTS", receiptsAggregatedByDate);
+
 	return (
 		receiptsAggregatedByDate.map((aggregatedReceipts, index) =>
 			<ReceiptListGroup key={index} {...aggregatedReceipts} />

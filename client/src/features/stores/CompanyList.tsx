@@ -1,7 +1,7 @@
 import { Fragment, FunctionComponent, ReactElement } from "react";
 import { Link, LinkProps } from "react-router-dom";
 import { Divider, Stack, StackProps, Typography, styled } from "@mui/material";
-import CardItem from "./CardItem";
+import Card from "../../components/card/Card";
 
 const CompanyListItemLink = styled(Stack)<StackProps & LinkProps>(({ theme }) => ({
 	display: "flex",
@@ -46,7 +46,7 @@ interface CompanyListProps {
 
 const CompanyList: FunctionComponent<CompanyListProps> = ({ companies }): ReactElement => {
 	return (
-		<CardItem>
+		<Card>
 			{companies.map((company, index) => (
 				<CompanyListItem
 					key={index}
@@ -54,7 +54,7 @@ const CompanyList: FunctionComponent<CompanyListProps> = ({ companies }): ReactE
 					divider={index !== companies.length - 1}
 				/>
 			))}
-		</CardItem>
+		</Card>
 	)
 }
 

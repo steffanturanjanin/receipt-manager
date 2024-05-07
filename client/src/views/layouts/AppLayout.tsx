@@ -85,15 +85,15 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 					/>
 					<NavigationActionLink
 						component={NavLink}
-						to="/profile"
-						//label="Profil"
-						icon={<ProfileIcon fontSize="large" />}
-					/>
-					<NavigationActionLink
-						component={NavLink}
 						to="/stats"
 						//label="Statistika"
 						icon={<StatsIcon fontSize="large" />}
+					/>
+					<NavigationActionLink
+						component={NavLink}
+						to="/profile"
+						//label="Profil"
+						icon={<ProfileIcon fontSize="large" />}
 					/>
 				</BottomNavigation>
 			</Box>
