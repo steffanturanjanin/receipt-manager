@@ -34,7 +34,7 @@ type ReceiptItemDb struct {
 
 type ReceiptItem struct {
 	ID        int       `json:"id"`
-	ReceiptID int       `json:"receiptID"`
+	ReceiptId int       `json:"receiptId"`
 	Name      string    `json:"name"`
 	Date      time.Time `json:"date"`
 	Store     string    `json:"store"`
@@ -117,7 +117,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	for _, dbReceiptItem := range dbReceiptItems {
 		receiptItem := ReceiptItem{}
 		receiptItem.ID = dbReceiptItem.ID
-		receiptItem.ReceiptID = dbReceiptItem.ReceiptId
+		receiptItem.ReceiptId = dbReceiptItem.ReceiptId
 		receiptItem.Name = dbReceiptItem.Name
 		receiptItem.Date = dbReceiptItem.Date
 		receiptItem.Store = dbReceiptItem.Store

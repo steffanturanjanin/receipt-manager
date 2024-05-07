@@ -29,6 +29,7 @@ func (t StoreTransformer) TransformSingle(model models.Store) StoreResponse {
 	store := StoreResponse{}
 	store.ID = int(model.ID)
 	store.Tin = model.Tin
+	store.Name = model.Name
 	store.LocationId = model.LocationId
 	store.LocationName = model.LocationName
 	store.Address = model.Address

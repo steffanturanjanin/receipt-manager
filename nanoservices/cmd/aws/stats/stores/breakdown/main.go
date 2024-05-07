@@ -22,14 +22,14 @@ import (
 )
 
 type ExpenseByStoreDb struct {
-	ID           int    `json:"id"`
+	Tin          string `json:"tin"`
 	Name         string `json:"name"`
 	Total        int    `json:"total"`
 	ReceiptCount int    `json:"receipt_count"`
 }
 
 type ExpenseByStore struct {
-	ID           int    `json:"id"`
+	Tin          string `json:"tin"`
 	Name         string `json:"name"`
 	Total        string `json:"total"`
 	ReceiptCount int    `json:"receiptCount"`
@@ -87,7 +87,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	var dbExpenses []ExpenseByStoreDb
 	dbErr := DB.Model(&models.Store{}).
 		Select(
-			"stores.id AS id",
+			"stores.tin AS tin",
 			"stores.name AS name",
 			"IFNULL(SUM(receipts.total_purchase_amount), 0) AS total",
 			"COUNT(stores.id) AS receipt_count",
@@ -95,7 +95,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 		Joins("INNER JOIN receipts ON stores.id = receipts.store_id").
 		Where("receipts.user_id = ?", user.Id).
 		Where("receipts.date BETWEEN ? AND ?", fromDate, toDate).
-		Group("stores.id").
+		Group("stores.tin, stores.name").
 		Order("total DESC").
 		Limit(10).
 		Scan(&dbExpenses).
@@ -110,7 +110,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	expenses := make([]ExpenseByStore, 0)
 	for _, dbExpense := range dbExpenses {
 		expense := ExpenseByStore{}
-		expense.ID = dbExpense.ID
+		expense.Tin = dbExpense.Tin
 		expense.Name = dbExpense.Name
 		expense.Total = fmt.Sprintf("%.2f", float64(dbExpense.Total)/100)
 		expense.ReceiptCount = dbExpense.ReceiptCount

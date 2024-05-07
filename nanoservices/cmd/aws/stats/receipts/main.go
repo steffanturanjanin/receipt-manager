@@ -151,7 +151,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if isCategoryUnique {
+		if isCategoryUnique && dbReceipt.CategoryName != "" {
 			receipt.Categories = append(receipt.Categories, dbReceipt.CategoryName)
 		}
 
@@ -162,7 +162,18 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 	for _, receiptDbDto := range dbReceipts {
 		receipt := receiptsMap[receiptDbDto.ReceiptId]
 		date := receiptDbDto.Date.Format("2006-01-02")
-		aggregatedByDate[date] = append(aggregatedByDate[date], receipt)
+
+		isReceiptAdded := false
+		for _, receiptsByDate := range aggregatedByDate[date] {
+			if receiptsByDate.ID == receipt.ID {
+				isReceiptAdded = true
+				break
+			}
+		}
+
+		if !isReceiptAdded {
+			aggregatedByDate[date] = append(aggregatedByDate[date], receipt)
+		}
 	}
 
 	response := make([]ReceiptsAggregatedByDateListItem, 0)
