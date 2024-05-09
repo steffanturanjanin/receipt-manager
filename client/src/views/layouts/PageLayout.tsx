@@ -1,5 +1,14 @@
-import { AppBar, Box, BoxProps, Stack, Toolbar, Typography, styled, Backdrop as MuiBackdrop, CircularProgress } from "@mui/material";
+import {
+	AppBar,
+	Box,
+	Stack,
+	Toolbar,
+	Typography,
+	Backdrop as MuiBackdrop,
+	CircularProgress
+} from "@mui/material";
 import { Fragment, FunctionComponent, ReactElement, ReactNode } from "react";
+import MainContent from "./MainContent";
 
 interface PageLayoutProps {
 	title: string;
@@ -8,15 +17,6 @@ interface PageLayoutProps {
 	showBackdrop?: boolean;
 	children: ReactNode;
 }
-
-const MainContent = styled(Box)<BoxProps>({
-	width: "100%",
-	maxWidth: "600px",
-	marginTop: "64px",
-	padding: "1.5rem",
-	marginLeft: "auto",
-	marginRight: "auto",
-})
 
 interface BackdropProps {
 	open: boolean;
@@ -43,7 +43,7 @@ const PageLayout: FunctionComponent<PageLayoutProps> = ({ title, showBackdrop, h
 					</Stack>
 				</Toolbar>
 			</AppBar>
-			<MainContent component="main">
+			<MainContent>
 				{children}
 			</MainContent>
 			<Backdrop open={!!showBackdrop} />

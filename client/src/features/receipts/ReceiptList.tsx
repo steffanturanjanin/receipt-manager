@@ -52,8 +52,6 @@ const ReceiptListGroup: FunctionComponent<ReceiptsAggregatedByDate> = ({ date, t
 }
 
 const ReceiptList: FunctionComponent<ReceiptListProps> = ({ receiptsAggregatedByDate }) => {
-	console.log("RECEIPTS", receiptsAggregatedByDate);
-
 	return (
 		receiptsAggregatedByDate.map((aggregatedReceipts, index) =>
 			<ReceiptListGroup key={index} {...aggregatedReceipts} />

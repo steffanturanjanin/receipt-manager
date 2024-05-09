@@ -1,22 +1,24 @@
-import { Navigate, RouteObject } from 'react-router-dom';
+import { Navigate, Outlet, RouteObject } from 'react-router-dom';
 import Login from "../views/pages/auth/Login";
 import Register from "../views/pages/auth/Register";
+import GuestGuard from './guards/GuestGuard';
 
 const auth: RouteObject[] = [
 	{
-		path: '/auth',
+		path: "/auth",
+		element: <GuestGuard element={<Outlet />} />,
 		children: [
 			{
-				path: '',
-				element: <Navigate to="login" />
+				path: "",
+				element: <Navigate to="login" replace />
 			},
 			{
 				index: true,
-				path: 'login',
+				path: "login",
 				element: <Login />
 			},
 			{
-				path: 'register',
+				path: "register",
 				element: <Register />,
 			}
 		]

@@ -13,17 +13,24 @@ import SearchPage from "../views/pages/search/SearchPage";
 import CompaniesPage from "../views/pages/stores/CompaniesPage";
 import CompanyPage from "../views/pages/stores/CompanyPage";
 import CategoryStatsPage from "../views/pages/categories/CategoryStatsPage";
+import ErrorBoundary from "../views/errors/ErrorBoundary";
+import NotFoundPage from "../views/errors/NotFoundPage";
 
 const routes: RouteObject[] = [
 	...auth,
 	{
+		path: "*",
+		element: <NotFoundPage />
+	},
+	{
 		path: "",
 		element: <AuthGuard element={<AppLayout />} />,
+		errorElement: <ErrorBoundary />,
 		children: [
 			{
 				index: true,
 				path: "",
-				element: <Home />
+				element: <Home />,
 			},
 			{
 				path: "/receipts",
@@ -59,10 +66,10 @@ const routes: RouteObject[] = [
 			},
 			{
 				path: "/categories/:id",
-				element: <CategoryStatsPage />
-			}
-		]
-	}
+				element: <CategoryStatsPage />,
+			},
+		],
+	},
 ];
 
 const Router: FunctionComponent = () =>

@@ -8,19 +8,19 @@ interface ExpensesByCategoryItemProps {
 }
 
 const ExpensesByCategoryItem: FunctionComponent<ExpensesByCategoryItemProps> = ({ category, divider }) => {
-	const { name, total, percentage, receiptCount } = category;
+	const { id, name, total, percentage, receiptCount } = category;
 
 	return (
 		<Fragment>
-			<CardLinkContent to="/">
+			<CardLinkContent to={`/categories/${id}`}>
 				<Stack direction="column" gap="0.5rem">
 					<Stack direction="row" justifyContent="space-between">
 						<Typography>{name}</Typography>
 						<Typography>{total}</Typography>
 					</Stack>
 					<Stack direction="row" justifyContent="space-between">
-						<Typography variant="caption">{receiptCount} račun</Typography>
-						<Typography variant="caption">{percentage}%</Typography>
+						<Typography variant="body2" color="grey.600">{receiptCount} račun</Typography>
+						<Typography variant="body2" color="grey.600">{percentage}%</Typography>
 					</Stack>
 				</Stack>
 			</CardLinkContent>

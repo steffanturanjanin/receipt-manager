@@ -19,7 +19,7 @@ const ExpenseByStoreItem: FunctionComponent<ExpenseByStoreItemProps> = ({ expens
 					</Stack>
 					<Stack direction="column" alignItems="flex-end">
 						<Typography>{total}</Typography>
-						<Typography variant="caption">{receiptCount} račun</Typography>
+						<Typography variant="body2" color="grey.600">{receiptCount} računa</Typography>
 					</Stack>
 			</Stack>
 			</CardLinkContent>

@@ -10,7 +10,7 @@ const AuthGuard: FunctionComponent<AuthGuardProps> = ({ element }): ReactElement
 	const { access_token } = getAuth() || {};
 
 	if (!access_token) {
-		//return <Navigate to="/auth/login" replace />
+		return <Navigate to="/auth/login" replace />
 	}
 
 	return <>{element}</>

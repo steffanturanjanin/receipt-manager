@@ -1,5 +1,4 @@
 import { httpClient } from "../http";
-import { categoryStats } from "./mocks";
 
 export const getCategories = async (): Promise<Category[]> => {
 	const { data } = await httpClient.get<Category[]>("/categories");
@@ -8,5 +7,7 @@ export const getCategories = async (): Promise<Category[]> => {
 }
 
 export const getCategoryStats = async (id: number): Promise<SingleCategoryStats> => {
-	return categoryStats;
+	const { data } = await httpClient.get<SingleCategoryStats>(`/stats/categories/${id}`);
+
+	return data;
 }

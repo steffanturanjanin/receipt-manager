@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactElement, useMemo } from "react";
+import { FunctionComponent, ReactElement, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import { Stack, Typography } from "@mui/material";
@@ -9,6 +9,7 @@ import CardContent from "../../../components/card/CardContent";
 import BackButton from "../../../components/BackButton";
 import MostPopularReceiptItems from "../../../features/categories/MostPopularReceiptItems";
 import MostPopularStores from "../../../features/categories/MostPopularStores";
+import { AxiosError } from "axios";
 
 const CategoryStatsPage: FunctionComponent = (): ReactElement => {
 	const { id } = useParams();
@@ -18,11 +19,17 @@ const CategoryStatsPage: FunctionComponent = (): ReactElement => {
 		return parseInt(id)
 	}, [id]);
 
-	const { isLoading, data: categoryStats } = useQuery({
+	const { isLoading, data: categoryStats, error } = useQuery({
 		queryKey: ["category", categoryId],
 		queryFn: () => getCategoryStats(categoryId!),
 		enabled: !!categoryId,
-	})
+	});
+
+	useEffect(() => {
+		if (error && (error as AxiosError)?.response?.status === 404) {
+			throw new Response("Not found", { status: 404 });
+		}
+	}, [error])
 
 	return (
 		<PageLayout
@@ -35,7 +42,7 @@ const CategoryStatsPage: FunctionComponent = (): ReactElement => {
 					<CardContent>
 						<Stack gap="0.5rem">
 							<Typography>Potrošeno u proteklih 12 meseci:</Typography>
-							<Typography variant="h5">{categoryStats?.total}</Typography>
+							<Typography variant="h5">{categoryStats?.total || "0.00"}</Typography>
 						</Stack>
 					</CardContent>
 				</Card>
