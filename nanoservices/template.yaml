@@ -645,6 +645,36 @@ Resources:
           RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
           RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
+  StatsCategoriesShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: StatsCategoriesShow
+      CodeUri: ./cmd/aws/stats/categories/show
+      Handler: main
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /stats/categories/{id}
+            Method: GET
+      Environment:
+        Variables:
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
+
   StatsCategoriesBreakdown:
     Type: AWS::Serverless::Function
     Properties:
