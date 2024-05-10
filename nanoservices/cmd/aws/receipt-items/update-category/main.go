@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -30,6 +29,9 @@ type UpdateReceiptItemCategoryRequest struct {
 }
 
 var (
+	// Database
+	DB *gorm.DB
+
 	// Router
 	GorillaLambda *gorillamux.GorillaMuxAdapter
 
@@ -38,6 +40,7 @@ var (
 
 	//Errors
 	ErrReceiptItemNotFound = transport.NewNotFoundError()
+	ErrForbidden           = transport.NewForbiddenError()
 	ErrCategoryNotFound    = transport.NewNotFoundError()
 	ErrServiceUnavailable  = transport.NewServiceUnavailableError()
 )
@@ -55,6 +58,8 @@ func init() {
 	// Initialize database
 	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
+	} else {
+		DB = db.Instance
 	}
 
 	// Build middleware chain
@@ -72,7 +77,7 @@ func init() {
 	V = validator.NewDefaultValidator()
 	V.Validator.RegisterValidation("category_exists", validateCategoryExistence)
 	V.Validator.RegisterTranslation("category_exists", V.Translator, func(ut ut.Translator) error {
-		return ut.Add("category_exists", "Category with id {0} does not exist.", true)
+		return ut.Add("category_exists", "Kategorija sa id-jem {0} ne postoji.", true)
 	}, func(ut ut.Translator, fe v.FieldError) string {
 		value, _ := fe.Value().(string)
 		t, _ := ut.T("category_exists", value)
@@ -81,6 +86,11 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	// Retrieve current user
+	user := middlewares.GetAuthUser(r)
+	// Retrieve receipt item id
+	receiptItemId := mux.Vars(r)["id"]
+
 	// Parse request body to struct
 	updateReceiptItemCategoryRequest := &UpdateReceiptItemCategoryRequest{}
 	if err := controllers.ParseBody(updateReceiptItemCategoryRequest, r); err != nil {
@@ -95,26 +105,23 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract receipt item {id} path parameter
-	pathParams := mux.Vars(r)
-	receiptItemId, err := strconv.ParseInt(pathParams["id"], 10, 64)
-	if err != nil {
-		log.Printf("Error converting path param: %s\n", err.Error())
-		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
-	}
-
-	// Hydrate Receipt Item
-	// If Not Found - return 404 HTTP status code
 	var dbReceiptItem models.ReceiptItem
-	if dbErr := db.Instance.Find(&dbReceiptItem, receiptItemId).Error; dbErr != nil {
+	dbErr := DB.
+		Model(&models.ReceiptItem{}).
+		Joins("INNER JOIN receipts ON receipt_items.receipt_id = receipts.id").
+		Where("receipts.user_id = ?", user.Id).
+		First(&dbReceiptItem, receiptItemId).
+		Error
+
+	if dbErr != nil {
 		if errors.Is(dbErr, gorm.ErrRecordNotFound) {
-			controllers.JsonResponse(w, ErrReceiptItemNotFound, http.StatusNotFound)
+			controllers.JsonResponse(w, ErrForbidden, http.StatusForbidden)
+			return
+		} else {
+			log.Printf("Error fetching receipt item %s: %s\n", receiptItemId, dbErr.Error())
+			controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 			return
 		}
-
-		log.Printf("Error fetching receipt item %+d: %s\n", receiptItemId, err.Error())
-		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
-		return
 	}
 
 	// Update Receipt Item Category
@@ -122,7 +129,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	*dbReceiptItem.CategoryID = updateReceiptItemCategoryRequest.CategoryId
 
 	if dbErr := db.Instance.Save(&dbReceiptItem).Error; dbErr != nil {
-		log.Printf("Error updating receipt item %+d: %s\n", receiptItemId, dbErr.Error())
+		log.Printf("Error updating receipt item %s: %s\n", receiptItemId, dbErr.Error())
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 		return
 	}
