@@ -11,11 +11,11 @@ const StoreDetails: FunctionComponent<SingleReceiptStore> = ({ tin, name, locati
 			<CardLinkContent to={`/stores/companies/${tin}`}>
 				<Stack direction="column" gap="1rem">
 					<Stack direction="column">
-						<Typography variant="h5" fontWeight="bold">{name}</Typography>
+						<Typography variant="h6" fontWeight="bold">{name}</Typography>
 						<Typography variant="body1">{locationName}</Typography>
 					</Stack>
 					<Stack direction="column">
-						<Typography variant="h5">{address}</Typography>
+						<Typography variant="h6">{address}</Typography>
 						<Typography variant="body1">{city}</Typography>
 				</Stack>
 				</Stack>
@@ -36,7 +36,7 @@ const ReceiptMetaDetails: FunctionComponent<ReceiptMetaDetailsProps> = ({ totalT
 			<Stack direction="column">
 				<CardContent>
 					<Stack direction="row" gap="0.5rem" alignItems="center" justifyContent="space-between">
-						<Typography variant="h6">Vrednost poreza:</Typography>
+						<Typography fontWeight="bold">Vrednost poreza:</Typography>
 						<Typography variant="body1">{totalTaxAmount}</Typography>
 					</Stack>
 				</CardContent>
@@ -45,7 +45,7 @@ const ReceiptMetaDetails: FunctionComponent<ReceiptMetaDetailsProps> = ({ totalT
 				/>
 				<CardContent>
 					<Stack direction="row" gap="0.5rem" alignItems="center" justifyContent="space-between">
-						<Typography variant="h6">PFR broj:</Typography>
+						<Typography fontWeight="bold">PFR broj:</Typography>
 						<Typography variant="body1">{pfrNumber}</Typography>
 					</Stack>
 				</CardContent>
@@ -54,7 +54,7 @@ const ReceiptMetaDetails: FunctionComponent<ReceiptMetaDetailsProps> = ({ totalT
 				/>
 				<CardContent>
 					<Stack direction="row" gap="0.5rem" alignItems="center" justifyContent="space-between">
-						<Typography variant="h6">Brojač:</Typography>
+						<Typography fontWeight="bold">Brojač:</Typography>
 						<Typography variant="body1">{counter}</Typography>
 					</Stack>
 				</CardContent>
@@ -79,7 +79,7 @@ const ReceiptUserDetails: FunctionComponent<ReceiptUserDetailsProps> = ({ user, 
 					<Typography>Dodao:</Typography>
 					<Stack direction="column" alignItems="flex-end">
 						<Typography variant="body1">{email}</Typography>
-						<Typography variant="body1">{formattedCreatedAt}</Typography>
+						<Typography variant="body2" color="grey.600">{formattedCreatedAt}</Typography>
 					</Stack>
 				</Stack>
 			</CardContent>
@@ -106,7 +106,7 @@ const ReceiptDetails: FunctionComponent<ReceiptDetailsProps> = ({
 }): ReactElement => {
 	return (
 		<Box component="section">
-			<Typography variant="h4" component="h2" marginY="2rem">Detalji sa računa</Typography>
+			<Typography variant="h5" component="h2" marginY="1rem">Detalji sa računa</Typography>
 			<StoreDetails {...store} />
 			<ReceiptMetaDetails {...({ totalTaxAmount, pfrNumber, counter})} />
 			<ReceiptUserDetails {...({ user, createdAt})} />

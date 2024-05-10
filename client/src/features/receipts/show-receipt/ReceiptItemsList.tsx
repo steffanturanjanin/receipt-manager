@@ -43,15 +43,15 @@ const ReceiptItem: FunctionComponent<ReceiptItemProps> = ({ divider, receiptItem
 			<ReceiptItemContainer onClick={() => onClick(receiptItem)}>
 				<Stack direction="column" gap="0.5rem">
 					<Stack direction="row" gap="0.5rem" justifyContent="space-between">
-						<Typography variant="h6">{name}</Typography>
-						<Typography variant="h6">{totalAmount}</Typography>
+						<Typography fontWeight="bold">{name}</Typography>
+						<Typography fontWeight="bold">{totalAmount}</Typography>
 					</Stack>
 					<Stack direction="row" gap="0.5rem" justifyContent="space-between">
 						<Stack component={Typography} variant="body2" direction="row" alignItems="center" gap="0.5rem">
 							<CategoryCircle color={category?.color || UNCATEGORIZED_COLOR} />
 							{category?.name || UNCATEGORIZED_NAME}
 						</Stack>
-						<Typography variant="body2">{breakdownPerUnit}</Typography>
+						<Typography variant="body2" color="grey.600">{breakdownPerUnit}</Typography>
 					</Stack>
 				</Stack>
 			</ReceiptItemContainer>
@@ -68,7 +68,7 @@ interface ReceiptItemsListProps {
 const ReceiptItemsList: FunctionComponent<ReceiptItemsListProps> = ({ receiptItems, onClick }): ReactElement => {
 	return (
 		<Box component="section">
-			<Typography variant="h4" component="h2" marginY="2rem">Stavke sa računa</Typography>
+			<Typography variant="h5" component="h2" marginY="1rem">Stavke sa računa</Typography>
 			<Card>
 				{receiptItems.map((receiptItem, index) => (
 					<ReceiptItem

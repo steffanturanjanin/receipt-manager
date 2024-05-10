@@ -7,7 +7,7 @@ export const updateReceiptItem = async (id: number, request: UpdateReceiptItemRe
 }
 
 export const getReceiptItems = async ({ searchText }: SearchQuery): Promise<ReceiptItem[]> => {
-	const { data } = await httpClient.get<ReceiptItem[]>("/receipt-items", {params: { searchText }});
+	const { data } = await httpClient.get<ReceiptItem[]>("/receipt-items", { params: { searchText } });
 
 	return data;
 }

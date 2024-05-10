@@ -23,9 +23,9 @@ const ReceiptPaymentOverview: FunctionComponent<ReceiptPaymentOverviewProps> = (
 				<Stack direction="column" gap="1rem">
 					<Stack direction="column">
 						<Typography variant="h4">{totalPurchaseAmount || "0.00" } RSD</Typography>
-						<Typography variant="body1">{formattedDate}</Typography>
+						<Typography variant="body1" color="grey.600">{formattedDate}</Typography>
 					</Stack>
-					<Typography variant="h5">{storeName}</Typography>
+					<Typography variant="h6">{storeName}</Typography>
 				</Stack>
 			</CardContent>
 		</Card>

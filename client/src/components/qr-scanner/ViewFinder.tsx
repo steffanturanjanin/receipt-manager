@@ -1,4 +1,5 @@
 import { FunctionComponent, ReactElement, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, BoxProps, Button, ButtonProps, Stack, StackProps, Typography, styled } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -77,6 +78,13 @@ interface ViewFinderProps {
 }
 
 const ViewFinder: FunctionComponent<ViewFinderProps> = ({ onClose, notification }): ReactElement => {
+	const navigate = useNavigate();
+
+	const onManualEntrance = () => {
+		onClose();
+		navigate("/receipts/create");
+	}
+
 	return (
 		<QrScannerContainer>
 			<QrScannerContent>
@@ -85,9 +93,15 @@ const ViewFinder: FunctionComponent<ViewFinderProps> = ({ onClose, notification 
 						<CloseIcon fontSize="large" sx={{fontSize: "48px"}}/>
 					</QrScannerCloseButton>
 				</Stack>
-				<Stack direction="row" alignItems="top" justifyContent="center">
-					<Typography variant="h4" component="p" zIndex={1} textAlign="center" marginY="1.5rem">
+				<Stack direction="column" alignItems="center" justifyContent="center">
+					<Typography variant="h4" zIndex={1} textAlign="center">
 						Skeniraj QR kod sa računa
+					</Typography>
+					<Typography variant="body1" zIndex={1}>
+						ili ako imate link računa, {" "}
+						<Button variant="text" sx={{ padding: 0 }} onClick={onManualEntrance}>
+							<Typography variant="h6">Unesite ručno</Typography>
+						</Button>
 					</Typography>
 				</Stack>
 				<QrScannerCameraContainer alignItems="center" justifyContent="center">
