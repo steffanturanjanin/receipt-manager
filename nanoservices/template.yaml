@@ -93,7 +93,7 @@ Resources:
     Properties:
       StageName: ReceiptManagerApiTest
       Cors:
-        AllowMethods: "'GET, POST, PUT, DELETE, OPTIONS'"
+        AllowMethods: "'GET, POST, PUT, PATCH, DELETE, OPTIONS'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
         AllowOrigin: "'*'"
         MaxAge: 600

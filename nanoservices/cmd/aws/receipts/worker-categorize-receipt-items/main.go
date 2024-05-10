@@ -22,7 +22,7 @@ import (
 const (
 	CATEGORIZE_RECEIPT_ITEMS_PROMPT_SERBIAN = `Dat je sledeći spisak kategorija: %s.
 Za svaki od sledećih artikala odrediti kojoj od navedenih kategorija pripada: %s.
-Svaki artikal pripada samo jednoj kategoriji. Rezultat vratiti u formatu JSON objekta, gde je ključ ime artikla,
+Svaki artikal pripada samo jednoj kategoriji. Rezultat vratiti kao plain text bez markupa u formatu JSON objekta, gde je ključ ime artikla,
 a vrednost ime kategorije kojoj artikal pripada. Zadržati imena artikala i kategorija u originalnom obliku.
 Ne dodavati nove kategorije i artikle.`
 )
@@ -95,7 +95,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 
 	response, err := OpenAiClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Messages:    messages,
-		Model:       openai.GPT3Dot5Turbo,
+		Model:       openai.GPT4,
 		MaxTokens:   2400,
 		Temperature: 0.1,
 	})
