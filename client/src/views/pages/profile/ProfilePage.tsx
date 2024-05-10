@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactElement } from "react";
+import { FunctionComponent, FormEvent, ReactElement, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "react-query";
 import dayjs from "dayjs";
@@ -23,10 +23,6 @@ const ProfileItem = styled(Stack)<StackProps>({
 	flexDirection: "row",
 });
 
-const ProfileLogoutItem = styled(ProfileItem)<StackProps>({
-	justifyContent: "center",
-});
-
 const LogoutButton = styled(LoadingButton)<LoadingButtonProps>(({ theme }) => ({
 	color: theme.palette.error.main,
 	width: "100%",
@@ -44,7 +40,7 @@ const ProfilePage: FunctionComponent = (): ReactElement => {
 		queryFn: () => getProfile(),
 	});
 
-	const { mutate: onSubmit } = useMutation({
+	const { mutate: onLogout } = useMutation({
 		mutationFn: () => logout(),
 		onSuccess: () => {
 			removeAuth();
@@ -52,17 +48,35 @@ const ProfilePage: FunctionComponent = (): ReactElement => {
 		}
 	});
 
-	const { firstName, lastName, email, registeredAt, receiptCount } = profile || {};
-	const formattedRegisteredAt = registeredAt ? dayjs(registeredAt).format("DD.MM.YYYY.") : "";
+	const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		onLogout();
+	}
+
+	const {
+		firstName,
+		lastName,
+		email,
+		registeredAt,
+		receiptCount
+	} = profile || {};
+
+	const formattedRegisteredAt = useMemo(
+		() => registeredAt ? dayjs(registeredAt).format("DD.MM.YYYY.") : "",
+		[registeredAt]
+	);
+	const username = useMemo(
+		() => (firstName && lastName) ? `${firstName} ${lastName}` : "",
+		[firstName, lastName]
+	);
+
 
 	return (
 		<PageLayout
 			title="Profil"
 			showBackdrop={isProfileFetching}
 		>
-			<Typography variant="h5" component="h2" mb="1rem">
-				{`${firstName} ${lastName}`}
-			</Typography>
+			<Typography variant="h5" component="h2" mb="1rem">{username}</Typography>
 			<Stack direction="column" gap="2rem">
 				<Card>
 					<CardContent>
@@ -88,11 +102,13 @@ const ProfilePage: FunctionComponent = (): ReactElement => {
 				</Card>
 
 				<Card>
-					<ProfileLogoutItem component="form" onSubmit={() => onSubmit()}>
-						<LogoutButton type="submit" variant="text">
-							Odjavi se <LogoutIcon />
-						</LogoutButton>
-					</ProfileLogoutItem>
+					<ProfileItem>
+						<Stack component="form" onSubmit={onSubmit} width="100%">
+							<LogoutButton type="submit" variant="text">
+								Odjavi se <LogoutIcon />
+							</LogoutButton>
+						</Stack>
+					</ProfileItem>
 				</Card>
 
 			</Stack>
