@@ -48,6 +48,7 @@ export const singleReceipt: SingleReceipt = {
 		lastName: "Turanjanin",
 		email: "stefan@turanjanin.net",
 	},
+	isFavorite: false,
 	status: "pending" as ReceiptStatus,
 	pfrNumber: "746DUV64-746DUV64-16901",
 	counter: "16890/16901ПП",
@@ -339,4 +340,169 @@ export const singleReceipt: SingleReceipt = {
 	}
 }
 
-
+export const favoriteReceipts: FavoriteReceipt[] = [
+	{
+		id: 1,
+		amount: "2455.99",
+		date: "2024-04-01 16:12:54",
+		store: {
+			id: 1,
+			name: "METLA DISKONTI",
+			location: "Diskont br. 32",
+			address: "Knjazevacka 209",
+			city: "Nis - Pantelej",
+		},
+		categories: [
+			{
+				id: 1,
+				name: "Hrana",
+				color: "#D95030"
+			},
+			{
+				id: 2,
+				name: "Piće",
+				color: "#6C6874",
+			},
+		]
+	},
+	{
+		id: 2,
+		amount: "5455.70",
+		date: "2024-3-23 12:02:11",
+		store: {
+			id: 1,
+			name: "IDEA D.O.O.",
+			location: "Idea Nis 118",
+			address: "Matejevacki put 33",
+			city: "Nis - Pantelej",
+		},
+		categories: [
+			{
+				id: 1,
+				name: "Hrana",
+				color: "#D95030"
+			},
+			{
+				id: 2,
+				name: "Mleko i jaja ",
+				color: "#1B5583",
+			},
+			{
+				id: 3,
+				name: "Kućna hemija",
+				color: "#84C3BE",
+			}
+		]
+	},
+	{
+		id: 3,
+		amount: "4210.56",
+		date: "2024-3-11 09:31:20",
+		store: {
+			id: 1,
+			name: "LIDL",
+			location: "LIDL Nis - Duvaniste",
+			address: "Vizantijski bulevar 28",
+			city: "Nis - Pantelej",
+		},
+		categories: [
+			{
+				id: 1,
+				name: "Hrana",
+				color: "#D95030"
+			},
+			{
+				id: 2,
+				name: "Piće",
+				color: "#1B5583",
+			},
+			{
+				id: 3,
+				name: "Domaćinstvo",
+				color: "#D36E70",
+			}
+		]
+	},
+	{
+		id: 1,
+		amount: "2455.99",
+		date: "2024-04-01 16:12:54",
+		store: {
+			id: 1,
+			name: "METLA DISKONTI",
+			location: "Diskont br. 32",
+			address: "Knjazevacka 209",
+			city: "Nis - Pantelej",
+		},
+		categories: [
+			{
+				id: 1,
+				name: "Hrana",
+				color: "#D95030"
+			},
+			{
+				id: 2,
+				name: "Piće",
+				color: "#6C6874",
+			},
+		]
+	},
+	{
+		id: 2,
+		amount: "5455.70",
+		date: "2024-3-23 12:02:11",
+		store: {
+			id: 1,
+			name: "IDEA D.O.O.",
+			location: "Idea Nis 118",
+			address: "Matejevacki put 33",
+			city: "Nis - Pantelej",
+		},
+		categories: [
+			{
+				id: 1,
+				name: "Hrana",
+				color: "#D95030"
+			},
+			{
+				id: 2,
+				name: "Mleko i jaja ",
+				color: "#1B5583",
+			},
+			{
+				id: 3,
+				name: "Kućna hemija",
+				color: "#84C3BE",
+			}
+		]
+	},
+	{
+		id: 3,
+		amount: "4210.56",
+		date: "2024-3-11 09:31:20",
+		store: {
+			id: 1,
+			name: "LIDL",
+			location: "LIDL Nis - Duvaniste",
+			address: "Vizantijski bulevar 28",
+			city: "Nis - Pantelej",
+		},
+		categories: [
+			{
+				id: 1,
+				name: "Hrana",
+				color: "#D95030"
+			},
+			{
+				id: 2,
+				name: "Piće",
+				color: "#1B5583",
+			},
+			{
+				id: 3,
+				name: "Domaćinstvo",
+				color: "#D36E70",
+			}
+		]
+	},
+]

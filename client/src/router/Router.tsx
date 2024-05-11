@@ -15,6 +15,7 @@ import CompanyPage from "../views/pages/stores/CompanyPage";
 import CategoryStatsPage from "../views/pages/categories/CategoryStatsPage";
 import ErrorBoundary from "../views/errors/ErrorBoundary";
 import NotFoundPage from "../views/errors/NotFoundPage";
+import FavoriteReceiptsPage from "../views/pages/receipts/FavoriteReceiptsPage";
 
 const routes: RouteObject[] = [
 	...auth,
@@ -43,6 +44,10 @@ const routes: RouteObject[] = [
 			{
 				path: "/receipts/:id",
 				element: <ShowReceiptPage />
+			},
+			{
+				path: "/receipts/favorites",
+				element: <FavoriteReceiptsPage />
 			},
 			{
 				path: "/profile",

@@ -91,3 +91,26 @@ interface SingleReceipt {
 	store: SingleReceiptStore;
 	createdAt: string;
 }
+
+
+interface FavoriteReceiptStore {
+	id: number;
+	name: string;
+	location: string;
+	address: string;
+	city: string;
+}
+
+interface FavoriteReceiptCategory {
+	id: number;
+	name: string;
+	color: string;
+}
+
+interface FavoriteReceipt {
+	id: number;
+	amount: string;
+	date: string;
+	store: FavoriteReceiptStore;
+	categories: FavoriteReceiptCategory[];
+}

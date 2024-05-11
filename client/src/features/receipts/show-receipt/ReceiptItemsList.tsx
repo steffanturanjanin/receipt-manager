@@ -1,20 +1,7 @@
 import { Fragment, FunctionComponent, ReactElement } from "react";
 import { Box, BoxProps, ButtonProps, Divider, Stack, Typography, styled, useTheme } from "@mui/material";
 import Card from "../../../components/card/Card";
-
-const ColorCircle = styled(Box)<BoxProps>({
-	width: "0.6em",
-	height: "0.6em",
-	borderRadius: "100%",
-});
-
-interface CategoryCircleProps {
-	color: string;
-}
-
-const CategoryCircle: FunctionComponent<CategoryCircleProps> = ({ color }) =>
-	<ColorCircle component="span" sx={{ backgroundColor: color }}/>
-
+import CategoryCircle from "../../categories/CategoryCircle";
 
 interface ReceiptItemProps {
 	receiptItem: SingleReceiptReceiptItem;

@@ -1,4 +1,5 @@
 import { httpClient } from "../http"
+import { favoriteReceipts } from "./mock";
 
 export const createReceipt = async (request: CreateReceiptRequest): Promise<{ message: string }> => {
 	const { data } = await httpClient.post("/receipts", request);
@@ -28,4 +29,8 @@ export const setFavorite = async (id: number, request: SetFavoriteRequest): Prom
 	const { data } = await httpClient.patch<SingleReceipt>(`/receipts/${id}/favorite`, request);
 
 	return data;
+}
+
+export const getFavoriteReceipts = async (): Promise<FavoriteReceipt[]> => {
+	return favoriteReceipts;
 }
