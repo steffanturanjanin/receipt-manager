@@ -583,11 +583,41 @@ Resources:
           RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
           RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
 
-  ReceiptsUpdateFavorite:
+  ReceiptsFavoritesIndex:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ReceiptsUpdateFavorite
-      CodeUri: ./cmd/aws/receipts/favorites/update-favorite
+      FunctionName: ReceiptsFavoritesIndex
+      CodeUri: ./cmd/aws/receipts/favorites/index
+      Handler: main
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ReceiptManagerApi
+            Path: /receipts/favorites
+            Method: GET
+      Environment:
+        Variables:
+          DbHost: !Ref DbHost
+          DbPort: !Ref DbPort
+          DbName: !Ref DbName
+          DbUser: !Ref DbUser
+          DbPassword: !Ref DbPassword
+          ApiSecret: !Ref ApiSecret
+          AccessTokenPublicKey: !Ref AccessTokenPublicKey
+          AccessTokenPrivateKey: !Ref AccessTokenPrivateKey
+          AccessTokenMaxAge: !Ref AccessTokenMaxAge
+          AccessTokenExpiresIn: !Ref AccessTokenExpiresIn
+          RefreshTokenPublicKey: !Ref RefreshTokenPublicKey
+          RefreshTokenPrivateKey: !Ref RefreshTokenPrivateKey
+          RefreshTokenMaxAge: !Ref RefreshTokenMaxAge
+          RefreshTokenExpiresIn: !Ref RefreshTokenExpiresIn
+
+  ReceiptsFavoritesUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ReceiptsFavoritesUpdate
+      CodeUri: ./cmd/aws/receipts/favorites/update
       Handler: main
       Events:
         Get:
