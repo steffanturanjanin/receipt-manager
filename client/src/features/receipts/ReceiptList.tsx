@@ -23,7 +23,7 @@ const ReceiptListItem: FunctionComponent<ReceiptAggregatedByDateItem> = ({ id, a
 					</Stack>
 					<Stack direction="row" justifyContent="space-between" alignItems="center">
 						<Typography component="span" variant="body2">{categoriesList}</Typography>
-						<Typography component="span">{timeFormatted}</Typography>
+						<Typography component="span" variant="body2" color="grey.600">{timeFormatted}</Typography>
 					</Stack>
 				</Stack>
 			</CardLinkContent>

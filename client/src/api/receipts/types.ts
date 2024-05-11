@@ -2,6 +2,10 @@ interface CreateReceiptRequest {
 	url: string;
 }
 
+interface SetFavoriteRequest {
+	isFavorite: boolean;
+}
+
 enum ReceiptStatus {
 	PENDING = "pending",
 	PROCESSED = "processed",
@@ -82,6 +86,7 @@ interface SingleReceipt {
 	date: string;
 	meta: object;
 	qrCode: string;
+	isFavorite: boolean;
 	receiptItems: SingleReceiptReceiptItem[];
 	store: SingleReceiptStore;
 	createdAt: string;

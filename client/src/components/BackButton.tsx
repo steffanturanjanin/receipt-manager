@@ -21,8 +21,8 @@ const BackButton: FunctionComponent = (): ReactElement => {
 
 	const back = () => {
     // If there's a previous location in the history, navigate back to it
-    if (location.state && location.state.from) {
-      navigate(location.state.from);
+    if (location.key != "") {
+      navigate(-1);
     } else {
       // If there's no previous location, navigate to a default route
       navigate('/');

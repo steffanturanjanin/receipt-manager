@@ -1,29 +1,20 @@
-import { FunctionComponent, useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
-import { getReceipt } from "../../../api/receipts";
+import { FunctionComponent, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { getReceipt, setFavorite } from "../../../api/receipts";
 import { useParams } from "react-router-dom";
 import PageLayout from "../../layouts/PageLayout";
-import { Button, ButtonProps, Stack, StackProps, styled } from "@mui/material";
+import { Stack, StackProps, styled } from "@mui/material";
 import ReceiptPaymentOverview from "../../../features/receipts/show-receipt/ReceiptPaymentOverview";
 import ReceiptItemsList from "../../../features/receipts/show-receipt/ReceiptItemsList";
 import ReceiptDetails from "../../../features/receipts/show-receipt/ReceiptDetails";
 import ReceiptItemUpdateDialog from "../../../features/receipt-items/ReceiptItemUpdateDialog";
-import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteReceipt from "../../../features/receipts/DeleteReceipt";
 import BackButton from "../../../components/BackButton";
+import { DeleteActionButton, FavoriteActionButton } from "../../../features/receipts/ActionButtons";
 
 const ReceiptContainer = styled(Stack)<StackProps>({
 	gap: "2rem"
 });
-
-const RemoveReceiptButton = styled(Button)<ButtonProps>(({ theme }) => ({
-	minWidth: "auto",
-	color: theme.palette.error.light,
-	border: `1px solid ${theme.palette.grey[400]}`,
-	"&:hover": {
-		borderColor: theme.palette.grey[600],
-	}
-}));
 
 interface UpdateReceiptItemForm {
 	open: boolean;
@@ -43,23 +34,46 @@ const ShowReceiptPage: FunctionComponent = () => {
 	});
 
 	// Fetch receipt
-	const { isLoading, data: receipt } = useQuery({
+	const { isLoading: isReceiptLoading, data: receipt } = useQuery({
 		queryKey: ["single_receipt", receiptId],
 		queryFn: () => getReceipt(receiptId!),
 		keepPreviousData: true,
 		enabled: !!receiptId,
 	});
 
+	// Favorite
+	const { isLoading: isSetFavoriteLoading, mutate: setFavoriteMutate } = useMutation({
+		mutationFn: (request: SetFavoriteRequest) => setFavorite(receipt!.id, request),
+		onSuccess: () => {
+			// When favorite status is changed
+			// Invalidate query and refetch receipt
+			refetchReceipt()
+		}
+	});
+
+	const onSetFavorite = () => {
+		if (receipt) {
+			const request: SetFavoriteRequest = { isFavorite: !receipt.isFavorite };
+			setFavoriteMutate(request);
+		}
+	}
+
+	const isLoading = useMemo(
+		() => isReceiptLoading || isSetFavoriteLoading,
+		[isReceiptLoading, isSetFavoriteLoading]
+	);
+
 	const queryClient = useQueryClient();
 
-	const refetch = () => {
+	const refetchReceipt = () => {
 		queryClient.invalidateQueries(["single_receipt", receiptId]);
 	}
 
 	const controls = (
-		<RemoveReceiptButton onClick={() => setDeleteReceiptForm({ ...deleteReceiptForm, open: true })}>
-			<DeleteIcon />
-		</RemoveReceiptButton>
+		<Stack direction="row" gap="0.5rem">
+			<DeleteActionButton onClick={() => setDeleteReceiptForm({ ...deleteReceiptForm, open: true })} />
+			<FavoriteActionButton isFavorite={!!receipt?.isFavorite} onClick={onSetFavorite}/>
+		</Stack>
 	)
 
 	return (
@@ -101,7 +115,7 @@ const ShowReceiptPage: FunctionComponent = () => {
 				updateReceiptItem={(value: SingleReceiptReceiptItem) =>
 					setUpdateReceiptItemForm({...updateReceiptItemForm, receiptItem: value})
 				}
-				onSubmitted={refetch}
+				onSubmitted={refetchReceipt}
 			/>
 
 			<DeleteReceipt

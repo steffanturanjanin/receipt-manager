@@ -23,3 +23,9 @@ export const deleteReceipt = async (id: number): Promise<void> => {
 
 	return data;
 }
+
+export const setFavorite = async (id: number, request: SetFavoriteRequest): Promise<SingleReceipt> => {
+	const { data } = await httpClient.patch<SingleReceipt>(`/receipts/${id}/favorite`, request);
+
+	return data;
+}
