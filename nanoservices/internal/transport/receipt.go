@@ -25,6 +25,7 @@ type BaseReceiptResponse struct {
 	Date                *time.Time            `json:"date"`
 	QrCode              *string               `json:"qrCode"`
 	Meta                *map[string]string    `json:"meta"`
+	IsFavorite          bool                  `json:"isFavorite"`
 	CreatedAt           time.Time             `json:"createdAt"`
 	ReceiptItems        []ReceiptItemResponse `json:"receiptItems"`
 	User                *UserReceipt          `json:"user"`
@@ -81,6 +82,7 @@ func (t BaseReceiptTransformer) TransformSingle(model models.Receipt) BaseReceip
 	receipt.Date = model.Date
 	receipt.QrCode = model.QrCode
 	receipt.Meta = meta
+	receipt.IsFavorite = model.IsFavorite
 	receipt.CreatedAt = model.CreatedAt
 	receipt.ReceiptItems = receiptItems
 	receipt.User = user

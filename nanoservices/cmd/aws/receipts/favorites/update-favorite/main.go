@@ -6,28 +6,37 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
-
 	"github.com/steffanturanjanin/receipt-manager/internal/controllers"
 	db "github.com/steffanturanjanin/receipt-manager/internal/database"
 	"github.com/steffanturanjanin/receipt-manager/internal/middlewares"
 	"github.com/steffanturanjanin/receipt-manager/internal/models"
 	"github.com/steffanturanjanin/receipt-manager/internal/transport"
+	validation "github.com/steffanturanjanin/receipt-manager/internal/validator"
+	"gorm.io/gorm"
 )
 
+type FavoriteRequest struct {
+	IsFavorite *bool `validate:"required,boolean" json:"isFavorite"`
+}
+
 var (
+	// Database
+	DB *gorm.DB
+
 	// Router
 	GorillaLambda *gorillamux.GorillaMuxAdapter
 
-	//Errors
-	ErrReceiptNotFound    = transport.NewNotFoundError()
+	// Validator
+	Validator *validation.Validator
+
+	// Errors
+	ErrForbidden          = transport.NewForbiddenError()
 	ErrServiceUnavailable = transport.NewServiceUnavailableError()
 )
 
@@ -35,6 +44,8 @@ func init() {
 	// Initialize database
 	if err := db.InitializeDB(); err != nil {
 		os.Exit(1)
+	} else {
+		DB = db.Instance
 	}
 
 	// Build middleware chain
@@ -43,22 +54,36 @@ func init() {
 	authMiddleware := middlewares.SetAuthMiddleware
 	handler := authMiddleware(corsMiddleware(jsonMiddleware(handler)))
 
-	// Initialize router
+	// Initialize Router
 	Router := mux.NewRouter()
-	Router.HandleFunc("/receipts/{id}", handler).Methods("GET")
+	Router.HandleFunc("/receipts/{id}/favorite", handler).Methods("PATCH")
 	GorillaLambda = gorillamux.New(Router)
+
+	// Initialize validator
+	Validator = validation.NewDefaultValidator()
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	// Get Auth user
+var handler = func(w http.ResponseWriter, r *http.Request) {
+	// Retrieve current user
 	user := middlewares.GetAuthUser(r)
 
-	// Extract id from path params
-	pathParams := mux.Vars(r)
-	receiptId, _ := strconv.ParseInt(pathParams["id"], 10, 64)
+	// Receipt id
+	receiptId := mux.Vars(r)["id"]
+
+	request := &FavoriteRequest{}
+	if err := controllers.ParseBody(request, r); err != nil {
+		log.Printf("Error while parsing request: %+v\n", err)
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
+
+	if err := Validator.GetValidationErrors(request); err != nil {
+		controllers.JsonResponse(w, transport.NewValidationError(err), http.StatusUnprocessableEntity)
+		return
+	}
 
 	// Initialize query
-	query := db.Instance.Model(models.Receipt{}).
+	query := DB.Model(&models.Receipt{}).
 		Preload("Store").
 		Preload("User").
 		Preload("ReceiptItems").
@@ -66,15 +91,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		Preload("ReceiptItems.Tax").
 		Where("user_id = ?", user.Id)
 
-	// Find Receipt
+		// Find Receipt
 	var dbReceipt models.Receipt
 	if dbErr := query.First(&dbReceipt, receiptId).Error; dbErr != nil {
 		if errors.Is(dbErr, gorm.ErrRecordNotFound) {
-			controllers.JsonResponse(w, ErrReceiptNotFound, http.StatusNotFound)
+			controllers.JsonResponse(w, ErrForbidden, http.StatusNotFound)
 			return
 		}
 
-		log.Printf("Error while finding receipt %d: %s", receiptId, dbErr.Error())
+		log.Printf("Error while finding receipt %+v\n", dbErr)
+		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
+		return
+	}
+
+	dbReceipt.IsFavorite = *request.IsFavorite
+	if dbErr := DB.Save(&dbReceipt).Error; dbErr != nil {
+		log.Printf("Error while updating receipt's favorite status: %+v\n", dbErr)
 		controllers.JsonResponse(w, ErrServiceUnavailable, http.StatusServiceUnavailable)
 		return
 	}

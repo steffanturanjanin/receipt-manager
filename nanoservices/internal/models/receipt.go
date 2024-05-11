@@ -28,6 +28,7 @@ type Receipt struct {
 	Date                *time.Time      `gorm:"nullable" json:"date"`
 	QrCode              *string         `gorm:"type:text; nullable" json:"qrCode"`
 	Meta                *datatypes.JSON `gorm:"nullable" json:"metaData"`
+	IsFavorite          bool            `gorm:"default:false" json:"isFavorite"`
 	CreatedAt           time.Time       `gorm:"not null; autoCreateTime" json:"createdAt"`
 	UpdatedAt           time.Time       `gorm:"not null; autoCreateTime" json:"updatedAt"`
 	User                *User           `gorm:"foreignKey:UserID; references:ID; nullable" json:"user"`
