@@ -13,19 +13,21 @@ const MostPopularStores: FunctionComponent<MostPopularStoresProps> = ({ stores }
 			{stores.map((store, index) => (
 				<Fragment key={index}>
 					<CardLinkContent to={`/stores/companies/${store.tin}`}>
-						<Stack direction="row" justifyContent="space-between" alignItems="center">
+						<Stack direction="row" justifyContent="space-between" gap="1rem">
 							<Stack direction="column">
-								<Typography>{store.name}</Typography>
+								<Typography fontWeight="bold">{store.name}</Typography>
 								<Typography>{store.location}</Typography>
 								<Typography variant="body2" color="grey.600">
 									{`${store.address} - ${store.city}`}
 								</Typography>
 							</Stack>
-							<Stack direction="column" alignItems="end">
-								<Typography>{store.total}</Typography>
-								<Typography variant="body2" color="grey.600">
-									{store.receiptCount} računa
-								</Typography>
+							<Stack direction="column" alignItems="end" justifyContent="space-between">
+								<Stack alignItems="flex-end">
+									<Typography>{store.total}</Typography>
+									<Typography variant="caption" color="grey.600">
+										{store.receiptCount} računa
+									</Typography>
+								</Stack>
 								<Typography variant="body2" color="grey.600">
 									{store.percent}%
 								</Typography>

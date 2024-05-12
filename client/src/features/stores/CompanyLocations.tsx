@@ -22,7 +22,7 @@ const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLoc
 							</Stack>
 							<Stack direction="row" justifyContent="space-between">
 								<Typography color="grey.700">{location.address}</Typography>
-								<Typography color="grey.700" variant="body2">{location.receiptCount} račun/a</Typography>
+								<Typography color="grey.700" variant="body2">{location.receiptCount} računa</Typography>
 							</Stack>
 						</Stack>
 						<Divider />
@@ -32,7 +32,7 @@ const CompanyLocations: FunctionComponent<CompanyLocationsProps> = ({ companyLoc
 					<Typography>Ukupno:</Typography>
 					<Stack direction="column">
 						<Typography>{total}</Typography>
-						<Typography color="grey.700" variant="body2">{receiptCount} račun/a</Typography>
+						<Typography color="grey.700" variant="body2">{receiptCount} računa</Typography>
 					</Stack>
 				</Stack>
 			</Card>

@@ -38,7 +38,7 @@ const ExpensesByCategory: FunctionComponent<ExpensesByCategoryProps> = ({ catego
 		<Fragment>
 			{categories.map((category, index) => (
 				<ExpensesByCategoryItem
-					key={category.id}
+					key={index}
 					category={category}
 					divider={index !== categories.length -1}
 				/>
