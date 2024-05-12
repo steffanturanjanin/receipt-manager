@@ -10,7 +10,18 @@ export const receipts: ReceiptsAggregatedByDate[] = [
 				store: {
 					name: "METLA DISKONT",
 				},
-				categories: ["Piće", "Hrana"],
+				categories: [
+					{
+						id: 1,
+						name: "Piće",
+						color: "#5B3A29",
+					},
+					{
+						id: 2,
+						name: "Hrana",
+						color: "#5B3A29",
+					}
+				]
 			}
 		],
 	},
@@ -25,7 +36,18 @@ export const receipts: ReceiptsAggregatedByDate[] = [
 				store: {
 					name: "IDEA",
 				},
-				categories: ["Piće", "Hrana"],
+				categories: [
+					{
+						id: 1,
+						name: "Piće",
+						color: "#5B3A29",
+					},
+					{
+						id: 2,
+						name: "Hrana",
+						color: "#5B3A29",
+					}
+				],
 			},
 			{
 				id: 3,
@@ -34,7 +56,18 @@ export const receipts: ReceiptsAggregatedByDate[] = [
 				store: {
 					name: "MAXI",
 				},
-				categories: ["Piće", "Hrana"],
+				categories: [
+					{
+						id: 1,
+						name: "Piće",
+						color: "#5B3A29",
+					},
+					{
+						id: 2,
+						name: "Hrana",
+						color: "#5B3A29",
+					}
+				],
 			}
 		],
 	}
