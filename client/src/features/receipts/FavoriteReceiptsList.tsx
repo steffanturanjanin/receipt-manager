@@ -85,7 +85,7 @@ interface FavoriteReceiptsListProps {
 
 const FavoriteReceiptsList: FunctionComponent<FavoriteReceiptsListProps> = ({ receipts, onItemClicked }): ReactElement => {
 	const empty = (
-		<Stack direction="column" alignItems="center" justifyContent="center" sx={{ height: "100%" }}>
+		<Stack direction="column" alignItems="center" justifyContent="center" marginTop="50%">
 			<Typography variant="h4">Nema omiljenih računa.</Typography>
 			<Typography>Dodajte omiljene račune i oni će biti prikazani na ovoj strani.</Typography>
 		</Stack>
@@ -104,7 +104,7 @@ const FavoriteReceiptsList: FunctionComponent<FavoriteReceiptsListProps> = ({ re
 	const content = receipts.length ? list : empty;
 
 	return (
-		<Stack direction="column" gap="1rem" height="100%">
+		<Stack direction="column" gap="1rem">
 			{content}
 		</Stack>
 	)

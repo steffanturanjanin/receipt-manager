@@ -104,6 +104,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		categories := make([]FavoriteReceiptCategory, 0)
 
 		for _, dbReceiptItem := range dbReceipt.ReceiptItems {
+			if dbReceiptItem.Category == nil {
+				continue
+			}
+
 			isCategoryPresent := false
 
 			for _, category := range categories {

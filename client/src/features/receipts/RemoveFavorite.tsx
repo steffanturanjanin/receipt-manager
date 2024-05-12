@@ -37,6 +37,7 @@ const RemoveFavorite: FunctionComponent<RemoveFavoriteProps> = ({
 		mutationFn: () => setFavorite(receiptId, { isFavorite: false }),
 		onSuccess: () => {
 			onRemovedFromFavorites();
+			onClose();
 		}
 	});
 

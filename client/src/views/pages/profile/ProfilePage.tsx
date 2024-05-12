@@ -17,6 +17,8 @@ import LoadingButton, { LoadingButtonProps } from "../../../components/LoadingBu
 import { removeAuth } from "../../../util/auth";
 import Card from "../../../components/card/Card";
 import CardContent from "../../../components/card/CardContent";
+import CardLinkContent from "../../../components/card/CardLinkContent";
+import StarFullIcon from "@mui/icons-material/Star";
 
 const ProfileItem = styled(Stack)<StackProps>({
 	justifyContent: "space-between",
@@ -99,6 +101,14 @@ const ProfilePage: FunctionComponent = (): ReactElement => {
 							<Typography>{receiptCount}</Typography>
 						</ProfileItem>
 					</CardContent>
+				</Card>
+
+				<Card>
+					<CardLinkContent to="/receipts/favorites">
+						<Stack component={Typography} direction="row" alignItems="center" justifyContent="center" gap="0.25rem">
+							Omiljeni računi <StarFullIcon color="warning" />
+						</Stack>
+					</CardLinkContent>
 				</Card>
 
 				<Card>

@@ -24,18 +24,25 @@ const AppLayoutContainer = styled(Stack)<StackProps>({
 });
 
 const AppLayoutContent = styled(Stack)<StackProps>(({ theme }) => ({
-	marginBottom: '5.5rem',
-	overflow: 'auto',
+	marginBottom: "5.5rem",
+	overflow: "auto",
 	backgroundColor: theme.palette.grey["100"],
-	height: '100vh',
+	height: "100vh",
 }));
 
 const BottomNavigationContainerStyle: SxProps = {
-	position: 'fixed',
+	position: "fixed",
 	bottom: 0,
 	left: 0,
 	right: 0,
-	paddingY: '1rem',
+	paddingY: "1rem",
+	display: "flex",
+	justifyContent: "center",
+}
+
+const BottomNavigationStyle: SxProps = {
+	width: "100%",
+	maxWidth: "600px",
 }
 
 const NavigationAction = styled(BottomNavigationAction)<BottomNavigationActionProps>({
@@ -65,7 +72,7 @@ const AppLayout: FunctionComponent = (): ReactElement => {
 			</AppLayoutContent>
 
 			<Box component={Paper} sx={BottomNavigationContainerStyle} elevation={3}>
-				<BottomNavigation>
+				<BottomNavigation sx={BottomNavigationStyle}>
 					<NavigationActionLink
 						component={NavLink}
 						to="/receipts"
