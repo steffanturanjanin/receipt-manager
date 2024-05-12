@@ -18,7 +18,11 @@ interface ReceiptAggregatedByDateItem {
 	store: {
 		name: string;
 	},
-	categories: string[],
+	categories: {
+		id: number;
+		name: string;
+		color: string;
+	}[],
 }
 
 interface ReceiptsAggregatedByDate {
@@ -91,7 +95,6 @@ interface SingleReceipt {
 	store: SingleReceiptStore;
 	createdAt: string;
 }
-
 
 interface FavoriteReceiptStore {
 	id: number;

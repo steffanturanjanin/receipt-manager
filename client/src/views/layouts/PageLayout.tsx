@@ -11,7 +11,7 @@ import { Fragment, FunctionComponent, ReactElement, ReactNode } from "react";
 import MainContent from "./MainContent";
 
 interface PageLayoutProps {
-	title: string;
+	title?: string;
 	headerPrefix?: ReactNode;
 	headerSuffix?: ReactNode;
 	showBackdrop?: boolean;
@@ -38,7 +38,9 @@ const PageLayout: FunctionComponent<PageLayoutProps> = ({ title, showBackdrop, h
 				<Toolbar sx={{ justifyContent: "center", alignItems: "center", width: "100%", maxWidth: "600px" }}>
 					<Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", gap: "16px" }}>
 						<Box component="div" sx={{ minWidth: headerPrefix ? "0" : "64px"}}>{headerPrefix && headerPrefix}</Box>
-						<Typography variant="h5" component="h1">{title}</Typography>
+						{title &&
+							<Typography variant="h5" component="h1">{title}</Typography>
+						}
 						<Box component="div" sx={{ minWidth: headerSuffix ? "0" : "64px" }}>{headerSuffix && headerSuffix}</Box>
 					</Stack>
 				</Toolbar>
