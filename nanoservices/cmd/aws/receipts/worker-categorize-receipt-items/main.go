@@ -88,10 +88,14 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		categories = append(categories, category)
 	}
 
+	prompt := GenerateCategorizationPrompt(categories, receiptItems)
+
 	messages := []openai.ChatCompletionMessage{{
 		Role:    openai.ChatMessageRoleUser,
-		Content: GenerateCategorizationPrompt(categories, receiptItems),
+		Content: prompt,
 	}}
+
+	log.Printf("Generated prompt: %s\n", prompt)
 
 	response, err := OpenAiClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Messages:    messages,
@@ -109,6 +113,8 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 	// Normalize output
 	exp := regexp.MustCompile(`(\r\n?|\n){2,}`)
 	normalizedOutput := exp.ReplaceAllString(output, "$1")
+
+	log.Printf("Prompt response: %s\n", normalizedOutput)
 
 	var itemsCategoriesMap map[string]string
 	if err := json.Unmarshal([]byte(normalizedOutput), &itemsCategoriesMap); err != nil {
@@ -140,7 +146,7 @@ func processMessage(ctx context.Context, message events.SQSMessage) error {
 		if foundReceiptItem != nil && foundCategory != nil {
 			foundReceiptItem.CategoryID = &foundCategory.ID
 
-			if err := DB.Save(&foundReceiptItem); err != nil {
+			if err := DB.Save(&foundReceiptItem).Error; err != nil {
 				break
 			}
 		}
