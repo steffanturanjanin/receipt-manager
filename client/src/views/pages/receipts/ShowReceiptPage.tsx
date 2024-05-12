@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { getReceipt, setFavorite } from "../../../api/receipts";
 import { useParams } from "react-router-dom";
 import PageLayout from "../../layouts/PageLayout";
-import { Stack, StackProps, styled } from "@mui/material";
+import { Stack, StackProps, Typography, styled } from "@mui/material";
 import ReceiptPaymentOverview from "../../../features/receipts/show-receipt/ReceiptPaymentOverview";
 import ReceiptItemsList from "../../../features/receipts/show-receipt/ReceiptItemsList";
 import ReceiptDetails from "../../../features/receipts/show-receipt/ReceiptDetails";
@@ -78,12 +78,12 @@ const ShowReceiptPage: FunctionComponent = () => {
 
 	return (
 		<PageLayout
-			title="Pregled računa"
 			headerPrefix={<BackButton />}
 			headerSuffix={controls}
 			showBackdrop={isLoading}
 		>
 			<ReceiptContainer>
+				<Typography variant="h4" component="h1">Pregled računa</Typography>
 				<ReceiptPaymentOverview {...{
 						storeName: receipt?.store.name || "",
 						totalPurchaseAmount: receipt?.totalPurchaseAmount || "0.00",

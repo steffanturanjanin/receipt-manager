@@ -5,8 +5,8 @@ import { useMutation } from 'react-query';
 import { TextField, Box, Typography, Container } from '@mui/material';
 import { SxProps } from '@mui/material/styles';
 import { login } from '../../../api/auth';
-import { AuthResponse, LoginRequest } from '../../../api/auth/types';
 import LoadingButton from '../../../components/LoadingButton';
+import { FormErrors, FormFieldsTranslator } from '../../../shared/types/errors';
 
 interface LoginForm {
 	email: string,

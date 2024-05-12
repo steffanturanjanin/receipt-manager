@@ -1,5 +1,5 @@
 import { FunctionComponent } from "react";
-import { RouteObject, RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouteObject, RouterProvider, createHashRouter } from "react-router-dom";
 import auth from "./auth";
 import AuthGuard from "./guards/AuthGuard";
 import Home from "../views/pages/home/Home";
@@ -78,6 +78,6 @@ const routes: RouteObject[] = [
 ];
 
 const Router: FunctionComponent = () =>
-	<RouterProvider router={createBrowserRouter(routes)} />
+	<RouterProvider router={createHashRouter(routes)} />
 
 export default Router;

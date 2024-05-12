@@ -41,7 +41,7 @@ const CategoryStats: FunctionComponent<CategoryStatsProps> = ({ categoryStats })
 					<Typography variant="h4">{total || "0.00"}</Typography>
 				</Stack>
 				{categories && categories.length > 0 &&
-					<Stack justifyContent="center" alignItems="center" sx={{ maxHeight: "350px"}}>
+					<Stack justifyContent="center" alignItems="center" sx={{ maxHeight: "350px" }}>
 						<Pie
 							data={{
 								labels: labels,
@@ -55,10 +55,10 @@ const CategoryStats: FunctionComponent<CategoryStatsProps> = ({ categoryStats })
 									legend: {
 										display: true,
 										position: "bottom",
-										align: "center",
+										align: "start",
 										labels: {
-											boxWidth: 20,
-											boxHeight: 20,
+											boxWidth: 12,
+											boxHeight: 12,
 										}
 									}
 								},

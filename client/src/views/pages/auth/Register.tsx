@@ -5,7 +5,6 @@ import { useMutation } from 'react-query';
 import { TextField, Box, Typography, Container } from '@mui/material';
 import { SxProps } from '@mui/material/styles';
 import { register } from '../../../api/auth';
-import { AuthResponse, RegisterRequest } from '../../../api/auth/types';
 import LoadingButton from '../../../components/LoadingButton';
 import { FormFieldsTranslator, FormErrors } from '../../../shared/types/errors';
 
