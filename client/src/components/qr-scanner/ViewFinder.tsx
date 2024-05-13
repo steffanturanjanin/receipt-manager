@@ -7,7 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 const QrScannerContainer = styled(Box)<BoxProps>({
 	width:"100%",
 	height:"100%",
-	padding: "1.5rem",
+	padding: "1rem",
 	position: "relative",
 });
 
@@ -90,17 +90,17 @@ const ViewFinder: FunctionComponent<ViewFinderProps> = ({ onClose, notification 
 			<QrScannerContent>
 				<Stack direction="row" justifyContent="end">
 					<QrScannerCloseButton onClick={onClose}>
-						<CloseIcon fontSize="large" sx={{fontSize: "48px"}}/>
+						<CloseIcon fontSize="large" sx={{fontSize: "24px"}}/>
 					</QrScannerCloseButton>
 				</Stack>
 				<Stack direction="column" alignItems="center" justifyContent="center">
-					<Typography variant="h4" zIndex={1} textAlign="center">
+					<Typography variant="h6" zIndex={1} textAlign="center">
 						Skeniraj QR kod sa računa
 					</Typography>
-					<Typography variant="body1" zIndex={1}>
+					<Typography variant="body1" zIndex={1} textAlign="center">
 						ili ako imate link računa, {" "}
-						<Button variant="text" sx={{ padding: 0 }} onClick={onManualEntrance}>
-							<Typography variant="h6">Unesite ručno</Typography>
+						<Button variant="text" size="small" sx={{ padding: 0, textTransform: "none" }} onClick={onManualEntrance}>
+							<Typography variant="h6">unesite ručno</Typography>
 						</Button>
 					</Typography>
 				</Stack>
