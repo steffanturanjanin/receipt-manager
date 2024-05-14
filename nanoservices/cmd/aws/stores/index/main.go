@@ -73,19 +73,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var dbStores []models.Store
-	dbErr := DB.
-		Select(
-			"stores.tin AS tin",
-			"stores.name AS name",
-			"stores.location_name AS location_name",
-			"stores.city AS city",
-			"stores.address AS address",
-		).
+	queryWithRankings := DB.Table("stores").Select(
+		"stores.id AS id",
+		"stores.tin AS tin",
+		"stores.name AS name",
+		"stores.location_name AS location_name",
+		"stores.city AS city",
+		"stores.address AS address",
+		"ROW_NUMBER() OVER (PARTITION BY stores.tin, stores.location_id) AS rn",
+	).
 		Joins("INNER JOIN receipts ON stores.id = receipts.store_id").
 		Where("receipts.user_id = ?", user.Id).
-		Where("name LIKE ? OR location_name LIKE ? OR city LIKE ? OR address LIKE ?", "%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%").
-		Find(&dbStores).
+		Where("stores.name LIKE ? OR stores.location_name LIKE ? OR stores.city LIKE ? OR stores.address LIKE ?",
+			"%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%", "%"+searchText+"%",
+		)
+
+	var dbStores []models.Store
+	dbErr := DB.Table("(?) AS stores", queryWithRankings).
+		Where("stores.rn = 1").
+		Scan(&dbStores).
 		Error
 
 	if dbErr != nil {
