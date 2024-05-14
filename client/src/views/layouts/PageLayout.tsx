@@ -39,7 +39,7 @@ const PageLayout: FunctionComponent<PageLayoutProps> = ({ title, showBackdrop, h
 					<Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: "100%", gap: "16px" }}>
 						<Box component="div" sx={{ minWidth: headerPrefix ? "0" : "64px"}}>{headerPrefix && headerPrefix}</Box>
 						{title &&
-							<Typography variant="h5" component="h1">{title}</Typography>
+							<Typography variant="h5" component="h1" textAlign="center">{title}</Typography>
 						}
 						<Box component="div" sx={{ minWidth: headerSuffix ? "0" : "64px" }}>{headerSuffix && headerSuffix}</Box>
 					</Stack>

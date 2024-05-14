@@ -12,8 +12,8 @@ interface ReceiptListProps {
 
 const ReceiptListItem: FunctionComponent<ReceiptAggregatedByDateItem> = ({ id, amount, date, store, categories }) => {
 	const timeFormatted = dayjs(date).format("HH:mm");
-	const categoryList = categories.map((category) => (
-		<Stack direction="row" alignItems="center" gap="0.25rem">
+	const categoryList = categories.map((category, index) => (
+		<Stack key={index} direction="row" alignItems="center" gap="0.25rem">
 			<CategoryCircle color={category.color} />
 			<Typography color="grey.600" variant="caption">{category.name}</Typography>
 		</Stack>
