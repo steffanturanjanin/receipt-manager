@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo, useState } from "react";
+import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { getReceipt, setFavorite } from "../../../api/receipts";
 import { useParams } from "react-router-dom";
@@ -11,6 +11,7 @@ import ReceiptItemUpdateDialog from "../../../features/receipt-items/ReceiptItem
 import DeleteReceipt from "../../../features/receipts/DeleteReceipt";
 import BackButton from "../../../components/BackButton";
 import { DeleteActionButton, FavoriteActionButton } from "../../../features/receipts/ActionButtons";
+import { AxiosError } from "axios";
 
 const ReceiptContainer = styled(Stack)<StackProps>({
 	gap: "2rem"
@@ -34,12 +35,23 @@ const ShowReceiptPage: FunctionComponent = () => {
 	});
 
 	// Fetch receipt
-	const { isLoading: isReceiptLoading, data: receipt } = useQuery({
+	const { isLoading: isReceiptLoading, data: receipt, error: singleReceiptError } = useQuery({
 		queryKey: ["single_receipt", receiptId],
 		queryFn: () => getReceipt(receiptId!),
 		keepPreviousData: true,
 		enabled: !!receiptId,
+		retry: false,
 	});
+
+	useEffect(() => {
+		if (singleReceiptError && (singleReceiptError as AxiosError)?.response?.status === 404) {
+			throw new Response("Not found", { status: 404 });
+		}
+	}, [singleReceiptError]);
+
+	useEffect(() => {
+		queryClient.invalidateQueries(["single_receipt", receiptId])
+	}, []);
 
 	// Favorite
 	const { isLoading: isSetFavoriteLoading, mutate: setFavoriteMutate } = useMutation({

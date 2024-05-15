@@ -27,14 +27,14 @@ const ReceiptsPage: FunctionComponent = (): ReactElement => {
 		calculateNextMonth
 	} = useMonthRange();
 
-	const { isLoading: isCategoriesStatsLoading, data: categoriesStats } = useQuery({
+	const { isFetching: isCategoriesStatsLoading, data: categoriesStats } = useQuery({
 		queryKey: ["categories_stats", monthRange?.from, monthRange?.to],
 		queryFn: () => getCategoriesStats({ fromDate: monthRange!.from, toDate: monthRange!.to }),
 		keepPreviousData: true,
 		enabled: !!monthRange,
 	});
 
-	const { isLoading: isReceiptsLoading, data: receipts } = useQuery({
+	const { isFetching: isReceiptsLoading, data: receipts } = useQuery({
 		queryKey: ["receipts", monthRange?.from, monthRange?.to],
 		queryFn: () => getReceiptsAggregatedByDate({ fromDate: monthRange!.from, toDate: monthRange!.to }),
 		keepPreviousData: true,

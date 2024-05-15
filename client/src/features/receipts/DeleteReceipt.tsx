@@ -34,8 +34,10 @@ const DeleteReceipt: FunctionComponent<DeleteReceiptProps> = ({ open, onClose, r
 	const { isLoading, mutate } = useMutation({
 		mutationFn: (id: number) => deleteReceipt(id),
 		onSuccess: () => {
-			const month = dayjs(receipt?.date).format("YYYY-MM");
-			navigate(`/receipts/${month}`, { replace: true });
+			if (receipt?.date) {
+				const month = dayjs(receipt.date).format("YYYY-MM");
+				navigate(`/receipts?${month}`);
+			}
 		}
 	});
 
