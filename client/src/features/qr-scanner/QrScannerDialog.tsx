@@ -37,6 +37,7 @@ interface QrScannerDialogProps {
 
 const QrScanNotification = styled(Stack)<StackProps>({
 	display: "flex",
+	flex: 1,
 	flexDirection: "column",
 	alignItems: "center",
 	textAlign: "center",
