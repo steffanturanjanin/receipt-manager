@@ -98,7 +98,7 @@ var handler = func(w http.ResponseWriter, r *http.Request) {
 		Joins("INNER JOIN receipts ON receipt_items.receipt_id = receipts.id").
 		Where("receipts.user_id = ?", user.Id).
 		Where("receipts.date BETWEEN ? AND ?", fromDate, toDate).
-		Group("categories.id, receipts.id").
+		Group("categories.id").
 		Order("total DESC").
 		Scan(&dbExpenses).
 		Error
